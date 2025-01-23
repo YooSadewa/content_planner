@@ -24,7 +24,7 @@ import {
     ];
   
     return (
-      <div className="h-screen w-2/12 bg-[#293854] py-8 ps-4">
+      <div className="h-screen w-[210px] bg-[#293854] py-8 ps-4 sticky top-0">
         <Image
           src={"/assets/logowhite.png"}
           alt="LOGO UIB"
@@ -44,7 +44,7 @@ import {
                 }`}
               >
                 <Link href={item.href} className="flex gap-3">
-                  <item.icon className="w-8 h-8" />
+                  <item.icon className="w-8 h-8 my-auto" />
                   <p className="flex items-center font-semibold">{item.name}</p>
                 </Link>
               </li>

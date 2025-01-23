@@ -12,7 +12,7 @@ const buttonVariants = cva(
         notupload:
           "bg-[#f7b500] text-primary-foreground shadow hover:bg-[#f7b500]/70",
         upload:
-          "bg-[#5CB338] text-primary-foreground shadow hover:bg-[#f7b500]/70",
+          "bg-[#5CB338] text-primary-foreground shadow hover:bg-[#5CB338]/70",
         default:
           "bg-[#293854] text-primary-foreground shadow hover:bg-[#293854]/90",
         destructive:

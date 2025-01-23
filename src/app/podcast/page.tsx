@@ -2,36 +2,85 @@
 import { useEffect, useState } from "react";
 import axios from "axios";
 import Bread from "@/components/BreadCrumb";
+import { columns } from "./columns";
 import {
   BreadcrumbLink,
   BreadcrumbSeparator,
 } from "@/components/ui/breadcrumb";
-import {
-  Table,
-  TableBody,
-  TableCaption,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
-} from "@/components/ui/table";
-import UploadModal from "@/components/UploadModal";
 import { Plus, Search, Slash } from "lucide-react";
-import Card from "@/components/Card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { DataTable } from "./DataTable";
+import HostPage from "./host/page";
+import PembicaraPage from "./pembicara/page";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogTrigger,
+} from "@/components/ui/alert-dialog";
+import InputHost from "@/components/(Podcast)/HostManage/AddData";
+import InputPembicara from "@/components/(Podcast)/PembicaraManage/AddData";
+import InputPodcast from "@/components/(Podcast)/Podcast/AddData";
+import { Label } from "@/components/ui/label";
+import { useForm } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { speakerInfoSchema, uploadInfoSchema } from "@/validation/Validation";
+
+const calculateDaysDifference = (date: string): number => {
+  const today = new Date();
+  const targetDate = new Date(date);
+  return Math.ceil(
+    (targetDate.getTime() - today.getTime()) / (1000 * 60 * 60 * 24)
+  );
+};
+
+type Podcasts = {
+  pdc_link: string;
+};
 
 export default function PodcastPage() {
-  const handleEdit = () => {
-    console.log("Edit clicked");
-  };
-
-  const handleVerify = () => {
-    console.log("Verify clicked");
-  };
+  const [errorMessage, setErrorMessage] = useState("");
+  const [successMessage, setSuccessMessage] = useState("");
+  const [isModalOpen, setModalOpen] = useState(false);
+  const [alerts, setAlerts] = useState<{ message: string; color: string }[]>(
+    []
+  );
   const [tableData, setTableData] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
+  const [selectedPodcastId, setSelectedPodcastId] = useState<number | null>(
+    null
+  );
+  const handleConfirm = () => {
+    console.log(`Confirmed upload for podcast ID: ${selectedPodcastId}`);
+    setModalOpen(false);
+  };
+  const handleCancel = () => {
+    setModalOpen(false);
+  };
+
+  const {
+    register,
+    handleSubmit,
+    formState: { errors, isSubmitting },
+  } = useForm<Podcasts>({
+    defaultValues: {
+      pdc_link: "",
+    },
+    resolver: zodResolver(uploadInfoSchema),
+  });
+
+  const onSubmit = async (data: Podcasts) => {
+    setLoading(true);
+    setErrorMessage("");
+    setSuccessMessage("");
+  };
 
   useEffect(() => {
     const fetchData = async () => {
@@ -39,6 +88,60 @@ export default function PodcastPage() {
         const response = await axios.get("http://127.0.0.1:8000/api/podcast");
         if (response.data.status && response.data.data.podcast) {
           setTableData(response.data.data.podcast);
+
+          const newAlerts = response.data.data.podcast.reduce(
+            (acc: any, podcast: any) => {
+              const daysToShoot = calculateDaysDifference(
+                podcast.pdc_jadwal_shoot
+              );
+              const daysToUpload = calculateDaysDifference(
+                podcast.pdc_jadwal_upload
+              );
+
+              if (!podcast.pdc_link) {
+                if (daysToShoot > 0 && daysToShoot <= 3) {
+                  acc.push({
+                    message: `Podcast "${podcast.pdc_tema}" jadwal shoot tinggal ${daysToShoot} hari lagi.`,
+                    color: "bg-yellow-300",
+                  });
+                } else if (daysToShoot === 0) {
+                  acc.push({
+                    message: `Podcast "${podcast.pdc_tema}" jadwal shoot adalah hari ini.`,
+                    color: "bg-yellow-300",
+                  });
+                } else if (daysToShoot < 0) {
+                  acc.push({
+                    message: `Podcast "${
+                      podcast.pdc_tema
+                    }" jadwal shoot telah lewat ${Math.abs(daysToShoot)} hari.`,
+                    color: "bg-red-500 text-white",
+                  });
+                }
+
+                if (daysToUpload > 0 && daysToUpload <= 3) {
+                  acc.push({
+                    message: `Podcast "${podcast.pdc_tema}" jadwal upload tinggal ${daysToUpload} hari lagi.`,
+                    color: "bg-yellow-300",
+                  });
+                } else if (daysToUpload === 0) {
+                  acc.push({
+                    message: `Podcast "${podcast.pdc_tema}" jadwal upload adalah hari ini.`,
+                    color: "bg-yellow-300",
+                  });
+                } else if (daysToUpload < 0) {
+                  acc.push({
+                    message: `Podcast "${podcast.pdc_tema}" jadwal upload telah lewat.`,
+                    color: "bg-red-500 text-white",
+                  });
+                }
+              }
+
+              return acc;
+            },
+            []
+          );
+
+          setAlerts(newAlerts);
         } else {
           setError("Format data tidak sesuai");
         }
@@ -53,54 +156,103 @@ export default function PodcastPage() {
     fetchData();
   }, []);
 
+  const onUpload = async (idPodcast: number) => {
+    console.log("Opening modal for Podcast ID:", idPodcast);
+    setSelectedPodcastId(idPodcast);
+    setModalOpen(true);
+    console.log("isModalOpen:", isModalOpen);
+  };
+
   return (
-    <div className="p-8 w-10/12 overflow-auto">
-      <div className="flex justify-between">
-        <div className="flex items-center">
-          <Bread>
-            <BreadcrumbLink href="/">Beranda</BreadcrumbLink>
-            <BreadcrumbSeparator>
-              <Slash />
-            </BreadcrumbSeparator>
-            <BreadcrumbLink href="/podcast">Podcast</BreadcrumbLink>
-          </Bread>
+    <div>
+      <div className="p-5 w-12/12 overflow-auto">
+        <div className="flex justify-between">
+          <div className="flex items-center">
+            <Bread>
+              <BreadcrumbLink href="/">Beranda</BreadcrumbLink>
+              <BreadcrumbSeparator>
+                <Slash />
+              </BreadcrumbSeparator>
+              <BreadcrumbLink href="/podcast">Podcast</BreadcrumbLink>
+            </Bread>
+          </div>
+          <div className="flex gap-1">
+            <InputPodcast />
+            <InputHost />
+            <InputPembicara />
+          </div>
         </div>
-        <div className="flex gap-1">
-          <Button size="sm" variant="default">
-            <Plus />
-            Tambahkan Podcast
-          </Button>
-          <Button size="sm" variant="default">
-            <Plus />
-            Tambahkan Host
-          </Button>
-          <Button size="sm" variant="default">
-            <Plus />
-            Tambahkan Pembicara
-          </Button>
+        <div className="flex justify-between my-5">
+          <h1 className="text-xl font-bold flex items-center">Data Podcast</h1>
+          <div className="flex w-full max-w-sm items-center space-x-2">
+            <Input type="text" placeholder="Search..." />
+            <Button type="submit">
+              <Search />
+            </Button>
+          </div>
         </div>
+        {alerts.length > 0 && (
+          <div className="my-4">
+            {alerts.map((alert, index) => (
+              <div
+                key={index}
+                className={`py-2 px-3 rounded-md ${alert.color} mb-2 text-sm`}
+              >
+                {alert.message}
+              </div>
+            ))}
+          </div>
+        )}
+        <DataTable columns={columns} data={tableData} onUpload={onUpload} />
+        {isModalOpen && (
+          <AlertDialog defaultOpen open>
+            <AlertDialogContent>
+              <AlertDialogHeader>
+                <AlertDialogTitle>
+                  Verifikasi upload link ke YouTube
+                </AlertDialogTitle>
+                <form onSubmit={handleSubmit(onSubmit)}>
+                  <div className="grid w-full items-center gap-1.5 mb-3">
+                    <Label htmlFor="pdc_link">Link Youtube</Label>
+                    <Input
+                      type="text"
+                      id="pdc_link"
+                      disabled={isSubmitting || loading}
+                      placeholder="https://www.youtube.com/"
+                      {...register("pdc_link")}
+                    />
+                    {errors.pdc_link?.message && (
+                      <div className="text-red-500 text-xs">
+                        {errors.pdc_link?.message}
+                      </div>
+                    )}
+                    {errorMessage && (
+                      <div className="text-red-500">{errorMessage}</div>
+                    )}
+                    {successMessage && (
+                      <div className="text-green-500">{successMessage}</div>
+                    )}
+                  </div>
+                </form>
+              </AlertDialogHeader>
+              <AlertDialogFooter>
+                <AlertDialogCancel onClick={handleCancel}>
+                  Cancel
+                </AlertDialogCancel>
+                <AlertDialogAction onClick={handleConfirm}>
+                  Continue
+                </AlertDialogAction>
+              </AlertDialogFooter>
+            </AlertDialogContent>
+          </AlertDialog>
+        )}
       </div>
-      <div className="flex justify-between mt-5">
-        <h1 className="text-xl font-bold flex items-center">Data Podcast</h1>
-        <div className="flex w-full max-w-sm items-center space-x-2">
-          <Input type="text" placeholder="Search..." />
-          <Button type="submit"><Search /></Button>
-        </div>
-      </div>
-      <div className="w-full flex gap-4 mt-4 flex-wrap">
-        {tableData.map((item: any) => (
-          <Card
-            key={item.pdc_id}
-            title={item.pdc_tema}
-            speaker={item.pdc_nama}
-            host={item.host_nama}
-            shootDate={item.pdc_jadwal_shoot}
-            uploadDate={item.pdc_jadwal_upload}
-            onEdit={handleEdit}
-            onVerify={handleVerify}
-            abstractContent={item.abstract}
-          />
-        ))}
+      <h1 className="text-center text-2xl font-bold">
+        Data Host dan Pembicara
+      </h1>
+      <div className="flex w-12/12 px-8 gap-4">
+        <HostPage />
+        <PembicaraPage />
       </div>
     </div>
   );
