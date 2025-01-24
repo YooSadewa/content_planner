@@ -54,6 +54,7 @@ export default function InputHost() {
         data
       );
       if (response.status === 200 || response.status === 201) {
+        window.location.reload();
         setSuccessMessage("Host berhasil ditambahkan.");
         setModalHostOpen(false);
       } else {

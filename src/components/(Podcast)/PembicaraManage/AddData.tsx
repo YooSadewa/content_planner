@@ -54,6 +54,7 @@ export default function InputPembicara() {
         data
       );
       if (response.status === 200 || response.status === 201) {
+        window.location.reload();
         setSuccessMessage("Pembicara berhasil ditambahkan.");
         setModalPembicaraOpen(false);
       } else {

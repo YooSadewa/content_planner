@@ -82,6 +82,7 @@ export default function InputPodcast() {
         data
       );
       if (response.status === 200 || response.status === 201) {
+        window.location.reload();
         setSuccessMessage("Podcast berhasil ditambahkan.");
         setModalPodcastOpen(false);
       } else {
@@ -182,7 +183,7 @@ export default function InputPodcast() {
                       )}
                     </div>
                     <div className="grid w-full items-center gap-1.5 mb-3">
-                      <Label htmlFor="pdc_jadwal_shoot">Jadwal Upload</Label>
+                      <Label htmlFor="pdc_jadwal_upload">Jadwal Upload</Label>
                       <Input
                         type="date"
                         id="pdc_jadwal_upload"

@@ -1,7 +1,7 @@
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
-@import url('https://fonts.googleapis.com/css2?family=Montserrat:ital,wght@0,100..900;1,100..900&display=swap');
+@import url("https://fonts.googleapis.com/css2?family=Montserrat:ital,wght@0,100..900;1,100..900&display=swap");
 
 .montserrat-regular {
   font-family: "Montserrat", serif;
@@ -93,4 +93,9 @@ body {
   .card:hover ~ .card {
     width: 15%; /* Card lainnya mengecil */
   }
+}
+
+:root {
+  --skeleton: #f3f3f3;
+  --background: #ffffff; /* Warna terang untuk skeleton */
 }

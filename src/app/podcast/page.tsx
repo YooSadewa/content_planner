@@ -30,7 +30,9 @@ import InputPodcast from "@/components/(Podcast)/Podcast/AddData";
 import { Label } from "@/components/ui/label";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { speakerInfoSchema, uploadInfoSchema } from "@/validation/Validation";
+import { uploadInfoSchema } from "@/validation/Validation";
+import { useRouter } from "next/navigation";
+import { Table, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 
 const calculateDaysDifference = (date: string): number => {
   const today = new Date();
@@ -41,6 +43,7 @@ const calculateDaysDifference = (date: string): number => {
 };
 
 type Podcasts = {
+  pdc_id: number;
   pdc_link: string;
 };
 
@@ -57,10 +60,6 @@ export default function PodcastPage() {
   const [selectedPodcastId, setSelectedPodcastId] = useState<number | null>(
     null
   );
-  const handleConfirm = () => {
-    console.log(`Confirmed upload for podcast ID: ${selectedPodcastId}`);
-    setModalOpen(false);
-  };
   const handleCancel = () => {
     setModalOpen(false);
   };
@@ -76,10 +75,29 @@ export default function PodcastPage() {
     resolver: zodResolver(uploadInfoSchema),
   });
 
+  const router = useRouter();
   const onSubmit = async (data: Podcasts) => {
     setLoading(true);
     setErrorMessage("");
     setSuccessMessage("");
+
+    try {
+      const response = await axios.put(
+        `http://127.0.0.1:8000/api/podcast/upload/${selectedPodcastId}`,
+        data
+      );
+      if (response.status === 200 || response.status === 201) {
+        window.location.reload();
+        setSuccessMessage("Link berhasil ditambahkan.");
+        setModalOpen(false);
+      } else {
+        setErrorMessage("Terjadi kesalahan saat menambahkan link.");
+      }
+    } catch (error) {
+      setErrorMessage("Gagal menghubungi server. Coba lagi nanti.");
+    } finally {
+      setLoading(false);
+    }
   };
 
   useEffect(() => {
@@ -203,7 +221,22 @@ export default function PodcastPage() {
             ))}
           </div>
         )}
-        <DataTable columns={columns} data={tableData} onUpload={onUpload} />
+        {loading ? (
+          <>
+            <div className="border pb-[72px] flex flex-col py-2 ps-2 pe-[7px] gap-4">
+              <div className="flex gap-5">
+                <div className="bg-gray-100 skeleton w-[482px] h-[200px] shadow-md rounded" />
+                <div className="bg-gray-100 skeleton w-[482px] h-[200px] shadow-md rounded" />
+              </div>
+              <div className="flex gap-5 mt-[4px]">
+                <div className="bg-gray-100 skeleton w-[482px] h-[200px] shadow-md rounded" />
+                <div className="bg-gray-100 skeleton w-[482px] h-[200px] shadow-md rounded" />
+              </div>
+            </div>
+          </>
+        ) : (
+          <DataTable columns={columns} data={tableData} onUpload={onUpload} />
+        )}
         {isModalOpen && (
           <AlertDialog defaultOpen open>
             <AlertDialogContent>
@@ -233,16 +266,19 @@ export default function PodcastPage() {
                       <div className="text-green-500">{successMessage}</div>
                     )}
                   </div>
+                  <AlertDialogFooter>
+                    <AlertDialogCancel type="button" onClick={handleCancel}>
+                      Cancel
+                    </AlertDialogCancel>
+                    <AlertDialogAction
+                      type="submit"
+                      disabled={isSubmitting || loading}
+                    >
+                      Continue
+                    </AlertDialogAction>
+                  </AlertDialogFooter>
                 </form>
               </AlertDialogHeader>
-              <AlertDialogFooter>
-                <AlertDialogCancel onClick={handleCancel}>
-                  Cancel
-                </AlertDialogCancel>
-                <AlertDialogAction onClick={handleConfirm}>
-                  Continue
-                </AlertDialogAction>
-              </AlertDialogFooter>
             </AlertDialogContent>
           </AlertDialog>
         )}
@@ -250,10 +286,19 @@ export default function PodcastPage() {
       <h1 className="text-center text-2xl font-bold">
         Data Host dan Pembicara
       </h1>
-      <div className="flex w-12/12 px-8 gap-4">
-        <HostPage />
-        <PembicaraPage />
-      </div>
+      {loading ? (
+        <div className="flex w-12/12 px-8 mt-5 mb-7 gap-4">
+          <div className="skeleton bg-gray-100 w-6/12 h-36 border rounded-none" />
+          <div className="skeleton bg-gray-100 w-6/12 h-36 border rounded-none" />
+        </div>
+      ) : (
+        <>
+          <div className="flex w-12/12 px-8 gap-4">
+            <HostPage />
+            <PembicaraPage />
+          </div>
+        </>
+      )}
     </div>
   );
 }
