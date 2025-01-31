@@ -11,7 +11,15 @@ import {
 } from "@/components/ui/alert-dialog";
 import { Button } from "@/components/ui/button";
 
-export function AbstractAlert({ content }: { content: string }) {
+export function AbstractAlert({
+  content,
+  notes,
+  title,
+}: {
+  content: any;
+  notes: any;
+  title: any;
+}) {
   return (
     <AlertDialog>
       <AlertDialogTrigger asChild>
@@ -21,8 +29,15 @@ export function AbstractAlert({ content }: { content: string }) {
       </AlertDialogTrigger>
       <AlertDialogContent>
         <AlertDialogHeader>
-          <AlertDialogTitle>Abstrak Podcast</AlertDialogTitle>
-          <AlertDialogDescription>{content}</AlertDialogDescription>
+          <AlertDialogTitle className="font-bold text-2xl capitalize break-all text-black">
+            {title}
+          </AlertDialogTitle>
+          <AlertDialogDescription className="break-all">
+            {content}
+          </AlertDialogDescription>
+          <AlertDialogDescription className="break-all">
+            {notes}
+          </AlertDialogDescription>
         </AlertDialogHeader>
         <AlertDialogFooter>
           <AlertDialogAction>OK</AlertDialogAction>

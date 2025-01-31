@@ -33,6 +33,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { uploadInfoSchema } from "@/validation/Validation";
 import { useRouter } from "next/navigation";
 import { Table, TableHead, TableHeader, TableRow } from "@/components/ui/table";
+import EditPodcast from "@/components/(Podcast)/Podcast/EditData";
 
 const calculateDaysDifference = (date: string): number => {
   const today = new Date();
@@ -51,6 +52,7 @@ export default function PodcastPage() {
   const [errorMessage, setErrorMessage] = useState("");
   const [successMessage, setSuccessMessage] = useState("");
   const [isModalOpen, setModalOpen] = useState(false);
+  const [isModalEditOpen, setModalEditOpen] = useState(false);
   const [alerts, setAlerts] = useState<{ message: string; color: string }[]>(
     []
   );
@@ -75,7 +77,6 @@ export default function PodcastPage() {
     resolver: zodResolver(uploadInfoSchema),
   });
 
-  const router = useRouter();
   const onSubmit = async (data: Podcasts) => {
     setLoading(true);
     setErrorMessage("");
@@ -164,7 +165,7 @@ export default function PodcastPage() {
           setError("Format data tidak sesuai");
         }
       } catch (err) {
-        console.error("Error:", err);
+        // console.error("Error:", err);
         setError("Gagal mengambil data dari API.");
       } finally {
         setLoading(false);
@@ -181,8 +182,35 @@ export default function PodcastPage() {
     console.log("isModalOpen:", isModalOpen);
   };
 
+  const onDelete = async (idPodcast: number) => {
+    try {
+      const response = await axios.delete(
+        `http://127.0.0.1:8000/api/podcast/delete/${idPodcast}`
+      );
+
+      if (response.data.status) {
+        setTableData((prevData) =>
+          prevData.filter((podcast: Podcasts) => podcast.pdc_id !== idPodcast)
+        );
+        window.location.reload();
+        console.log(`Podcast dengan ID ${idPodcast} berhasil dihapus`);
+      } else {
+        console.error("Deletion failed:", response.data.message);
+      }
+    } catch (error) {
+      console.error("Terjadi kesalahan:", error);
+      setError("Gagal menghapus pembicara");
+    }
+  };
+
+  const onEdit = async (idPodcast: number) => {
+    console.log("Opening modal for Podcast ID:", idPodcast);
+    setSelectedPodcastId(idPodcast);
+    setModalEditOpen(true);
+  };
+
   return (
-    <div>
+    <div className="bg-gray-100">
       <div className="p-5 w-12/12 overflow-auto">
         <div className="flex justify-between">
           <div className="flex items-center">
@@ -214,7 +242,7 @@ export default function PodcastPage() {
             {alerts.map((alert, index) => (
               <div
                 key={index}
-                className={`py-2 px-3 rounded-md ${alert.color} mb-2 text-sm`}
+                className={`py-2 px-3 rounded-md ${alert.color} mb-2 text-sm uppercase font-bold`}
               >
                 {alert.message}
               </div>
@@ -235,7 +263,13 @@ export default function PodcastPage() {
             </div>
           </>
         ) : (
-          <DataTable columns={columns} data={tableData} onUpload={onUpload} />
+          <DataTable
+            columns={columns}
+            data={tableData}
+            onUpload={onUpload}
+            onDelete={onDelete}
+            onEdit={onEdit}
+          />
         )}
         {isModalOpen && (
           <AlertDialog defaultOpen open>

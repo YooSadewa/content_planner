@@ -1,5 +1,5 @@
 "use client";
-import { Plus } from "lucide-react";
+import { Pencil } from "lucide-react";
 import { Button } from "../../ui/button";
 import {
   AlertDialog,
@@ -12,7 +12,7 @@ import {
 } from "../../ui/alert-dialog";
 import { Label } from "../../ui/label";
 import { Input } from "../../ui/input";
-import { useEffect, useState } from "react";
+import { useState, useEffect } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { podcastInfoSchema } from "@/validation/Validation";
@@ -39,7 +39,29 @@ type Hosts = {
   host_nama: string;
 };
 
-export default function InputPodcast() {
+type EditPodcastProps = {
+  id: string | number;
+  currentName: string;
+  currentAbstract: string;
+  currentSpeaker: any;
+  currentHost: any;
+  currentShoot: string;
+  currentUpload: string;
+  currentNote: string;
+  currentLink: string;
+};
+
+export default function EditPodcast({
+  id,
+  currentName,
+  currentAbstract,
+  currentHost,
+  currentLink,
+  currentNote,
+  currentShoot,
+  currentUpload,
+  currentSpeaker,
+}: EditPodcastProps) {
   const [hosts, setHosts] = useState<Hosts[]>([]);
   const [speakers, setSpeakers] = useState<Speakers[]>([]);
   const [error, setError] = useState("");
@@ -48,25 +70,25 @@ export default function InputPodcast() {
   const [errorMessage, setErrorMessage] = useState("");
   const [successMessage, setSuccessMessage] = useState("");
 
-  const onAddPodcast = () => {
+  const onEditPodcast = () => {
     setModalPodcastOpen(true);
   };
 
   const {
     register,
-    setValue,
     handleSubmit,
     formState: { errors, isSubmitting },
+    reset,
   } = useForm<Podcasts>({
     defaultValues: {
-      pdc_jadwal_shoot: "",
-      pdc_jadwal_upload: "",
-      pdc_tema: "",
-      pdc_abstrak: "",
-      pmb_id: { pmb_id: "", pmb_nama: "" },
-      host_id: { host_id: "", host_nama: "" },
-      pdc_link: "",
-      pdc_catatan: "",
+      pdc_tema: currentName,
+      pdc_abstrak: currentAbstract,
+      host_id: currentHost.host_id,
+      pmb_id: currentSpeaker.speaker_id,
+      pdc_jadwal_shoot: currentShoot,
+      pdc_jadwal_upload: currentUpload,
+      pdc_catatan: currentNote,
+      pdc_link: currentLink,
     },
     resolver: zodResolver(podcastInfoSchema),
   });
@@ -77,16 +99,16 @@ export default function InputPodcast() {
     setSuccessMessage("");
 
     try {
-      const response = await axios.post(
-        "http://127.0.0.1:8000/api/podcast/create",
+      const response = await axios.put(
+        `http://127.0.0.1:8000/api/podcast/update/${id}`,
         data
       );
-      if (response.status === 200 || response.status === 201) {
+      if (response.status === 200) {
         window.location.reload();
-        setSuccessMessage("Podcast berhasil ditambahkan.");
+        setSuccessMessage("podcast berhasil diperbarui.");
         setModalPodcastOpen(false);
       } else {
-        setErrorMessage("Terjadi kesalahan saat menambahkan pembicara.");
+        setErrorMessage("Terjadi kesalahan saat memperbarui podcast.");
       }
     } catch (error) {
       setErrorMessage("Podcast sudah tersedia.");
@@ -96,13 +118,9 @@ export default function InputPodcast() {
   };
 
   const handleCancel = () => {
+    reset();
     setModalPodcastOpen(false);
   };
-
-  useEffect(() => {
-    setValue("host_id", "Pilih" as any);
-    setValue("pmb_id", "Pilih" as any);
-  }, [setValue]);
 
   useEffect(() => {
     const fetchHost = async () => {
@@ -146,16 +164,15 @@ export default function InputPodcast() {
 
   return (
     <div>
-      <Button size="sm" variant="default" onClick={onAddPodcast}>
-        <Plus />
-        Tambahkan Podcast
+      <Button size="sm" onClick={onEditPodcast} variant="outline">
+        <Pencil className="h-4 w-4" />
       </Button>
       {isModalPodcastOpen && (
         <AlertDialog defaultOpen open>
           <AlertDialogContent>
             <form onSubmit={handleSubmit(onSubmit)}>
               <AlertDialogHeader>
-                <AlertDialogTitle>Tambahkan Podcast</AlertDialogTitle>
+                <AlertDialogTitle>Edit Podcast</AlertDialogTitle>
                 <div className="pt-1 pb-4 w-full">
                   <div className="flex gap-5">
                     <div className="grid w-full items-center gap-1.5 mb-3">

@@ -19,11 +19,13 @@ export default function Card({
         <h1 className="font-bold text-2xl h-5 capitalize">{title}</h1>
         <AbstractAlert
           content={abstractContent || "Abstract content tidak tersedia"}
+          notes={"Default Notes"}
+          title={"Default Title"}
         />
       </div>
       <div className="flex gap-4 mt-2 justify-between">
         <div className="flex flex-col gap-1">
-          <div className="flex flex-row gap-1 text-[13px]">
+          <div className="flex items-center gap-1 text-[13px]">
             <Speech />
             <p className="flex items-center gap-1">
               Pembicara:{" "}

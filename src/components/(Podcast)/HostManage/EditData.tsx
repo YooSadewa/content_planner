@@ -1,5 +1,5 @@
 "use client";
-import { Plus } from "lucide-react";
+import { Pencil } from "lucide-react";
 import { Button } from "../../ui/button";
 import {
   AlertDialog,
@@ -22,13 +22,18 @@ type Hosts = {
   host_nama: string;
 };
 
-export default function InputHost() {
+type EditHostProps = {
+  id: string | number;
+  currentName: string;
+};
+
+export default function EditHost({ id, currentName }: EditHostProps) {
   const [isModalHostOpen, setModalHostOpen] = useState(false);
   const [loading, setLoading] = useState(false);
   const [errorMessage, setErrorMessage] = useState("");
   const [successMessage, setSuccessMessage] = useState("");
 
-  const onAddHost = () => {
+  const onEditHost = () => {
     setModalHostOpen(true);
   };
 
@@ -36,9 +41,10 @@ export default function InputHost() {
     register,
     handleSubmit,
     formState: { errors, isSubmitting },
+    reset,
   } = useForm<Hosts>({
     defaultValues: {
-      host_nama: "",
+      host_nama: currentName,
     },
     resolver: zodResolver(hostInfoSchema),
   });
@@ -49,48 +55,47 @@ export default function InputHost() {
     setSuccessMessage("");
 
     try {
-      const response = await axios.post(
-        "http://127.0.0.1:8000/api/host/create",
+      const response = await axios.put(
+        `http://127.0.0.1:8000/api/host/update/${id}`,
         data
       );
-      if (response.status === 200 || response.status === 201) {
+      if (response.status === 200) {
         window.location.reload();
-        setSuccessMessage("Host berhasil ditambahkan.");
+        setSuccessMessage("host berhasil diperbarui.");
         setModalHostOpen(false);
       } else {
-        setErrorMessage("Terjadi kesalahan saat menambahkan host.");
+        setErrorMessage("Terjadi kesalahan saat memperbarui host.");
       }
     } catch (error) {
-      setErrorMessage("Nama sudah tersedia");
+      setErrorMessage("Nama sudah tersedia.");
     } finally {
       setLoading(false);
     }
   };
 
   const handleCancel = () => {
+    reset();
     setModalHostOpen(false);
   };
 
   return (
     <div>
-      <Button size="sm" variant="default" onClick={onAddHost}>
-        <Plus />
-        Tambahkan Host
+      <Button size="sm" onClick={onEditHost} variant="outline">
+        <Pencil className="h-4 w-4" />
       </Button>
       {isModalHostOpen && (
         <AlertDialog defaultOpen open>
           <AlertDialogContent>
             <form onSubmit={handleSubmit(onSubmit)}>
               <AlertDialogHeader>
-                <AlertDialogTitle>Tambahkan Nama Host</AlertDialogTitle>
+                <AlertDialogTitle>Edit Nama Host</AlertDialogTitle>
                 <div className="pt-1 pb-4 w-full">
                   <div className="grid w-full items-center gap-1.5">
-                    <Label htmlFor="host_nama">Nama Host</Label>
+                    <Label htmlFor="host_nama">Nama host</Label>
                     <Input
                       type="text"
                       id="host_nama"
                       disabled={isSubmitting || loading}
-                      placeholder="ex. Muhammad Sumbul"
                       {...register("host_nama")}
                     />
                     {errors.host_nama?.message && (
@@ -109,10 +114,10 @@ export default function InputHost() {
               </AlertDialogHeader>
               <AlertDialogFooter>
                 <AlertDialogCancel type="button" onClick={handleCancel}>
-                  Cancel
+                  Batal
                 </AlertDialogCancel>
                 <AlertDialogAction type="submit" disabled={loading}>
-                  {loading ? "Loading..." : "Continue"}
+                  {loading ? "Loading..." : "Simpan"}
                 </AlertDialogAction>
               </AlertDialogFooter>
             </form>

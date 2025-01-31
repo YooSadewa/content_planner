@@ -33,7 +33,7 @@ export const podcastInfoSchema = z
       .string()
       .min(1, { message: "Theme must be at least 1 character long" })
       .max(150, { message: "Theme must be at most 150 characters long" }),
-    pdc_abstrak: z.string({ message: "Abstrak harus berupa string." }),
+    // pdc_abstrak: z.string({ message: "Abstrak harus berupa string." }),
     pmb_id: z.string().refine((val) => !isNaN(Number(val)) && Number(val) > 0, {
       message: "Choose a valid speaker.",
     }),
@@ -42,7 +42,7 @@ export const podcastInfoSchema = z
       .refine((val) => !isNaN(Number(val)) && Number(val) > 0, {
         message: "Choose a valid host.",
       }),
-    pdc_catatan: z.string({ message: "Note must be a string." }),
+    // pdc_catatan: z.string({ message: "Note must be a string." }),
   })
   .superRefine((data, ctx) => {
     const shootDate = new Date(data.pdc_jadwal_shoot);

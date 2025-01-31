@@ -1,5 +1,5 @@
 "use client";
-import { Plus } from "lucide-react";
+import { Pencil } from "lucide-react";
 import { Button } from "../../ui/button";
 import {
   AlertDialog,
@@ -15,87 +15,92 @@ import { Input } from "../../ui/input";
 import { useState } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { hostInfoSchema } from "@/validation/Validation";
+import { speakerInfoSchema } from "@/validation/Validation";
 import axios from "axios";
 
-type Hosts = {
-  host_nama: string;
+type Speakers = {
+  pmb_nama: string;
 };
 
-export default function InputHost() {
-  const [isModalHostOpen, setModalHostOpen] = useState(false);
+type EditPembicaraProps = {
+  id: string | number;
+  currentName: string;
+};
+
+export default function EditPembicara({ id, currentName }: EditPembicaraProps) {
+  const [isModalPembicaraOpen, setModalPembicaraOpen] = useState(false);
   const [loading, setLoading] = useState(false);
   const [errorMessage, setErrorMessage] = useState("");
   const [successMessage, setSuccessMessage] = useState("");
 
-  const onAddHost = () => {
-    setModalHostOpen(true);
+  const onEditPembicara = () => {
+    setModalPembicaraOpen(true);
   };
 
   const {
     register,
     handleSubmit,
     formState: { errors, isSubmitting },
-  } = useForm<Hosts>({
+    reset,
+  } = useForm<Speakers>({
     defaultValues: {
-      host_nama: "",
+      pmb_nama: currentName,
     },
-    resolver: zodResolver(hostInfoSchema),
+    resolver: zodResolver(speakerInfoSchema),
   });
 
-  const onSubmit = async (data: Hosts) => {
+  const onSubmit = async (data: Speakers) => {
     setLoading(true);
     setErrorMessage("");
     setSuccessMessage("");
 
     try {
-      const response = await axios.post(
-        "http://127.0.0.1:8000/api/host/create",
+      const response = await axios.put(
+        `http://127.0.0.1:8000/api/pembicara/update/${id}`,
         data
       );
-      if (response.status === 200 || response.status === 201) {
+      if (response.status === 200) {
         window.location.reload();
-        setSuccessMessage("Host berhasil ditambahkan.");
-        setModalHostOpen(false);
+        setSuccessMessage("Pembicara berhasil diperbarui.");
+        setModalPembicaraOpen(false);
       } else {
-        setErrorMessage("Terjadi kesalahan saat menambahkan host.");
+        setErrorMessage("Terjadi kesalahan saat memperbarui pembicara.");
       }
     } catch (error) {
-      setErrorMessage("Nama sudah tersedia");
+      setErrorMessage("Nama sudah tersedia.");
     } finally {
       setLoading(false);
     }
   };
 
   const handleCancel = () => {
-    setModalHostOpen(false);
+    reset();
+    setModalPembicaraOpen(false);
   };
 
   return (
     <div>
-      <Button size="sm" variant="default" onClick={onAddHost}>
-        <Plus />
-        Tambahkan Host
+      <Button size="sm" onClick={onEditPembicara} variant="outline">
+        <Pencil className="h-4 w-4" />
       </Button>
-      {isModalHostOpen && (
+      {isModalPembicaraOpen && (
         <AlertDialog defaultOpen open>
           <AlertDialogContent>
             <form onSubmit={handleSubmit(onSubmit)}>
               <AlertDialogHeader>
-                <AlertDialogTitle>Tambahkan Nama Host</AlertDialogTitle>
+                <AlertDialogTitle>Edit Nama Pembicara</AlertDialogTitle>
                 <div className="pt-1 pb-4 w-full">
                   <div className="grid w-full items-center gap-1.5">
-                    <Label htmlFor="host_nama">Nama Host</Label>
+                    <Label htmlFor="pmb_nama">Nama Pembicara</Label>
                     <Input
                       type="text"
-                      id="host_nama"
+                      id="pmb_nama"
                       disabled={isSubmitting || loading}
-                      placeholder="ex. Muhammad Sumbul"
-                      {...register("host_nama")}
+                      {...register("pmb_nama")}
                     />
-                    {errors.host_nama?.message && (
+                    {errors.pmb_nama?.message && (
                       <div className="text-red-500 text-xs">
-                        {errors.host_nama?.message}
+                        {errors.pmb_nama?.message}
                       </div>
                     )}
                     {errorMessage && (
@@ -109,10 +114,10 @@ export default function InputHost() {
               </AlertDialogHeader>
               <AlertDialogFooter>
                 <AlertDialogCancel type="button" onClick={handleCancel}>
-                  Cancel
+                  Batal
                 </AlertDialogCancel>
                 <AlertDialogAction type="submit" disabled={loading}>
-                  {loading ? "Loading..." : "Continue"}
+                  {loading ? "Loading..." : "Simpan"}
                 </AlertDialogAction>
               </AlertDialogFooter>
             </form>

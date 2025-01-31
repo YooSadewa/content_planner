@@ -1,10 +1,10 @@
+import EditPodcast from "@/components/(Podcast)/Podcast/EditData";
 import { AbstractAlert } from "@/components/AbstractAlert";
 import { Button } from "@/components/ui/button";
 import { ColumnDef } from "@tanstack/react-table";
 import { FilePenLine, Speech, Trash } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
-import { useState } from "react";
 
 type Podcast = {
   host_id: number;
@@ -32,6 +32,7 @@ export const columns: ColumnDef<Podcast>[] = [
       const host = row.original.host_nama;
       const shootDate = row.original.pdc_jadwal_shoot;
       const uploadDate = row.original.pdc_jadwal_upload;
+      const notes = row.original.pdc_catatan;
       const link = row.original.pdc_link;
       const meta = table.options.meta as any;
       const isLoading = meta?.loading || false;
@@ -40,14 +41,18 @@ export const columns: ColumnDef<Podcast>[] = [
           <div className="flex flex-row ps-1 pt-1 gap-4">
             <div className="flex-[1_1_calc(50%-16px)] max-w-[494px] h-fit shadow-md rounded p-7 bg-white">
               <div className="">
-                <h1 className="font-bold text-2xl h-5 capitalize">{title}</h1>
+                <h1 className="font-bold text-2xl capitalize truncate">
+                  {title}
+                </h1>
                 <AbstractAlert
+                  title={title}
                   content={abstractContent || "Abstract content tidak tersedia"}
+                  notes={notes || "Catatan tidak tersedia"}
                 />
               </div>
-              <div className="flex gap-4 mt-2 justify-between">
+              <div className="flex gap-2 mt-2 justify-between">
                 <div className="flex flex-col gap-1">
-                  <div className="flex flex-row gap-1 text-[13px]">
+                  <div className="flex items-center gap-1 text-[13px]">
                     <Speech />
                     <p className="flex items-center gap-1">
                       Pembicara:{" "}
@@ -99,18 +104,12 @@ export const columns: ColumnDef<Podcast>[] = [
                   </Button>
                 )}
                 <span className="w-[1px] h-5 bg-[#f7b500] my-auto" />
-                <Button
-                  variant="default"
-                  className="duration-300"
-                  size="sm"
-                  onClick={() => {}}
-                >
-                  <FilePenLine />
-                </Button>
+                <EditPodcast id={idPodcast} currentName={title} currentAbstract={abstractContent} currentHost={host} currentLink={link} currentNote={notes} currentShoot={shootDate} currentSpeaker={speaker} currentUpload={uploadDate} />
                 <span className="w-[1px] h-5 bg-[#f7b500] my-auto" />
                 <Button
                   size="sm"
                   className="bg-red-500 transition-all duration-300 hover:bg-red-500/80"
+                  onClick={() => meta.onDelete(idPodcast)}
                 >
                   <Trash />
                 </Button>

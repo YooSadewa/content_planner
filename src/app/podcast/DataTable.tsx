@@ -8,18 +8,23 @@ import {
   useReactTable,
 } from "@tanstack/react-table";
 import { ChevronLeft, ChevronRight } from "lucide-react";
+import Image from "next/image";
 import { useState } from "react";
 
 interface DataTableProps<TData, TValue> {
   columns: ColumnDef<TData, TValue>[];
   data: TData[];
   onUpload: (idPodcast: number) => void;
+  onDelete: (idPodcast: number) => void;
+  onEdit: (idPodcast: number) => void;
 }
 
 export function DataTable<TData, TValue>({
   columns,
   data,
-  onUpload
+  onUpload,
+  onDelete,
+  onEdit
 }: DataTableProps<TData, TValue>) {
   const [pagination, setPagination] = useState({
     pageIndex: 0,
@@ -36,7 +41,9 @@ export function DataTable<TData, TValue>({
     getCoreRowModel: getCoreRowModel(),
     getPaginationRowModel: getPaginationRowModel(),
     meta: {
-      onUpload: onUpload
+      onUpload: onUpload,
+      onDelete: onDelete,
+      onEdit: onEdit
     },
   });
 
@@ -73,8 +80,16 @@ export function DataTable<TData, TValue>({
               </div>
             ))
           ) : (
-            <div>
-              <div className="h-24 text-center">No results.</div>
+            <div className="w-full h-[420px]">
+              <div className="flex flex-col items-center gap-5 mt-20">
+                <Image
+                  src={"/assets/nodata.svg"}
+                  alt="no data"
+                  width={200}
+                  height={100}
+                />
+                <p className="font-bold text-xl">No data found.</p>
+              </div>
             </div>
           )}
         </div>
@@ -88,7 +103,7 @@ export function DataTable<TData, TValue>({
         >
           <ChevronLeft />
         </button>
-        <span>
+        <span className="text-sm">
           Page {table.getState().pagination.pageIndex + 1} of{" "}
           {table.getPageCount()}
         </span>

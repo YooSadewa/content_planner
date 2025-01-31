@@ -1,10 +1,11 @@
+import EditPembicara from "@/components/(Podcast)/PembicaraManage/EditData";
 import { Button } from "@/components/ui/button";
 import { ColumnDef } from "@tanstack/react-table";
 import { Pencil, Trash, UserPen } from "lucide-react";
 
 type Pembicara = {
-  host_id: number;
-  host_nama: string;
+  pmb_id: number;
+  pmb_nama: string;
 };
 
 export const columns: ColumnDef<Pembicara>[] = [
@@ -23,14 +24,16 @@ export const columns: ColumnDef<Pembicara>[] = [
     id: "actions",
     header: "Management",
     cell: ({ row, table }) => {
+      const pembicara = row.original;
       const meta = table.options.meta as any;
       return (
         <div className="flex justify-center gap-2">
-          <Button size="sm">
-            <UserPen />
-          </Button>
+          <EditPembicara 
+            id={pembicara.pmb_id} 
+            currentName={pembicara.pmb_nama} 
+          />
           <span className="w-[1px] h-5 bg-[#f7b500] my-auto" />
-          <Button size="sm">
+          <Button size="sm" onClick={() => meta.onDelete(pembicara.pmb_id)}>
             <Trash />
           </Button>
         </div>

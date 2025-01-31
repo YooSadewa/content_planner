@@ -61,7 +61,7 @@ export default function InputPembicara() {
         setErrorMessage("Terjadi kesalahan saat menambahkan pembicara.");
       }
     } catch (error) {
-      setErrorMessage("Gagal menghubungi server. Coba lagi nanti.");
+      setErrorMessage("Nama sudah tersedia");
     } finally {
       setLoading(false);
     }
