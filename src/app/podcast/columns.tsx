@@ -23,6 +23,8 @@ type Podcast = {
 export const columns: ColumnDef<Podcast>[] = [
   {
     accessorKey: "pdc_id",
+    accessorFn: (row) =>
+      `${row.host_nama} ${row.pdc_abstrak} ${row.pdc_catatan} ${row.pdc_jadwal_shoot} ${row.pdc_jadwal_upload} ${row.pdc_link} ${row.pdc_nama} ${row.pdc_tema}`,
     header: "",
     cell: ({ row, table }) => {
       const idPodcast = row.original.pdc_id;
@@ -39,9 +41,9 @@ export const columns: ColumnDef<Podcast>[] = [
       return (
         <>
           <div className="flex flex-row ps-1 pt-1 gap-4">
-            <div className="flex-[1_1_calc(50%-16px)] max-w-[494px] h-fit shadow-md rounded p-7 bg-white">
+            <div className="w-full h-fit shadow-md rounded p-7 bg-white">
               <div className="">
-                <h1 className="font-bold text-2xl capitalize truncate">
+                <h1 className="font-bold text-3xl capitalize truncate">
                   {title}
                 </h1>
                 <AbstractAlert
@@ -52,7 +54,7 @@ export const columns: ColumnDef<Podcast>[] = [
               </div>
               <div className="flex gap-2 mt-2 justify-between">
                 <div className="flex flex-col gap-1">
-                  <div className="flex items-center gap-1 text-[13px]">
+                  <div className="flex items-center gap-1 text-[16px]">
                     <Speech />
                     <p className="flex items-center gap-1">
                       Pembicara:{" "}
@@ -61,7 +63,7 @@ export const columns: ColumnDef<Podcast>[] = [
                       </span>
                     </p>
                   </div>
-                  <div className="flex flex-row gap-1 text-[13px]">
+                  <div className="flex flex-row gap-1 text-[16px]">
                     <Image
                       src={"/assets/icons/mic.png"}
                       alt="Mic"
@@ -69,14 +71,14 @@ export const columns: ColumnDef<Podcast>[] = [
                       height={200}
                       className="w-5 h-5"
                     />
-                    <p className="flex items-center gap-1">
+                    <p className="flex items-center gap-1 ps-1">
                       Host:{" "}
                       <span className="font-semibold capitalize">{host}</span>
                     </p>
                   </div>
                 </div>
-                <span className="w-[1px] h-10 my-auto bg-[#f7b500]" />
-                <div className="flex flex-col text-[13px] justify-center">
+                <span className="w-[1px] h-12 my-auto bg-[#f7b500]" />
+                <div className="flex flex-col text-[16px] justify-center items-end gap-1">
                   <p>
                     Jadwal Shoot:{" "}
                     <span className="font-semibold">{shootDate}</span>
@@ -104,11 +106,21 @@ export const columns: ColumnDef<Podcast>[] = [
                   </Button>
                 )}
                 <span className="w-[1px] h-5 bg-[#f7b500] my-auto" />
-                <EditPodcast id={idPodcast} currentName={title} currentAbstract={abstractContent} currentHost={host} currentLink={link} currentNote={notes} currentShoot={shootDate} currentSpeaker={speaker} currentUpload={uploadDate} />
+                <EditPodcast
+                  id={idPodcast}
+                  currentName={title}
+                  currentAbstract={abstractContent}
+                  currentHost={host}
+                  currentLink={link}
+                  currentNote={notes}
+                  currentShoot={shootDate}
+                  currentSpeaker={speaker}
+                  currentUpload={uploadDate}
+                />
                 <span className="w-[1px] h-5 bg-[#f7b500] my-auto" />
                 <Button
                   size="sm"
-                  className="bg-red-500 transition-all duration-300 hover:bg-red-500/80"
+                  className="bg-red-600 transition-all duration-300 hover:bg-red-500/80"
                   onClick={() => meta.onDelete(idPodcast)}
                 >
                   <Trash />

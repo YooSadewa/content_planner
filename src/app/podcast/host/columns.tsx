@@ -30,7 +30,7 @@ export const columns: ColumnDef<Host>[] = [
         <div className="flex justify-center gap-2">
           <EditHost id={host.host_id} currentName={host.host_nama} />
           <span className="w-[1px] h-5 bg-[#f7b500] my-auto" />
-          <Button size="sm" onClick={() => meta.onDelete(host.host_id)}>
+          <Button size="sm" className="bg-red-600" onClick={() => meta.onDelete(host.host_id)}>
             <Trash />
           </Button>
         </div>

@@ -33,7 +33,7 @@ export const columns: ColumnDef<Pembicara>[] = [
             currentName={pembicara.pmb_nama} 
           />
           <span className="w-[1px] h-5 bg-[#f7b500] my-auto" />
-          <Button size="sm" onClick={() => meta.onDelete(pembicara.pmb_id)}>
+          <Button size="sm" className="bg-red-600" onClick={() => meta.onDelete(pembicara.pmb_id)}>
             <Trash />
           </Button>
         </div>

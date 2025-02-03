@@ -59,6 +59,7 @@ export default function PodcastPage() {
   const [tableData, setTableData] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
+  const [search, setSearch] = useState("");
   const [selectedPodcastId, setSelectedPodcastId] = useState<number | null>(
     null
   );
@@ -113,45 +114,50 @@ export default function PodcastPage() {
               const daysToShoot = calculateDaysDifference(
                 podcast.pdc_jadwal_shoot
               );
-              const daysToUpload = calculateDaysDifference(
-                podcast.pdc_jadwal_upload
-              );
 
               if (!podcast.pdc_link) {
+                // Alert untuk jadwal shoot
                 if (daysToShoot > 0 && daysToShoot <= 3) {
                   acc.push({
-                    message: `Podcast "${podcast.pdc_tema}" jadwal shoot tinggal ${daysToShoot} hari lagi.`,
+                    message: `Jadwal shoot Podcast "${podcast.pdc_tema}" tinggal ${daysToShoot} hari lagi.`,
                     color: "bg-yellow-300",
                   });
                 } else if (daysToShoot === 0) {
                   acc.push({
-                    message: `Podcast "${podcast.pdc_tema}" jadwal shoot adalah hari ini.`,
+                    message: `Jadwal shoot Podcast "${podcast.pdc_tema}" adalah hari ini.`,
                     color: "bg-yellow-300",
                   });
                 } else if (daysToShoot < 0) {
                   acc.push({
-                    message: `Podcast "${
+                    message: `Jadwal shoot Podcast "${
                       podcast.pdc_tema
-                    }" jadwal shoot telah lewat ${Math.abs(daysToShoot)} hari.`,
+                    }" telah lewat ${Math.abs(daysToShoot)} hari.`,
                     color: "bg-red-500 text-white",
                   });
                 }
 
-                if (daysToUpload > 0 && daysToUpload <= 3) {
-                  acc.push({
-                    message: `Podcast "${podcast.pdc_tema}" jadwal upload tinggal ${daysToUpload} hari lagi.`,
-                    color: "bg-yellow-300",
-                  });
-                } else if (daysToUpload === 0) {
-                  acc.push({
-                    message: `Podcast "${podcast.pdc_tema}" jadwal upload adalah hari ini.`,
-                    color: "bg-yellow-300",
-                  });
-                } else if (daysToUpload < 0) {
-                  acc.push({
-                    message: `Podcast "${podcast.pdc_tema}" jadwal upload telah lewat.`,
-                    color: "bg-red-500 text-white",
-                  });
+                // Alert untuk jadwal upload hanya jika ada jadwal upload
+                if (podcast.pdc_jadwal_upload) {
+                  const daysToUpload = calculateDaysDifference(
+                    podcast.pdc_jadwal_upload
+                  );
+
+                  if (daysToUpload > 0 && daysToUpload <= 3) {
+                    acc.push({
+                      message: `Jadwal upload Podcast "${podcast.pdc_tema}" tinggal ${daysToUpload} hari lagi.`,
+                      color: "bg-yellow-300",
+                    });
+                  } else if (daysToUpload === 0) {
+                    acc.push({
+                      message: `Jadwal upload Podcast "${podcast.pdc_tema}" adalah hari ini.`,
+                      color: "bg-yellow-300",
+                    });
+                  } else if (daysToUpload < 0) {
+                    acc.push({
+                      message: `Jadwal upload Podcast "${podcast.pdc_tema}" telah lewat.`,
+                      color: "bg-red-500 text-white",
+                    });
+                  }
                 }
               }
 
@@ -165,7 +171,6 @@ export default function PodcastPage() {
           setError("Format data tidak sesuai");
         }
       } catch (err) {
-        // console.error("Error:", err);
         setError("Gagal mengambil data dari API.");
       } finally {
         setLoading(false);
@@ -222,23 +227,14 @@ export default function PodcastPage() {
               <BreadcrumbLink href="/podcast">Podcast</BreadcrumbLink>
             </Bread>
           </div>
-          <div className="flex gap-1">
+          <div className="flex gap-1 mb-5">
             <InputPodcast />
             <InputHost />
             <InputPembicara />
           </div>
         </div>
-        <div className="flex justify-between my-5">
-          <h1 className="text-xl font-bold flex items-center">Data Podcast</h1>
-          <div className="flex w-full max-w-sm items-center space-x-2">
-            <Input type="text" placeholder="Search..." />
-            <Button type="submit">
-              <Search />
-            </Button>
-          </div>
-        </div>
         {alerts.length > 0 && (
-          <div className="my-4">
+          <div className="mb-4">
             {alerts.map((alert, index) => (
               <div
                 key={index}
@@ -264,6 +260,7 @@ export default function PodcastPage() {
           </>
         ) : (
           <DataTable
+            query={search}
             columns={columns}
             data={tableData}
             onUpload={onUpload}
@@ -321,13 +318,13 @@ export default function PodcastPage() {
         Data Host dan Pembicara
       </h1>
       {loading ? (
-        <div className="flex w-12/12 px-8 mt-5 mb-7 gap-4">
+        <div className="flex w-12/12 px-8 my-5 mb-7 gap-4">
           <div className="skeleton bg-gray-100 w-6/12 h-36 border rounded-none" />
           <div className="skeleton bg-gray-100 w-6/12 h-36 border rounded-none" />
         </div>
       ) : (
         <>
-          <div className="flex w-12/12 px-8 gap-4">
+          <div className="flex w-12/12 px-8 gap-4 my-5">
             <HostPage />
             <PembicaraPage />
           </div>

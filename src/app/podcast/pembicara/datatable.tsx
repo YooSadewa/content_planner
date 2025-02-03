@@ -105,7 +105,7 @@ export function DataSpeakerTable<TData, TValue>({
         <button
           onClick={() => table.previousPage()}
           disabled={!table.getCanPreviousPage()}
-          className="px-1 py-1 bg-gray-200 rounded-full mb-2 ms-2"
+          className="px-1 py-1 bg-gray-200 rounded-full mt-2 ms-2"
         >
           <ChevronLeft />
         </button>
@@ -116,7 +116,7 @@ export function DataSpeakerTable<TData, TValue>({
         <button
           onClick={() => table.nextPage()}
           disabled={!table.getCanNextPage()}
-          className="px-1 py-1 bg-gray-200 rounded-full my-2 me-2"
+          className="px-1 py-1 bg-gray-200 rounded-full mt-2 me-2"
         >
           <ChevronRight />
         </button>
