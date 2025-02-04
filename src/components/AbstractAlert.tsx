@@ -24,7 +24,7 @@ export function AbstractAlert({
     <AlertDialog>
       <AlertDialogTrigger asChild>
         <Button variant="none" className="p-0 m-0 h-0">
-          Lihat abstrak dan catatan
+          Lihat tema, abstrak, dan catatan selengkapnya
         </Button>
       </AlertDialogTrigger>
       <AlertDialogContent>

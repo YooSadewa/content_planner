@@ -3,15 +3,15 @@ import { z } from "zod";
 export const hostInfoSchema = z.object({
   host_nama: z
     .string()
-    .min(3, { message: "Host name must be at least 3 characters long" })
-    .max(100, { message: "Host name must be at most 100 characters long" }),
+    .min(3, { message: "Nama host harus terdiri dari minimal 3 karakter" })
+    .max(100, { message: "Nama host harus terdiri dari maksimal 100 karakter" }),
 });
 
 export const speakerInfoSchema = z.object({
   pmb_nama: z
     .string()
-    .min(3, { message: "Speaker name must be at least 3 characters long" })
-    .max(100, { message: "Speaker name must be at most 100 characters long" }),
+    .min(3, { message: "Nama pembicara harus terdiri dari minimal 3 karakter" })
+    .max(100, { message: "Nama pembicara harus terdiri dari maksimal 100 karakter" }),
 });
 
 export const podcastInfoSchema = z
@@ -25,38 +25,46 @@ export const podcastInfoSchema = z
         return !isNaN(inputDate.getTime()) && inputDate >= currentDate;
       },
       {
-        message: "The shoot date must be valid and must not be in the past.",
+        message: "Tanggal shooting harus valid dan tidak boleh di masa lalu.",
       }
     ),
-    pdc_jadwal_upload: z.string(),
+    pdc_jadwal_upload: z.string().nullable().optional(), 
     pdc_tema: z
       .string()
-      .min(1, { message: "Theme must be at least 1 character long" })
-      .max(150, { message: "Theme must be at most 150 characters long" }),
-    // pdc_abstrak: z.string({ message: "Abstrak harus berupa string." }),
+      .min(1, { message: "Tema harus diisi" })
+      .max(150, { message: "Tema harus terdiri dari maksimal 150 karakter" }),
     pmb_id: z.string().refine((val) => !isNaN(Number(val)) && Number(val) > 0, {
-      message: "Choose a valid speaker.",
+      message: "Pilih pembicara yang valid.",
     }),
     host_id: z
       .string()
       .refine((val) => !isNaN(Number(val)) && Number(val) > 0, {
-        message: "Choose a valid host.",
+        message: "Pilih host yang valid.",
       }),
-    // pdc_catatan: z.string({ message: "Note must be a string." }),
   })
   .superRefine((data, ctx) => {
     const shootDate = new Date(data.pdc_jadwal_shoot);
-    const uploadDate = new Date(data.pdc_jadwal_upload);
 
-    if (uploadDate < shootDate) {
-      ctx.addIssue({
-        code: "custom",
-        path: ["pdc_jadwal_upload"], 
-        message: "Upload date must be after shoot date.",
-      });
+    // Tangani kasus null
+    if (
+      data.pdc_jadwal_upload !== null &&
+      data.pdc_jadwal_upload !== undefined
+    ) {
+      const uploadDate = new Date(data.pdc_jadwal_upload);
+
+      if (uploadDate < shootDate) {
+        ctx.addIssue({
+          code: "custom",
+          path: ["pdc_jadwal_upload"],
+          message: "Tanggal upload harus setelah tanggal shooting",
+        });
+      }
     }
   });
 
 export const uploadInfoSchema = z.object({
-  pdc_link: z.string().url("URL must be valid").min(1, {message: "URL must be at least 1 character long"})
+  pdc_link: z
+    .string()
+    .url("URL harus valid")
+    .min(1, { message: "URL harus diisi" }),
 });

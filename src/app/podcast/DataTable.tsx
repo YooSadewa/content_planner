@@ -27,6 +27,7 @@ import React, { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { ChevronLeft, ChevronRight, Search } from "lucide-react";
+import Image from "next/image";
 
 interface DataTableProps<TData, TValue> {
   query: string;
@@ -101,7 +102,7 @@ export function DataTable<TData, TValue>({
               <h1 className="text-xl font-bold flex items-center">
                 Data Podcast
               </h1>
-              <div className="flex w-full max-w-sm items-center space-x-2">
+              <div className="flex w-full max-w-sm items-center space-x-2 bg-white shadow-sm rounded-md">
                 <Input
                   type="text"
                   name="search"
@@ -137,9 +138,10 @@ export function DataTable<TData, TValue>({
                     <TableRow>
                       <TableCell
                         colSpan={columns.length}
-                        className="h-24 text-center"
+                        className="text-center flex flex-col m-auto h-[480px] items-center justify-center gap-5 font-semibold"
                       >
-                        Tidak ada data ditemukan.
+                        <Image src={"/assets/nodata.svg"} alt="No data" width={200} height={200} className="mx-auto"/>
+                        Tidak ada data podcast
                       </TableCell>
                     </TableRow>
                   )}

@@ -31,7 +31,10 @@ export default function PembicaraPage() {
       try {
         const response = await axios.get("http://127.0.0.1:8000/api/host");
         if (response.data.status && response.data.data.host) {
-          setTableData(response.data.data.host);
+          const filteredData = response.data.data.host.filter(
+            (item : any) => item.host_isactive === "Y"
+          );
+          setTableData(filteredData);
         } else {
           setError("Format data tidak sesuai");
         }
@@ -58,7 +61,7 @@ export default function PembicaraPage() {
     if (!hostToDelete) return;
 
     try {
-      const response = await axios.delete(
+      const response = await axios.patch(
         `http://127.0.0.1:8000/api/host/delete/${hostToDelete}`
       );
 
@@ -88,7 +91,7 @@ export default function PembicaraPage() {
   };
 
   return (
-    <div className="w-6/12">
+    <div className="w-6/12 shadow-md rounded-md border-t p-5">
       <DataHostTable
         columns={columns}
         data={tableData}

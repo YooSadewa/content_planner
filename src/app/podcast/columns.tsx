@@ -5,6 +5,10 @@ import { ColumnDef } from "@tanstack/react-table";
 import { FilePenLine, Speech, Trash } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
+import moment from "moment";
+import "moment/locale/id";
+import { useEffect, useState } from "react";
+import axios from "axios";
 
 type Podcast = {
   host_id: number;
@@ -20,6 +24,17 @@ type Podcast = {
   pmb_id: number;
 };
 
+type Speakers = {
+  pmb_id: string;
+  pmb_nama: string;
+  pmb_isactive: string;
+};
+
+type Hosts = {
+  host_id: string;
+  host_nama: string;
+};
+
 export const columns: ColumnDef<Podcast>[] = [
   {
     accessorKey: "pdc_id",
@@ -31,24 +46,84 @@ export const columns: ColumnDef<Podcast>[] = [
       const title = row.original.pdc_tema;
       const abstractContent = row.original.pdc_abstrak;
       const speaker = row.original.pdc_nama;
+      const speakerId = row.original.pmb_id;
       const host = row.original.host_nama;
-      const shootDate = row.original.pdc_jadwal_shoot;
-      const uploadDate = row.original.pdc_jadwal_upload;
+      const hostId = row.original.host_id;
+      const shootDate = moment(row.original.pdc_jadwal_shoot).format(
+        "D MMMM YYYY"
+      );
+      const uploadDate = row.original.pdc_jadwal_upload
+        ? moment(row.original.pdc_jadwal_upload).format("D MMMM YYYY")
+        : "Tidak Ditetapkan";
       const notes = row.original.pdc_catatan;
       const link = row.original.pdc_link;
       const meta = table.options.meta as any;
+
+      const [speakers, setSpeakers] = useState<Speakers[]>([]);
+      const [error, setError] = useState("");
+      useEffect(() => {
+        const fetchSpeaker = async () => {
+          try {
+            const response = await axios.get(
+              "http://127.0.0.1:8000/api/pembicara"
+            );
+
+            if (response.data.status && response.data.data.pembicara) {
+              const filteredSpeakers = response.data.data.pembicara.filter(
+                (speaker: any) =>
+                  speaker.pmb_id === speakerId || speaker.pmb_isactive === "Y"
+              );
+
+              console.log("Speaker: ", response.data.data.pembicara);
+              setSpeakers(filteredSpeakers);
+            } else {
+              setError("Format data tidak sesuai");
+            }
+          } catch (err) {
+            setError("Gagal mengambil data dari API.");
+          }
+        };
+
+        fetchSpeaker();
+      }, [speakerId]);
+
+      const [hosts, setHosts] = useState<Hosts[]>([]);
+      useEffect(() => {
+        const fetchHost = async () => {
+          try {
+            const response = await axios.get("http://127.0.0.1:8000/api/host");
+            console.log("Full API Response:", response.data);
+
+            if (response.data.status && response.data.data.host) {
+              const filteredHosts = response.data.data.host.filter(
+                (host: any) =>
+                  host.host_id === hostId || host.host_isactive === "Y"
+              );
+
+              console.log("Host: ", response.data.data.host);
+              setHosts(filteredHosts);
+            } else {
+              setError("Format data tidak sesuai");
+            }
+          } catch (err) {
+            setError("Gagal mengambil data dari API.");
+          }
+        };
+
+        fetchHost();
+      }, []);
       const isLoading = meta?.loading || false;
       return (
         <>
           <div className="flex flex-row ps-1 pt-1 gap-4">
             <div className="w-full h-fit shadow-md rounded p-7 bg-white">
               <div className="">
-                <h1 className="font-bold text-3xl capitalize truncate">
+                <h1 className="font-bold text-3xl capitalize truncate overflow-hidden whitespace-nowrap text-ellipsis w-[920px]">
                   {title}
                 </h1>
                 <AbstractAlert
                   title={title}
-                  content={abstractContent || "Abstract content tidak tersedia"}
+                  content={abstractContent || "Abstrak tidak tersedia"}
                   notes={notes || "Catatan tidak tersedia"}
                 />
               </div>
@@ -92,7 +167,9 @@ export const columns: ColumnDef<Podcast>[] = [
               <div className="flex gap-2 justify-end mt-4">
                 {link ? (
                   <Button variant="upload" size="sm">
-                    <Link href={link}>Lihat Podcast</Link>
+                    <Link href={link} target="_blank">
+                      Lihat Podcast
+                    </Link>
                   </Button>
                 ) : (
                   <Button
@@ -113,9 +190,12 @@ export const columns: ColumnDef<Podcast>[] = [
                   currentHost={host}
                   currentLink={link}
                   currentNote={notes}
-                  currentShoot={shootDate}
+                  currentShoot={row.original.pdc_jadwal_shoot}
+                  currentSpeakerId={speakerId}
                   currentSpeaker={speaker}
-                  currentUpload={uploadDate}
+                  currentUpload={row.original.pdc_jadwal_upload}
+                  speakers={speakers}
+                  hosts={hosts}
                 />
                 <span className="w-[1px] h-5 bg-[#f7b500] my-auto" />
                 <Button

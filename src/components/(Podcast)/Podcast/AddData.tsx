@@ -32,11 +32,13 @@ type Podcasts = {
 type Speakers = {
   pmb_id: string;
   pmb_nama: string;
+  pmb_isactive: string;
 };
 
 type Hosts = {
   host_id: string;
   host_nama: string;
+  host_isactive: string;
 };
 
 export default function InputPodcast() {
@@ -112,7 +114,12 @@ export default function InputPodcast() {
 
         if (response.data.status && response.data.data.host) {
           console.log("Hosts Data:", response.data.data.host);
-          setHosts(response.data.data.host);
+
+          const activeHosts = response.data.data.host.filter(
+            (host: any) => host.host_isactive === "Y"
+          );
+
+          setHosts(activeHosts);
         } else {
           setError("Format data tidak sesuai");
         }
@@ -132,7 +139,12 @@ export default function InputPodcast() {
 
         if (response.data.status && response.data.data.pembicara) {
           console.log("Speakers Data:", response.data.data.pembicara);
-          setSpeakers(response.data.data.pembicara);
+
+          const activeSpeakers = response.data.data.pembicara.filter(
+            (speaker: any) => speaker.pmb_isactive === "Y"
+          );
+
+          setSpeakers(activeSpeakers);
         } else {
           setError("Format data tidak sesuai");
         }

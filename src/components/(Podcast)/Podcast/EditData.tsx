@@ -49,6 +49,9 @@ type EditPodcastProps = {
   currentUpload: string;
   currentNote: string;
   currentLink: string;
+  currentSpeakerId: number;
+  speakers: Speakers[];
+  hosts: Hosts[];
 };
 
 export default function EditPodcast({
@@ -61,10 +64,9 @@ export default function EditPodcast({
   currentShoot,
   currentUpload,
   currentSpeaker,
+  speakers,
+  hosts,
 }: EditPodcastProps) {
-  const [hosts, setHosts] = useState<Hosts[]>([]);
-  const [speakers, setSpeakers] = useState<Speakers[]>([]);
-  const [error, setError] = useState("");
   const [isModalPodcastOpen, setModalPodcastOpen] = useState(false);
   const [loading, setLoading] = useState(false);
   const [errorMessage, setErrorMessage] = useState("");
@@ -73,6 +75,8 @@ export default function EditPodcast({
   const onEditPodcast = () => {
     setModalPodcastOpen(true);
   };
+
+  console.log("Speaker data", currentLink);
 
   const {
     register,
@@ -122,45 +126,7 @@ export default function EditPodcast({
     setModalPodcastOpen(false);
   };
 
-  useEffect(() => {
-    const fetchHost = async () => {
-      try {
-        const response = await axios.get("http://127.0.0.1:8000/api/host");
-        console.log("Full API Response:", response.data);
-
-        if (response.data.status && response.data.data.host) {
-          console.log("Hosts Data:", response.data.data.host);
-          setHosts(response.data.data.host);
-        } else {
-          setError("Format data tidak sesuai");
-        }
-      } catch (err) {
-        setError("Gagal mengambil data dari API.");
-      }
-    };
-
-    fetchHost();
-  }, []);
-
-  useEffect(() => {
-    const fetchSpeaker = async () => {
-      try {
-        const response = await axios.get("http://127.0.0.1:8000/api/pembicara");
-        console.log("Full API Response:", response.data);
-
-        if (response.data.status && response.data.data.pembicara) {
-          console.log("Speakers Data:", response.data.data.pembicara);
-          setSpeakers(response.data.data.pembicara);
-        } else {
-          setError("Format data tidak sesuai");
-        }
-      } catch (err) {
-        setError("Gagal mengambil data dari API.");
-      }
-    };
-
-    fetchSpeaker();
-  }, []);
+  console.log(currentShoot, currentUpload);
 
   return (
     <div>
