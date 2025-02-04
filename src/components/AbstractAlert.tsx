@@ -29,14 +29,14 @@ export function AbstractAlert({
       </AlertDialogTrigger>
       <AlertDialogContent>
         <AlertDialogHeader>
-          <AlertDialogTitle className="font-bold text-2xl capitalize break-all text-black">
+          <AlertDialogTitle className="font-bold text-2xl capitalize break-words text-black">
             {title}
           </AlertDialogTitle>
-          <AlertDialogDescription className="break-all">
-            {content}
+          <AlertDialogDescription className="break-words">
+            <span className="font-bold">Abstrak:</span> {content}
           </AlertDialogDescription>
-          <AlertDialogDescription className="break-all">
-            {notes}
+          <AlertDialogDescription className="break-words">
+          <span className="font-bold">Catatan:</span> {notes}
           </AlertDialogDescription>
         </AlertDialogHeader>
         <AlertDialogFooter>
