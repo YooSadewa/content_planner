@@ -4,14 +4,18 @@ export const hostInfoSchema = z.object({
   host_nama: z
     .string()
     .min(3, { message: "Nama host harus terdiri dari minimal 3 karakter" })
-    .max(100, { message: "Nama host harus terdiri dari maksimal 100 karakter" }),
+    .max(100, {
+      message: "Nama host harus terdiri dari maksimal 100 karakter",
+    }),
 });
 
 export const speakerInfoSchema = z.object({
   pmb_nama: z
     .string()
     .min(3, { message: "Nama pembicara harus terdiri dari minimal 3 karakter" })
-    .max(100, { message: "Nama pembicara harus terdiri dari maksimal 100 karakter" }),
+    .max(100, {
+      message: "Nama pembicara harus terdiri dari maksimal 100 karakter",
+    }),
 });
 
 export const podcastInfoSchema = z
@@ -28,7 +32,7 @@ export const podcastInfoSchema = z
         message: "Tanggal shooting harus valid dan tidak boleh di masa lalu.",
       }
     ),
-    pdc_jadwal_upload: z.string().nullable().optional(), 
+    pdc_jadwal_upload: z.string().nullable().optional(),
     pdc_tema: z
       .string()
       .min(1, { message: "Tema harus diisi" })
@@ -42,7 +46,7 @@ export const podcastInfoSchema = z
       .refine((val) => !isNaN(Number(val)) && Number(val) > 0, {
         message: "Pilih host yang valid.",
       }),
-    pdc_catatan: z.string()
+    pdc_catatan: z.string(),
   })
   .superRefine((data, ctx) => {
     const shootDate = new Date(data.pdc_jadwal_shoot);
@@ -69,4 +73,19 @@ export const uploadInfoSchema = z.object({
     .string()
     .url("URL harus valid")
     .min(1, { message: "URL harus diisi" }),
+});
+
+export const quoteInfoSchema = z.object({
+  qotd_link: z
+    .string()
+    .url("Link Instagram harus valid")
+    .min(1, { message: "Link Instagram harus diisi" }),
+});
+
+export const inspiringInfoSchema = z.object({
+  ins_nama: z.string().min(1, { message: "Nama harus diisi" }),
+  ins_link: z
+    .string()
+    .url("Link Instagram harus valid")
+    .min(1, { message: "Link Instagram harus diisi" }),
 });
