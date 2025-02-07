@@ -11,11 +11,13 @@ interface DataTableProps<TData, TValue> {
   query: string;
   columns: ColumnDef<TData, TValue>[];
   data: TData[];
+  onDelete: (idInspiring: number) => void;
 }
 
 export function DataTableInspiring<TData, TValue>({
   columns,
   data,
+  onDelete
 }: DataTableProps<TData, TValue>) {
   const table = useReactTable({
     data,
@@ -25,6 +27,9 @@ export function DataTableInspiring<TData, TValue>({
         pageIndex: 0,
         pageSize: 3,
       },
+    },
+    meta: {
+      onDelete: onDelete,
     },
     getCoreRowModel: getCoreRowModel(),
     getPaginationRowModel: getPaginationRowModel(),

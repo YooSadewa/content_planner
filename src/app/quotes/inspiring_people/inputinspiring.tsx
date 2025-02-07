@@ -43,14 +43,22 @@ export default function CreateInspiring() {
     resolver: zodResolver(inspiringInfoSchema),
   });
 
+  const sanitizeInstagramLink = (url: string) => {
+    const match = url.match(/(https:\/\/www\.instagram\.com\/p\/[\w-]+\/)/);
+    return match ? match[1] : url;
+  }
+
   const onSubmit = async (data: Inspiring) => {
     setLoading(true);
     setErrorMessage("");
     setSuccessMessage("");
+
+    const sanitizedLink = sanitizeInstagramLink(data.ins_link);
+    setValue("ins_link", sanitizedLink);
     try {
       const response = await axios.post(
         "http://127.0.0.1:8000/api/inspiringpeople/create",
-        data
+        {ins_link: sanitizedLink, ins_nama: data.ins_nama}
       );
       if (response.status === 200 || response.status === 201) {
         window.location.reload();
@@ -112,7 +120,16 @@ export default function CreateInspiring() {
                       id="ins_link"
                       disabled={isSubmitting || loading}
                       placeholder="https://www.instagram.com/p/"
-                      {...register("ins_link")}
+                      {...register("ins_link", {
+                        onChange: (e) => {
+                          const sanitizedLink = sanitizeInstagramLink(
+                            e.target.value
+                          );
+                          setValue("ins_link", sanitizedLink, {
+                            shouldValidate: true
+                          })
+                        }
+                      })}
                     />
                     {errors.ins_link?.message && (
                       <div className="text-red-500 text-xs">

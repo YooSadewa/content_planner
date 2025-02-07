@@ -17,6 +17,17 @@ import { columnsInsp } from "./inspiring_people/columns";
 import { DataTableInspiring } from "./inspiring_people/datatable";
 import CreateInspiring from "./inspiring_people/inputinspiring";
 
+type Quote = {
+  qotd_id: number;
+  qotd_link: string;
+};
+
+type Inspiring = {
+  ins_id: number;
+  ins_link: string;
+  ins_nama: string;
+};
+
 export default function QuotesPage() {
   const [loading, setLoading] = useState(true);
   const [tableData, setTableData] = useState([]);
@@ -44,7 +55,9 @@ export default function QuotesPage() {
   useEffect(() => {
     const fetchInspiring = async () => {
       try {
-        const response = await axios.get("http://127.0.0.1:8000/api/inspiringpeople");
+        const response = await axios.get(
+          "http://127.0.0.1:8000/api/inspiringpeople"
+        );
 
         if (response.data.status && response.data.data.inspiringPeople) {
           console.log("Inspiring People: ", response.data.data.inspiringPeople);
@@ -60,6 +73,53 @@ export default function QuotesPage() {
     };
     fetchInspiring();
   }, []);
+
+  const onDeleteQuote = async (idQuote: number) => {
+    try {
+      const response = await axios.delete(
+        `http://127.0.0.1:8000/api/quote/delete/${idQuote}`
+      );
+
+      if (response.data.status) {
+        setTableData((prevData) =>
+          prevData.filter((quote: Quote) => quote.qotd_id !== idQuote)
+        );
+        window.location.reload();
+        console.log(`Quote dengan ID ${idQuote} berhasil dihapus.`);
+      } else {
+        console.error("Deletion failed:", response.data.message);
+      }
+    } catch (err) {
+      console.error("Terjadi kesalahan:", error);
+      setError("Gagal menghapus quote");
+    }
+  };
+
+  const onDeleteInspiring = async (idInspiring: number) => {
+    try {
+      const response = await axios.delete(
+        `http://127.0.0.1:8000/api/inspiringpeople/delete/${idInspiring}`
+      );
+
+      if (response.data.status) {
+        setTableData((prevData) =>
+          prevData.filter(
+            (inspiring: Inspiring) => inspiring.ins_id !== idInspiring
+          )
+        );
+        window.location.reload();
+        console.log(
+          `Inspiring People dengan ID ${idInspiring} berhasil dihapus.`
+        );
+      } else {
+        console.error("Deletion failed:", response.data.message);
+      }
+    } catch (err) {
+      console.error("Terjadi kesalahan:", error);
+      setError("Gagal menghapus inspiring");
+    }
+  };
+
   return (
     <div className="bg-gray-100 w-[1050px]">
       <div className="p-5 overflow-auto">
@@ -99,7 +159,12 @@ export default function QuotesPage() {
             </div>
           </div>
         ) : (
-          <DataTable query="" columns={columns} data={tableData} />
+          <DataTable
+            query=""
+            columns={columns}
+            data={tableData}
+            onDelete={onDeleteQuote}
+          />
         )}
         {loading ? (
           <div className="bg-white p-5 rounded-xl mt-5 flex flex-col w-[1010px]">
@@ -122,7 +187,12 @@ export default function QuotesPage() {
             </div>
           </div>
         ) : (
-          <DataTableInspiring query="" columns={columnsInsp} data={tableDataInspiring} />
+          <DataTableInspiring
+            query=""
+            columns={columnsInsp}
+            data={tableDataInspiring}
+            onDelete={onDeleteInspiring}
+          />
         )}
       </div>
     </div>

@@ -99,3 +99,7 @@ body {
   --skeleton: #f3f3f3;
   --background: #ffffff; /* Warna terang untuk skeleton */
 }
+
+.disabled-iframe {
+  pointer-events: none;
+}

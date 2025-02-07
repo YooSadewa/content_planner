@@ -27,9 +27,7 @@ export default function CreateQuote() {
   const [loading, setLoading] = useState(false);
   const [errorMessage, setErrorMessage] = useState("");
   const [successMessage, setSuccessMessage] = useState("");
-  const onAddQuote = () => {
-    setModalOpen(true);
-  };
+
   const {
     register,
     setValue,
@@ -42,19 +40,28 @@ export default function CreateQuote() {
     resolver: zodResolver(quoteInfoSchema),
   });
 
+  const sanitizeInstagramLink = (url: string) => {
+    const match = url.match(/(https:\/\/www\.instagram\.com\/p\/[\w-]+\/)/);
+    return match ? match[1] : url;
+  };
+
   const onSubmit = async (data: Quote) => {
     setLoading(true);
     setErrorMessage("");
     setSuccessMessage("");
+
+    const sanitizedLink = sanitizeInstagramLink(data.qotd_link);
+    setValue("qotd_link", sanitizedLink);
+
     try {
       const response = await axios.post(
         "http://127.0.0.1:8000/api/quote/create",
-        data
+        { qotd_link: sanitizedLink }
       );
       if (response.status === 200 || response.status === 201) {
-        window.location.reload();
         setSuccessMessage("Quote berhasil ditambahkan");
         setModalOpen(false);
+        window.location.reload();
       } else {
         setErrorMessage("Gagal menambahkan quote");
       }
@@ -64,12 +71,10 @@ export default function CreateQuote() {
       setLoading(false);
     }
   };
-  const handleCancel = () => {
-    setModalOpen(false);
-  };
+
   return (
     <>
-      <Button size="sm" variant="default" onClick={onAddQuote}>
+      <Button size="sm" variant="default" onClick={() => setModalOpen(true)}>
         <Plus />
         Tambahkan Quote
       </Button>
@@ -90,7 +95,16 @@ export default function CreateQuote() {
                       id="qotd_link"
                       disabled={isSubmitting || loading}
                       placeholder="https://www.instagram.com/p/"
-                      {...register("qotd_link")}
+                      {...register("qotd_link", {
+                        onChange: (e) => {
+                          const sanitizedLink = sanitizeInstagramLink(
+                            e.target.value
+                          );
+                          setValue("qotd_link", sanitizedLink, {
+                            shouldValidate: true,
+                          });
+                        },
+                      })}
                     />
                     {errors.qotd_link?.message && (
                       <div className="text-red-500 text-xs">
@@ -107,7 +121,10 @@ export default function CreateQuote() {
                 </div>
               </AlertDialogHeader>
               <AlertDialogFooter>
-                <AlertDialogCancel type="button" onClick={handleCancel}>
+                <AlertDialogCancel
+                  type="button"
+                  onClick={() => setModalOpen(false)}
+                >
                   Cancel
                 </AlertDialogCancel>
                 <AlertDialogAction type="submit" disabled={loading}>

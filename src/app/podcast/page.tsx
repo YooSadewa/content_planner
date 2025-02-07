@@ -204,7 +204,7 @@ export default function PodcastPage() {
       }
     } catch (error) {
       console.error("Terjadi kesalahan:", error);
-      setError("Gagal menghapus pembicara");
+      setError("Gagal menghapus podcast");
     }
   };
 
