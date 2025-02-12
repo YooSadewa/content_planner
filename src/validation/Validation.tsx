@@ -89,3 +89,21 @@ export const inspiringInfoSchema = z.object({
     .url("Link Instagram harus valid")
     .min(1, { message: "Link Instagram harus diisi" }),
 });
+
+export const picContentInfoSchema = z.object({
+  ikf_tgl: z.string().min(1, { message: "Tanggal harus diisi" }),
+  ikf_judul_konten: z
+    .string()
+    .min(1, { message: "Judul konten harus diisi" })
+    .max(150, { message: "Judul konten melebihi batas 150 karakter" }),
+  ikf_ringkasan: z
+    .string()
+    .min(1, { message: "Ringkasan harus diisi" })
+    .max(150, { message: "Ringkasan melebihi batas 150 karakter" }),
+  ikf_referensi: z
+    .string()
+    .url("Link Harus Valid")
+    .or(z.literal(""))
+    .nullable()
+    .optional(),
+});

@@ -1,4 +1,3 @@
-// columns.ts
 import { ColumnDef } from "@tanstack/react-table";
 import { Button } from "@/components/ui/button";
 
@@ -16,7 +15,7 @@ export const columns: ColumnDef<IdeKontenFoto>[] = [
     header: "Tanggal",
     cell: ({ row }) => {
       return (
-        <div className="text-center w-[100px]">{row.original.ikf_tgl}</div>
+        <div>{row.original.ikf_tgl}</div>
       );
     },
   },
@@ -24,14 +23,14 @@ export const columns: ColumnDef<IdeKontenFoto>[] = [
     accessorKey: "ikf_judul_konten",
     header: "Judul Konten",
     cell: ({ row }) => {
-      return <div className="w-[200px]">{row.original.ikf_judul_konten}</div>;
+      return <div>{row.original.ikf_judul_konten}</div>;
     },
   },
   {
     accessorKey: "ikf_ringkasan",
     header: "Ringkasan Konten",
     cell: ({ row }) => {
-      return <div>{row.original.ikf_ringkasan}</div>;
+      return <div className="">{row.original.ikf_ringkasan}</div>;
     },
   },
   {
@@ -47,23 +46,6 @@ export const columns: ColumnDef<IdeKontenFoto>[] = [
           onClick={() => meta.onOpenReference(row.original.ikf_id)}
         >
           Lihat Referensi
-        </Button>
-      );
-    },
-  },
-  {
-    id: "actions",
-    header: "Aksi",
-    cell: ({ row, table }) => {
-      const meta = table.options.meta as { onOpen: (id: number) => void };
-      return (
-        <Button
-          size="sm"
-          variant="outline"
-          className="w-full"
-          onClick={() => meta.onOpen(row.original.ikf_id)}
-        >
-          Lihat Selengkapnya
         </Button>
       );
     },

@@ -9,6 +9,7 @@ import { DataTable } from "./ide-konten-foto/datatable";
 import { columns } from "./ide-konten-foto/columns";
 import { useEffect, useState } from "react";
 import axios from "axios";
+import CreateKontenFoto from "./ide-konten-foto/adddata";
 
 export default function IdeKontenPage() {
   const [tableData, setTableData] = useState([]);
@@ -54,12 +55,10 @@ export default function IdeKontenPage() {
               <BreadcrumbLink href="/ide-konten">Ide Konten</BreadcrumbLink>
             </Bread>
           </div>
-          <div className="flex gap-2">
-
-          </div>
+          <CreateKontenFoto />
         </div>
-        <div className="p-5 mt-5 rounded-xl bg-white flex flex-col items-center">
-          <h1 className="font-bold text-2xl mb-3 ps-1 text-[#293854] me-auto">
+        <div className="px-3 pt-5 mt-5 rounded-xl bg-white flex flex-col items-center">
+          <h1 className="font-bold text-2xl ps-1 text-[#293854] me-auto">
             Ide Konten Foto
           </h1>
           <DataTable data={tableData} onOpen={onOpen} />

@@ -247,14 +247,33 @@ export default function PodcastPage() {
         )}
         {loading ? (
           <>
-            <div className="border pb-[72px] flex flex-col py-2 ps-2 pe-[7px] gap-4">
-              <div className="flex gap-5">
-                <div className="bg-gray-100 skeleton w-[482px] h-[200px] shadow-md rounded" />
-                <div className="bg-gray-100 skeleton w-[482px] h-[200px] shadow-md rounded" />
-              </div>
-              <div className="flex gap-5 mt-[4px]">
-                <div className="bg-gray-100 skeleton w-[482px] h-[200px] shadow-md rounded" />
-                <div className="bg-gray-100 skeleton w-[482px] h-[200px] shadow-md rounded" />
+            <div className="shadow-md border-t rounded-xl">
+              <div className="w-[1010px] h-[535px]">
+                <div className="flex gap-2">
+                  <div className="flex justify-between mb-1 w-full m-3">
+                    <h1 className="text-xl font-bold flex items-center">
+                      Data Podcast
+                    </h1>
+                    <div className="flex w-full max-w-sm items-center space-x-2 bg-white shadow-sm rounded-md">
+                      <Input
+                        type="text"
+                        name="search"
+                        id="search"
+                        placeholder="Cari..."
+                      />
+                    </div>
+                  </div>
+                </div>
+                <div className="pb-[72px] flex flex-col py-2 ps-2 pe-[7px] gap-4">
+                  <div className="flex gap-5">
+                    <div className="bg-gray-100 skeleton w-[482px] h-[200px] shadow-md rounded" />
+                    <div className="bg-gray-100 skeleton w-[482px] h-[200px] shadow-md rounded" />
+                  </div>
+                  <div className="flex gap-5 mt-[4px]">
+                    <div className="bg-gray-100 skeleton w-[482px] h-[200px] shadow-md rounded" />
+                    <div className="bg-gray-100 skeleton w-[482px] h-[200px] shadow-md rounded" />
+                  </div>
+                </div>
               </div>
             </div>
           </>
