@@ -1,10 +1,3 @@
-import React, { useState } from "react";
-import {
-  useReactTable,
-  getCoreRowModel,
-  getPaginationRowModel,
-  flexRender,
-} from "@tanstack/react-table";
 import {
   Table,
   TableBody,
@@ -14,38 +7,44 @@ import {
   TableRow,
 } from "@/components/ui/tablecontent";
 import {
+  flexRender,
+  getCoreRowModel,
+  getPaginationRowModel,
+  useReactTable,
+} from "@tanstack/react-table";
+import {
   Sheet,
   SheetContent,
   SheetDescription,
   SheetHeader,
   SheetTitle,
 } from "@/components/ui/sheet";
-import { Button } from "@/components/ui/button";
-import {
-  ChevronLeft,
-  ChevronRight,
-} from "lucide-react";
-import axios from "axios";
 import { columns } from "./columns";
+import { useState } from "react";
+import axios from "axios";
+import { Button } from "@/components/ui/button";
+import { ChevronLeft, ChevronRight } from "lucide-react";
 
-type IdeKontenFoto = {
-  ikf_id: number;
-  ikf_tgl: string;
-  ikf_judul_konten: string;
-  ikf_ringkasan: string;
-  ikf_referensi: string;
+type IdeKontenVideo = {
+  ikv_id: number;
+  ikv_tgl: string;
+  ikv_judul_konten: string;
+  ikv_ringkasan: string;
+  ikv_pic: string;
+  ikv_status: string;
+  ikv_skrip: string;
+  ikv_upload: string;
 };
 
 type DataTableProps = {
-  data: IdeKontenFoto[];
+  data: IdeKontenVideo[];
   onOpen: (id: number) => void;
 };
 
-export function DataTable({ data }: DataTableProps) {
-  const [selectedItem, setSelectedItem] = useState<IdeKontenFoto | null>(null);
+export function DataTableVideo({ data }: DataTableProps) {
+  const [selectedItem, setSelectedItem] = useState<IdeKontenVideo | null>(null);
   const [hoveredRow, setHoveredRow] = useState<number | null>(null);
   const [error, setError] = useState("");
-
   const formatNameDate = (dateString: string) => {
     const date = new Date(dateString);
     return date.toLocaleDateString("id-ID", {
@@ -54,7 +53,6 @@ export function DataTable({ data }: DataTableProps) {
       year: "numeric",
     });
   };
-
   const table = useReactTable({
     data,
     columns,
@@ -62,7 +60,7 @@ export function DataTable({ data }: DataTableProps) {
     getPaginationRowModel: getPaginationRowModel(),
     initialState: {
       pagination: {
-        pageSize: 5, 
+        pageSize: 5,
       },
     },
     meta: {
@@ -71,7 +69,7 @@ export function DataTable({ data }: DataTableProps) {
       handleDelete: async (idIkf: number) => {
         try {
           const response = await axios.delete(
-            `http://127.0.0.1:8000/api/idekontenfoto/delete/${idIkf}`
+            `http://127.0.0.1:8000/api/idekontenvideo/delete/${idIkf}`
           );
 
           if (response.data.status) {
@@ -87,43 +85,46 @@ export function DataTable({ data }: DataTableProps) {
       },
     },
   });
-
   return (
     <div className="p-2">
-      <Table>
-        <TableHeader>
-          <TableRow className="border-t">
-            {table.getHeaderGroups()[0].headers.map((header) => (
-              <TableHead key={header.id} className="border-e last:border-e-0">
-                {flexRender(
-                  header.column.columnDef.header,
-                  header.getContext()
-                )}
-              </TableHead>
-            ))}
-          </TableRow>
-        </TableHeader>
-        <TableBody>
-          {table.getRowModel().rows.map((row) => (
-            <TableRow
-              key={row.id}
-              onMouseEnter={() => setHoveredRow(row.original.ikf_id)}
-              onMouseLeave={() => setHoveredRow(null)}
-            >
-              {row.getVisibleCells().map((cell, index) => (
-                <TableCell
-                  key={cell.id}
-                  className={`border-e ${
-                    index === row.getVisibleCells().length - 1 ? "" : "border-e"
-                  }`}
-                >
-                  {flexRender(cell.column.columnDef.cell, cell.getContext())}
-                </TableCell>
+      <div className="w-[975px] overflow-x-auto">
+        <Table>
+          <TableHeader>
+            <TableRow className="border-t">
+              {table.getHeaderGroups()[0].headers.map((header) => (
+                <TableHead key={header.id} className="border-e last:border-e-0">
+                  {flexRender(
+                    header.column.columnDef.header,
+                    header.getContext()
+                  )}
+                </TableHead>
               ))}
             </TableRow>
-          ))}
-        </TableBody>
-      </Table>
+          </TableHeader>
+          <TableBody>
+            {table.getRowModel().rows.map((row) => (
+              <TableRow
+                key={row.id}
+                onMouseEnter={() => setHoveredRow(row.original.ikv_id)}
+                onMouseLeave={() => setHoveredRow(null)}
+              >
+                {row.getVisibleCells().map((cell, index) => (
+                  <TableCell
+                    key={cell.id}
+                    className={`border-e ${
+                      index === row.getVisibleCells().length - 1
+                        ? ""
+                        : "border-e"
+                    }`}
+                  >
+                    {flexRender(cell.column.columnDef.cell, cell.getContext())}
+                  </TableCell>
+                ))}
+              </TableRow>
+            ))}
+          </TableBody>
+        </Table>
+      </div>
       <div className="flex justify-between items-center w-full mt-4">
         <Button
           onClick={() => table.previousPage()}
@@ -151,13 +152,13 @@ export function DataTable({ data }: DataTableProps) {
           <SheetContent>
             <SheetHeader>
               <SheetTitle className="sentence-case">
-                {selectedItem.ikf_judul_konten}
+                {selectedItem.ikv_judul_konten}
               </SheetTitle>
               <SheetDescription className="sentence-case text-black">
-                {formatNameDate(selectedItem.ikf_tgl)}
+                {formatNameDate(selectedItem.ikv_tgl)}
               </SheetDescription>
               <SheetDescription className="sentence-case">
-                {selectedItem.ikf_ringkasan}
+                {selectedItem.ikv_ringkasan}
               </SheetDescription>
             </SheetHeader>
           </SheetContent>

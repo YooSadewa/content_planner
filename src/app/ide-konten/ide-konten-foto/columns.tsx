@@ -91,7 +91,7 @@ export const columns: ColumnDef<IdeKontenFoto>[] = [
         <div className="w-32 p-2">
           <Button
             variant="upload"
-            className="h-5 text-[10px] px-4 text-white"
+            className="h-5 text-[10px] px-4 text-white font-semibold"
             disabled={!referensi}
           >
             {referensi ? (

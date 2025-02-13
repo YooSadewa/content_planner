@@ -10,9 +10,11 @@ import { columns } from "./ide-konten-foto/columns";
 import { useEffect, useState } from "react";
 import axios from "axios";
 import CreateKontenFoto from "./ide-konten-foto/adddata";
+import { DataTableVideo } from "./ide-konten-video/datatable";
 
 export default function IdeKontenPage() {
   const [tableData, setTableData] = useState([]);
+  const [tableDataVideo, setTableDataVideo] = useState([]);
   const [modalOpen, setModalOpen] = useState(false);
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(true);
@@ -38,6 +40,30 @@ export default function IdeKontenPage() {
     };
     fetchIdeFoto();
   }, []);
+  useEffect(() => {
+    const fetchIdeVideo = async () => {
+      try {
+        const response = await axios.get(
+          "http://127.0.0.1:8000/api/idekontenvideo"
+        );
+
+        if (response.data.status && response.data.data.ide_konten_video) {
+          console.log(
+            "Ide Konten Video: ",
+            response.data.data.ide_konten_video
+          );
+          setTableDataVideo(response.data.data.ide_konten_video);
+        } else {
+          setError("Format data tidak sesuai");
+        }
+      } catch (err) {
+        setError("Gagal mengambil data dari API.");
+      } finally {
+        setLoading(false);
+      }
+    };
+    fetchIdeVideo();
+  }, []);
   const onOpen = async (idFoto: number) => {
     setModalOpen(true);
     setSelectedId(idFoto);
@@ -62,6 +88,12 @@ export default function IdeKontenPage() {
             Ide Konten Foto
           </h1>
           <DataTable data={tableData} onOpen={onOpen} />
+        </div>
+        <div className="px-3 pt-5 mt-5 rounded-xl bg-white flex flex-col items-center">
+          <h1 className="font-bold text-2xl ps-1 text-[#293854] me-auto">
+            Ide Konten Video
+          </h1>
+            <DataTableVideo data={tableDataVideo} onOpen={onOpen} />
         </div>
       </div>
     </div>
