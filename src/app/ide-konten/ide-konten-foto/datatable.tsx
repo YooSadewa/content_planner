@@ -25,6 +25,8 @@ import {
   Trash,
   Waypoints,
 } from "lucide-react";
+import axios from "axios";
+import UpdateKontenFoto from "./editdata";
 
 type IdeKontenFoto = {
   ikf_id: number;
@@ -56,6 +58,30 @@ export function DataTable({ data }: DataTableProps) {
   };
   const [selectedItem, setSelectedItem] = useState<IdeKontenFoto | null>(null);
   const [hoveredRow, setHoveredRow] = useState<number | null>(null);
+  const [tableData, setTableData] = useState([]);
+  const [error, setError] = useState("");
+  const handleDelete = async (idIkf: number) => {
+    try {
+      const response = await axios.delete(
+        `http://127.0.0.1:8000/api/idekontenfoto/delete/${idIkf}`
+      );
+
+      if (response.data.status) {
+        setTableData((prevData) =>
+          prevData.filter(
+            (kontenFoto: IdeKontenFoto) => kontenFoto.ikf_id !== idIkf
+          )
+        );
+        window.location.reload();
+        console.log(`Quote dengan ID ${idIkf} berhasil dihapus.`);
+      } else {
+        console.error("Deletion failed:", response.data.message);
+      }
+    } catch (err) {
+      console.error("Terjadi kesalahan:", error);
+      setError("Gagal menghapus quote");
+    }
+  };
 
   return (
     <div className="p-2">
@@ -91,19 +117,20 @@ export function DataTable({ data }: DataTableProps) {
               onMouseEnter={() => setHoveredRow(item.ikf_id)}
               onMouseLeave={() => setHoveredRow(null)}
             >
-              <TableCell className="w-[290px] truncate border-e flex justify-between p-0">
-                <p className="flex items-center ps-2 sentence-case">
+              <TableCell className="border-e flex justify-between p-0 relative">
+                <p className="block pt-2 ps-2 sentence-case truncate w-[290px] min-w-0">
                   {item.ikf_judul_konten}
                 </p>
                 {hoveredRow === item.ikf_id && (
                   <Button
                     onClick={() => setSelectedItem(item)}
-                    className="h-7 text-[10px] px-3 mt-1 me-2 text-white"
+                    className="h-7 text-[10px] px-3 mt-1 me-1 text-white absolute right-0"
                   >
                     Detail
                   </Button>
                 )}
               </TableCell>
+
               <TableCell className="w-32 border-e">
                 {formatDate(item.ikf_tgl)}
               </TableCell>
@@ -131,12 +158,15 @@ export function DataTable({ data }: DataTableProps) {
               </TableCell>
 
               <TableCell className="w-32 p-1 flex justify-between gap-1">
-                <Button variant="outline" className="w-16 h-7">
-                  <Pencil />
-                </Button>
+                <UpdateKontenFoto
+                  id={item.ikf_id}
+                  currentName={item.ikf_judul_konten}
+                  currentSummary={item.ikf_ringkasan}
+                  currentReference={item.ikf_referensi}
+                />
                 <Button
                   className="bg-red-600 transition-all h-full duration-300 hover:bg-red-500/80 w-16 h-7"
-                  // onClick={() => meta.onDelete(quote.qotd_id)}
+                  onClick={() => handleDelete(item.ikf_id)}
                 >
                   <Trash />
                 </Button>

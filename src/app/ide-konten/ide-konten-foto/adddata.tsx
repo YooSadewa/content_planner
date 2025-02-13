@@ -88,7 +88,7 @@ export default function CreateKontenFoto() {
                 <AlertDialogTitle>Tambahkan Konten</AlertDialogTitle>
                 <div className="pt-1 pb-4 w-full flex flex-col gap-3">
                   <div className="grid w-full items-center gap-1.5">
-                    <Label htmlFor="ikf_judul_konten">Judul Konten</Label>
+                    <Label htmlFor="ikf_judul_konten">Judul Konten <span className="text-red-600">*</span></Label>
                     <Input
                       type="text"
                       id="ikf_judul_konten"
@@ -115,16 +115,11 @@ export default function CreateKontenFoto() {
                       id="ikf_tgl"
                       className="cursor-not-allowed"
                       readOnly
-                      value={new Date().toLocaleDateString("id-ID", {
-                        day: "2-digit",
-                        month: "long",
-                        year: "numeric",
-                      })}
                       {...register("ikf_tgl")}
                     />
                   </div>
                   <div className="grid w-full items-center gap-1.5">
-                    <Label htmlFor="ikf_ringkasan">Ringkasan Konten</Label>
+                    <Label htmlFor="ikf_ringkasan">Ringkasan Konten <span className="text-red-600">*</span></Label>
                     <textarea
                       id="ikf_ringkasan"
                       disabled={isSubmitting || loading}

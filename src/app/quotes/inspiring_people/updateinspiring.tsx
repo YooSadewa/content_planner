@@ -67,7 +67,9 @@ export default function UpdateInspiring({
   };
 
   const onUpdate = async (data: Inspiring) => {
-    setLoading(true), setErrorMessage(""), setSuccessMessage("");
+    setLoading(true);
+    setErrorMessage("");
+    setSuccessMessage("");
     const sanitizedLink = sanitizeInstagramLink(data.ins_link);
     setValue("ins_link", sanitizedLink);
 
@@ -104,7 +106,7 @@ export default function UpdateInspiring({
         <AlertDialogContent>
           <form onSubmit={handleSubmit(onUpdate)}>
             <AlertDialogHeader>
-              <AlertDialogTitle>Tambahkan Link Inspiring</AlertDialogTitle>
+              <AlertDialogTitle>Edit Link Inspiring</AlertDialogTitle>
               <AlertDialogDescription>
                 Tambah link menggunakan link Instagram!
               </AlertDialogDescription>
