@@ -140,7 +140,13 @@ export function DataTable<TData, TValue>({
                         colSpan={columns.length}
                         className="text-center flex flex-col m-auto h-[480px] items-center justify-center gap-5 font-semibold"
                       >
-                        <Image src={"/assets/nodata.svg"} alt="No data" width={200} height={200} className="mx-auto"/>
+                        <Image
+                          src={"/assets/nodata.svg"}
+                          alt="No data"
+                          width={200}
+                          height={200}
+                          className="mx-auto"
+                        />
                         Tidak ada data podcast
                       </TableCell>
                     </TableRow>
@@ -150,25 +156,27 @@ export function DataTable<TData, TValue>({
             </Table>
           </div>
         </div>
-        <div className="flex justify-between items-center mt-4">
-          <button
+        <div className="flex justify-between items-center w-full mt-4">
+          <Button
             onClick={() => table.previousPage()}
             disabled={!table.getCanPreviousPage()}
-            className="px-2 py-2 bg-gray-200 rounded-full mb-2 ms-2"
+            variant="outline"
+            className="px-2 py-1 m-4"
           >
-            <ChevronLeft />
-          </button>
-          <span className="text-sm">
-            Page {table.getState().pagination.pageIndex + 1} of{" "}
+            <ChevronLeft className="h-4 w-4" />
+          </Button>
+          <span className="text-sm m-4">
+            Halaman {table.getState().pagination.pageIndex + 1} dari{" "}
             {table.getPageCount()}
           </span>
-          <button
+          <Button
             onClick={() => table.nextPage()}
             disabled={!table.getCanNextPage()}
-            className="px-2 py-2 bg-gray-200 rounded-full my-2 me-2"
+            variant="outline"
+            className="px-2 py-1 m-4"
           >
-            <ChevronRight />
-          </button>
+            <ChevronRight className="h-4 w-4" />
+          </Button>
         </div>
       </div>
     </>

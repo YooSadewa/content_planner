@@ -1,5 +1,12 @@
 import React, { useState } from "react";
 import {
+  useReactTable,
+  getCoreRowModel,
+  getPaginationRowModel,
+  flexRender,
+  createColumnHelper,
+} from "@tanstack/react-table";
+import {
   Table,
   TableBody,
   TableCell,
@@ -20,12 +27,14 @@ import {
   BookMarked,
   CalendarDays,
   Camera,
+  ChevronLeft,
+  ChevronRight,
   FileText,
-  Pencil,
   Trash,
   Waypoints,
 } from "lucide-react";
 import axios from "axios";
+import { columns } from "./columns";
 import UpdateKontenFoto from "./editdata";
 
 type IdeKontenFoto = {
@@ -44,10 +53,10 @@ type DataTableProps = {
 };
 
 export function DataTable({ data }: DataTableProps) {
-  const formatDate = (dateString: string) => {
-    const date = new Date(dateString);
-    return date.toLocaleDateString("id-ID");
-  };
+  const [selectedItem, setSelectedItem] = useState<IdeKontenFoto | null>(null);
+  const [hoveredRow, setHoveredRow] = useState<number | null>(null);
+  const [error, setError] = useState("");
+
   const formatNameDate = (dateString: string) => {
     const date = new Date(dateString);
     return date.toLocaleDateString("id-ID", {
@@ -56,125 +65,98 @@ export function DataTable({ data }: DataTableProps) {
       year: "numeric",
     });
   };
-  const [selectedItem, setSelectedItem] = useState<IdeKontenFoto | null>(null);
-  const [hoveredRow, setHoveredRow] = useState<number | null>(null);
-  const [tableData, setTableData] = useState([]);
-  const [error, setError] = useState("");
-  const handleDelete = async (idIkf: number) => {
-    try {
-      const response = await axios.delete(
-        `http://127.0.0.1:8000/api/idekontenfoto/delete/${idIkf}`
-      );
 
-      if (response.data.status) {
-        setTableData((prevData) =>
-          prevData.filter(
-            (kontenFoto: IdeKontenFoto) => kontenFoto.ikf_id !== idIkf
-          )
-        );
-        window.location.reload();
-        console.log(`Quote dengan ID ${idIkf} berhasil dihapus.`);
-      } else {
-        console.error("Deletion failed:", response.data.message);
-      }
-    } catch (err) {
-      console.error("Terjadi kesalahan:", error);
-      setError("Gagal menghapus quote");
-    }
-  };
+  const table = useReactTable({
+    data,
+    columns,
+    getCoreRowModel: getCoreRowModel(),
+    getPaginationRowModel: getPaginationRowModel(),
+    initialState: {
+      pagination: {
+        pageSize: 5, 
+      },
+    },
+    meta: {
+      hoveredRow,
+      setSelectedItem,
+      handleDelete: async (idIkf: number) => {
+        try {
+          const response = await axios.delete(
+            `http://127.0.0.1:8000/api/idekontenfoto/delete/${idIkf}`
+          );
+
+          if (response.data.status) {
+            window.location.reload();
+            console.log(`Quote dengan ID ${idIkf} berhasil dihapus.`);
+          } else {
+            console.error("Deletion failed:", response.data.message);
+          }
+        } catch (err) {
+          console.error("Terjadi kesalahan:", error);
+          setError("Gagal menghapus quote");
+        }
+      },
+    },
+  });
 
   return (
     <div className="p-2">
       <Table>
         <TableHeader>
           <TableRow className="border-t">
-            <TableHead className="flex gap-2 w-[290px] border-e">
-              <Camera size={18} />
-              <p>Judul Konten</p>
-            </TableHead>
-            <TableHead className="flex gap-2 w-32 border-e">
-              <CalendarDays size={18} />
-              <p>Tanggal</p>
-            </TableHead>
-            <TableHead className="flex gap-2 w-[290px] border-e">
-              <FileText size={18} />
-              <p>Ringkasan Konten</p>
-            </TableHead>
-            <TableHead className="flex gap-2 w-32 border-e">
-              <BookMarked size={18} />
-              <p>Referensi</p>
-            </TableHead>
-            <TableHead className="flex gap-2 w-32">
-              <Waypoints size={18} />
-              <p>Aksi</p>
-            </TableHead>
+            {table.getHeaderGroups()[0].headers.map((header) => (
+              <TableHead key={header.id} className="border-e last:border-e-0">
+                {flexRender(
+                  header.column.columnDef.header,
+                  header.getContext()
+                )}
+              </TableHead>
+            ))}
           </TableRow>
         </TableHeader>
         <TableBody>
-          {data.map((item) => (
+          {table.getRowModel().rows.map((row) => (
             <TableRow
-              key={item.ikf_id}
-              onMouseEnter={() => setHoveredRow(item.ikf_id)}
+              key={row.id}
+              onMouseEnter={() => setHoveredRow(row.original.ikf_id)}
               onMouseLeave={() => setHoveredRow(null)}
             >
-              <TableCell className="border-e flex justify-between p-0 relative">
-                <p className="block pt-2 ps-2 sentence-case truncate w-[290px] min-w-0">
-                  {item.ikf_judul_konten}
-                </p>
-                {hoveredRow === item.ikf_id && (
-                  <Button
-                    onClick={() => setSelectedItem(item)}
-                    className="h-7 text-[10px] px-3 mt-1 me-1 text-white absolute right-0"
-                  >
-                    Detail
-                  </Button>
-                )}
-              </TableCell>
-
-              <TableCell className="w-32 border-e">
-                {formatDate(item.ikf_tgl)}
-              </TableCell>
-              <TableCell className="w-[290px] truncate border-e sentence-case">
-                {item.ikf_ringkasan}
-              </TableCell>
-              <TableCell className="w-32 border-e">
-                <Button
-                  variant="upload"
-                  className="h-5 text-[10px] px-4 text-white"
-                  disabled={!item.ikf_referensi}
+              {row.getVisibleCells().map((cell, index) => (
+                <TableCell
+                  key={cell.id}
+                  className={`border-e ${
+                    index === row.getVisibleCells().length - 1 ? "" : "border-e"
+                  }`}
                 >
-                  {item.ikf_referensi ? (
-                    <Link
-                      href={item.ikf_referensi}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                    >
-                      Lihat Referensi
-                    </Link>
-                  ) : (
-                    <p className="px-3">Tidak Ada</p>
-                  )}
-                </Button>
-              </TableCell>
-
-              <TableCell className="w-32 p-1 flex justify-between gap-1">
-                <UpdateKontenFoto
-                  id={item.ikf_id}
-                  currentName={item.ikf_judul_konten}
-                  currentSummary={item.ikf_ringkasan}
-                  currentReference={item.ikf_referensi}
-                />
-                <Button
-                  className="bg-red-600 transition-all h-full duration-300 hover:bg-red-500/80 w-16 h-7"
-                  onClick={() => handleDelete(item.ikf_id)}
-                >
-                  <Trash />
-                </Button>
-              </TableCell>
+                  {flexRender(cell.column.columnDef.cell, cell.getContext())}
+                </TableCell>
+              ))}
             </TableRow>
           ))}
         </TableBody>
       </Table>
+      <div className="flex justify-between items-center w-full mt-4">
+        <Button
+          onClick={() => table.previousPage()}
+          disabled={!table.getCanPreviousPage()}
+          variant="outline"
+          className="px-2 py-1"
+        >
+          <ChevronLeft className="h-4 w-4" />
+        </Button>
+        <span className="text-sm">
+          Halaman {table.getState().pagination.pageIndex + 1} dari{" "}
+          {table.getPageCount()}
+        </span>
+        <Button
+          onClick={() => table.nextPage()}
+          disabled={!table.getCanNextPage()}
+          variant="outline"
+          className="px-2 py-1"
+        >
+          <ChevronRight className="h-4 w-4" />
+        </Button>
+      </div>
       {selectedItem && (
         <Sheet open={!!selectedItem} onOpenChange={() => setSelectedItem(null)}>
           <SheetContent>

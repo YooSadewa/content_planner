@@ -1,5 +1,6 @@
 "use client";
 
+import { Button } from "@/components/ui/button";
 import {
   Table,
   TableBody,
@@ -101,25 +102,27 @@ DataTableProps<TData, TValue>) {
           </TableBody>
         </Table>
       </div>
-      <div className="flex justify-between items-center mt-4">
-        <button
+      <div className="flex justify-between items-center w-full mt-4">
+        <Button
           onClick={() => table.previousPage()}
           disabled={!table.getCanPreviousPage()}
-          className="px-1 py-1 bg-gray-200 rounded-full mt-2 ms-2"
+          variant="outline"
+          className="px-2 py-1"
         >
-          <ChevronLeft />
-        </button>
+          <ChevronLeft className="h-4 w-4" />
+        </Button>
         <span className="text-sm">
-          Page {table.getState().pagination.pageIndex + 1} of{" "}
+          Halaman {table.getState().pagination.pageIndex + 1} dari{" "}
           {table.getPageCount()}
         </span>
-        <button
+        <Button
           onClick={() => table.nextPage()}
           disabled={!table.getCanNextPage()}
-          className="px-1 py-1 bg-gray-200 rounded-full mt-2 me-2"
+          variant="outline"
+          className="px-2 py-1"
         >
-          <ChevronRight />
-        </button>
+          <ChevronRight className="h-4 w-4" />
+        </Button>
       </div>
     </div>
   );

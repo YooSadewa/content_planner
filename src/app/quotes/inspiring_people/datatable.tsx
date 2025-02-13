@@ -1,3 +1,4 @@
+import { Button } from "@/components/ui/button";
 import { Table, TableBody, TableCell, TableRow } from "@/components/ui/table";
 import {
   ColumnDef,
@@ -17,7 +18,7 @@ interface DataTableProps<TData, TValue> {
 export function DataTableInspiring<TData, TValue>({
   columns,
   data,
-  onDelete
+  onDelete,
 }: DataTableProps<TData, TValue>) {
   const table = useReactTable({
     data,
@@ -37,7 +38,7 @@ export function DataTableInspiring<TData, TValue>({
 
   return (
     <>
-        <div className="bg-white p-5 rounded-xl mt-5 flex flex-col w-[1010px]">
+      <div className="bg-white p-5 rounded-xl mt-5 flex flex-col w-[1010px]">
         <h1 className="font-bold text-2xl mb-3 text-[#293854]">
           Data Postingan Instagram "Inspiring People"
         </h1>
@@ -70,28 +71,30 @@ export function DataTableInspiring<TData, TValue>({
               </TableRow>
             </TableBody>
           </Table>
-          <div className="flex justify-between items-center w-full">
-            <button
+          <div className="flex justify-between items-center w-full mt-4">
+            <Button
               onClick={() => table.previousPage()}
               disabled={!table.getCanPreviousPage()}
-              className="px-1 py-1 bg-gray-200 rounded-full ms-2"
+              variant="outline"
+              className="px-2 py-1"
             >
-              <ChevronLeft />
-            </button>
+              <ChevronLeft className="h-4 w-4" />
+            </Button>
             <span className="text-sm">
-              Page {table.getState().pagination.pageIndex + 1} of{" "}
+              Halaman {table.getState().pagination.pageIndex + 1} dari{" "}
               {table.getPageCount()}
             </span>
-            <button
+            <Button
               onClick={() => table.nextPage()}
               disabled={!table.getCanNextPage()}
-              className="px-1 py-1 bg-gray-200 rounded-full me-2"
+              variant="outline"
+              className="px-2 py-1"
             >
-              <ChevronRight />
-            </button>
+              <ChevronRight className="h-4 w-4" />
+            </Button>
           </div>
         </div>
       </div>
     </>
-  )
+  );
 }
