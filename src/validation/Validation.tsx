@@ -107,3 +107,35 @@ export const picContentInfoSchema = z.object({
     .nullable()
     .optional(),
 });
+
+const allowedFileTypes = [
+  "application/pdf",
+  "application/msword",
+  "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
+];
+
+export const vidContentInfoSchema = z.object({
+  ikv_tgl: z.string().min(1, { message: "Tanggal harus diisi" }),
+  ikv_judul_konten: z
+    .string()
+    .min(1, { message: "Judul konten harus diisi" })
+    .max(150, { message: "Judul konten melebihi batas 150 karakter" }),
+  ikv_ringkasan: z
+    .string()
+    .min(1, { message: "Ringkasan harus diisi" })
+    .max(150, { message: "Ringkasan melebihi batas 150 karakter" }),
+  ikv_pic: z.string().min(1, { message: "Person in Charge harus diisi" }),
+  ikv_status: z
+    .string()
+    .min(1, { message: "Status harus dipilih" })
+    .refine((val) => val === "scheduled" || val === "on hold", {
+      message: "Status tidak valid",
+    }),
+  ikv_skrip: z
+    .custom<FileList>((val) => val instanceof FileList && val.length > 0, {
+      message: "Skrip harus diupload",
+    })
+    .refine((files) => files && allowedFileTypes.includes(files[0]?.type), {
+      message: "File harus berupa PDF, DOC, atau DOCX",
+    }),
+});

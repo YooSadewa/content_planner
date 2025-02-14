@@ -63,10 +63,10 @@ export default function CreateKontenFoto() {
       );
       if (response.status === 200 || response.status === 201) {
         window.location.reload();
-        setSuccessMessage("Pembicara berhasil ditambahkan.");
+        setSuccessMessage("Konten berhasil ditambahkan.");
         setModalOpen(false);
       } else {
-        setErrorMessage("Terjadi kesalahan saat menambahkan pembicara.");
+        setErrorMessage("Terjadi kesalahan saat menambahkan Konten.");
       }
     } catch (error) {
       setErrorMessage("Judul Sudah tersedia");

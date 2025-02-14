@@ -11,6 +11,7 @@ import { useEffect, useState } from "react";
 import axios from "axios";
 import CreateKontenFoto from "./ide-konten-foto/adddata";
 import { DataTableVideo } from "./ide-konten-video/datatable";
+import CreateKontenVideo from "./ide-konten-video/adddata";
 
 export default function IdeKontenPage() {
   const [tableData, setTableData] = useState([]);
@@ -81,7 +82,10 @@ export default function IdeKontenPage() {
               <BreadcrumbLink href="/ide-konten">Ide Konten</BreadcrumbLink>
             </Bread>
           </div>
-          <CreateKontenFoto />
+          <div className="flex gap-1">
+            <CreateKontenFoto />
+            <CreateKontenVideo />
+          </div>
         </div>
         <div className="px-3 pt-5 mt-5 rounded-xl bg-white flex flex-col items-center">
           <h1 className="font-bold text-2xl ps-1 text-[#293854] me-auto">
