@@ -22,11 +22,19 @@ import {
 } from "@/components/ui/sheet";
 import { Button } from "@/components/ui/button";
 import {
+  BookMarked,
+  Calendar,
+  CalendarDays,
   ChevronLeft,
   ChevronRight,
+  FileText,
+  Info,
+  LinkIcon,
 } from "lucide-react";
 import axios from "axios";
 import { columns } from "./columns";
+import Link from "next/link";
+import { Separator } from "@/components/ui/separator";
 
 type IdeKontenFoto = {
   ikf_id: number;
@@ -62,7 +70,7 @@ export function DataTable({ data }: DataTableProps) {
     getPaginationRowModel: getPaginationRowModel(),
     initialState: {
       pagination: {
-        pageSize: 5, 
+        pageSize: 5,
       },
     },
     meta: {
@@ -148,17 +156,67 @@ export function DataTable({ data }: DataTableProps) {
       </div>
       {selectedItem && (
         <Sheet open={!!selectedItem} onOpenChange={() => setSelectedItem(null)}>
-          <SheetContent>
+          <SheetContent className="overflow-y-auto">
             <SheetHeader>
-              <SheetTitle className="sentence-case">
-                {selectedItem.ikf_judul_konten}
-              </SheetTitle>
-              <SheetDescription className="sentence-case text-black">
-                {formatNameDate(selectedItem.ikf_tgl)}
-              </SheetDescription>
-              <SheetDescription className="sentence-case">
-                {selectedItem.ikf_ringkasan}
-              </SheetDescription>
+              <div className="flex items-center space-x-2 mb-2">
+                <Info className="w-5 h-5 text-blue-500" />
+                <SheetTitle className="sentence-case">
+                  {selectedItem.ikf_judul_konten}
+                </SheetTitle>
+              </div>
+
+              <Separator className="my-4" />
+
+              <div className="space-y-6">
+                <div className="flex items-center space-x-2">
+                  <CalendarDays className="w-4 h-4 text-gray-500" />
+                  <SheetDescription className="sentence-case text-black m-0">
+                    {formatNameDate(selectedItem.ikf_tgl)}
+                  </SheetDescription>
+                </div>
+
+                <div className="bg-gray-50 p-4 rounded-lg">
+                  <div className="flex items-start space-x-2">
+                    <FileText className="w-4 h-4 text-gray-500 mt-1" />
+                    <div className="flex-1">
+                      <SheetDescription className="sentence-case text-black">
+                        <span className="font-semibold text-gray-700 block mb-2">
+                          Ringkasan Konten
+                        </span>
+                        <span className="text-gray-600 leading-relaxed">
+                          {selectedItem.ikf_ringkasan}
+                        </span>
+                      </SheetDescription>
+                    </div>
+                  </div>
+                </div>
+
+                <div className="bg-gray-50 p-4 rounded-lg">
+                  <div className="flex items-start space-x-2">
+                    <BookMarked className="w-4 h-4 text-gray-500 mt-1" />
+                    <div className="flex-1">
+                      <SheetDescription className="sentence-case text-black">
+                        <span className="font-semibold text-gray-700 block mb-2">
+                          Referensi
+                        </span>
+                        {selectedItem.ikf_referensi ? (
+                          <Link
+                            href={selectedItem.ikf_referensi}
+                            className="text-blue-500 hover:text-blue-600 underline break-all"
+                            target="_blank"
+                          >
+                            {selectedItem.ikf_referensi}
+                          </Link>
+                        ) : (
+                          <span className="text-gray-500 italic">
+                            Tidak ada referensi
+                          </span>
+                        )}
+                      </SheetDescription>
+                    </div>
+                  </div>
+                </div>
+              </div>
             </SheetHeader>
           </SheetContent>
         </Sheet>
