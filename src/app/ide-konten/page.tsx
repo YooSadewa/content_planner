@@ -93,7 +93,7 @@ export default function IdeKontenPage() {
           <h1 className="font-bold text-2xl ps-1 text-[#293854] me-auto">
             Ide Konten Video
           </h1>
-            <DataTableVideo data={tableDataVideo} onOpen={onOpen} />
+          <DataTableVideo data={tableDataVideo} onOpen={onOpen} />
         </div>
       </div>
     </div>

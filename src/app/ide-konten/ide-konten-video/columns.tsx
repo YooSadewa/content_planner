@@ -9,12 +9,14 @@ import {
   FileText,
   ScrollText,
   Trash,
+  Upload,
   User,
   Video,
   Waypoints,
 } from "lucide-react";
 import Link from "next/link";
 import UpdateKontenFoto from "../ide-konten-foto/editdata";
+import { ConfirmUpload } from "./uploadcontent";
 
 type IdeKontenVideo = {
   ikv_id: number;
@@ -166,6 +168,7 @@ export const columns: ColumnDef<IdeKontenVideo>[] = [
       </div>
     ),
     cell: ({ row }) => {
+      const id = row.original.ikv_id;
       const uploadDate = row.getValue("ikv_upload");
 
       const formattedDate =
@@ -174,7 +177,16 @@ export const columns: ColumnDef<IdeKontenVideo>[] = [
           ? new Date(uploadDate).toLocaleDateString("id-ID")
           : "Belum diupload";
 
-      return <div className="w-44 p-2">{formattedDate}</div>;
+      return (
+        <div
+          className={`w-44 px-2 flex items-center gap-2 justify-around ${
+            uploadDate ? "py-2" : "py-1"
+          }`}
+        >
+          <span className="me-auto">{formattedDate}</span>
+          {!uploadDate && <ConfirmUpload id={id} />}
+        </div>
+      );
     },
   },
   {
