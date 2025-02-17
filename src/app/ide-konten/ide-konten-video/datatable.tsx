@@ -77,15 +77,15 @@ export function DataTableVideo({ data }: DataTableProps) {
     meta: {
       hoveredRow,
       setSelectedItem,
-      handleDelete: async (idIkf: number) => {
+      handleDelete: async (idIkv: number) => {
         try {
           const response = await axios.delete(
-            `http://127.0.0.1:8000/api/idekontenvideo/delete/${idIkf}`
+            `http://127.0.0.1:8000/api/idekontenvideo/delete/${idIkv}`
           );
 
           if (response.data.status) {
             window.location.reload();
-            console.log(`Quote dengan ID ${idIkf} berhasil dihapus.`);
+            console.log(`Quote dengan ID ${idIkv} berhasil dihapus.`);
           } else {
             console.error("Deletion failed:", response.data.message);
           }

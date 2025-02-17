@@ -17,6 +17,7 @@ import {
 import Link from "next/link";
 import UpdateKontenFoto from "../ide-konten-foto/editdata";
 import { ConfirmUpload } from "./uploadcontent";
+import UpdateKontenVideo from "./editdata";
 
 type IdeKontenVideo = {
   ikv_id: number;
@@ -199,8 +200,20 @@ export const columns: ColumnDef<IdeKontenVideo>[] = [
     ),
     cell: ({ row, table }) => {
       const meta = table.options.meta as { handleDelete: (id: number) => void };
+      console.log({
+        skrip: row.getValue("ikv_skrip"),
+        status: row.getValue("ikv_status")
+      });
       return (
         <div className="w-32 p-1 flex justify-between gap-1">
+          <UpdateKontenVideo
+            id={row.getValue("ikv_id")}
+            currentName={row.getValue("ikv_judul_konten")}
+            currentSummary={row.getValue("ikv_ringkasan")}
+            currentPic={row.getValue("ikv_pic")}
+            currentScript={row.getValue("ikv_skrip")}
+            currentStatus={row.getValue("ikv_status")}
+          />
           <Button
             className="bg-red-600 transition-all h-full duration-300 hover:bg-red-500/80 w-16 h-7"
             onClick={() => meta.handleDelete(row.getValue("ikv_id"))}

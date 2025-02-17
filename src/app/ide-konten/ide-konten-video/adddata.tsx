@@ -245,13 +245,9 @@ export default function CreateKontenVideo() {
                         id="ikv_skrip"
                         disabled={isSubmitting || loading}
                         accept=".pdf,.doc,.docx"
-                        className="absolute w-full h-full opacity-0 cursor-pointer"
+                        className="w-full h-full p-[7px] cursor-pointer"
                         {...register("ikv_skrip")}
                       />
-                      <div className="w-full border text-sm px-3 py-2 text-gray-500 rounded flex justify-between">
-                        Pilih File
-                        <Folder size={18} className="my-auto" />
-                      </div>
                     </div>
                     {errors.ikv_skrip?.message && (
                       <div className="text-red-500 text-xs">
