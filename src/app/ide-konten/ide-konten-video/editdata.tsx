@@ -20,7 +20,7 @@ import {
 } from "@/components/ui/select";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { useState } from "react";
+import React, { useState } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { editVidContentInfoSchema } from "@/validation/Validation";
@@ -53,6 +53,7 @@ export default function UpdateKontenVideo({
   currentStatus,
   currentScript,
 }: EditKontenVideoProps) {
+  const [,setCurrentStatus] = React.useState("scheduled");
   const [loading, setLoading] = useState(false);
   const [isModalOpen, setModalOpen] = useState(false);
   const [errorMessage, setErrorMessage] = useState("");
@@ -83,6 +84,13 @@ export default function UpdateKontenVideo({
     resolver: zodResolver(editVidContentInfoSchema),
   });
 
+  const handleStatusChange = (value: any) => {
+    setCurrentStatus(value);
+    setValue("ikv_status", value);
+  };
+
+  const canShowDone = currentStatus === "done";
+
   const onUpdate = async (data: IdeKontenVideo) => {
     setLoading(true);
     setErrorMessage("");
@@ -105,7 +113,7 @@ export default function UpdateKontenVideo({
         formData.append("ikv_skrip", fileInput.files[0]);
       }
 
-      formData.append("_method", "PUT"); 
+      formData.append("_method", "PUT");
       const response = await axios.post(
         `http://127.0.0.1:8000/api/idekontenvideo/update/${id}`,
         formData,
@@ -223,7 +231,7 @@ export default function UpdateKontenVideo({
                     </Label>
                     <Select
                       defaultValue={currentStatus}
-                      onValueChange={(value) => setValue("ikv_status", value)}
+                      onValueChange={handleStatusChange}
                     >
                       <SelectTrigger className="w-full">
                         <SelectValue placeholder="Pilih Status" />
@@ -232,15 +240,15 @@ export default function UpdateKontenVideo({
                         <SelectGroup>
                           <SelectItem value="scheduled">Scheduled</SelectItem>
                           <SelectItem value="on hold">On Hold</SelectItem>
-                          <SelectItem value="done" hidden>
-                            Done
-                          </SelectItem>
+                          {(canShowDone || currentStatus === "done") && (
+                            <SelectItem value="done">Done</SelectItem>
+                          )}
                         </SelectGroup>
                       </SelectContent>
                     </Select>
-                    {errors.ikv_status?.message && (
+                    {errors?.ikv_status?.message && (
                       <div className="text-red-500 text-xs">
-                        {errors.ikv_status?.message}
+                        {errors.ikv_status.message}
                       </div>
                     )}
                     {errorMessage && (
