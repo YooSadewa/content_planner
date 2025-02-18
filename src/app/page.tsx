@@ -6,11 +6,11 @@ import {
   Flame,
   MessageSquareQuote,
   Podcast,
-  Quote,
   Video,
 } from "lucide-react";
 import { useEffect, useState } from "react";
 import axios from "axios";
+import TotalUploadPodcast from "./podcast/detailupload";
 
 export default function HomePage() {
   const [totalFoto, setTotalFoto] = useState(0);
@@ -39,10 +39,6 @@ export default function HomePage() {
         setLoading(false);
       }
     };
-
-    fetchFoto();
-  }, []);
-  useEffect(() => {
     const fetchVideo = async () => {
       try {
         const response = await axios.get(
@@ -61,10 +57,6 @@ export default function HomePage() {
         setLoading(false);
       }
     };
-
-    fetchVideo();
-  }, []);
-  useEffect(() => {
     const fetchPodcast = async () => {
       try {
         const response = await axios.get("http://127.0.0.1:8000/api/podcast");
@@ -81,10 +73,6 @@ export default function HomePage() {
         setLoading(false);
       }
     };
-
-    fetchPodcast();
-  }, []);
-  useEffect(() => {
     const fetchQuotes = async () => {
       try {
         const response = await axios.get("http://127.0.0.1:8000/api/quote");
@@ -101,10 +89,6 @@ export default function HomePage() {
         setLoading(false);
       }
     };
-
-    fetchQuotes();
-  }, []);
-  useEffect(() => {
     const fetchInspiring = async () => {
       try {
         const response = await axios.get(
@@ -124,12 +108,17 @@ export default function HomePage() {
       }
     };
 
+    fetchFoto();
+    fetchVideo();
+    fetchPodcast();
+    fetchQuotes();
     fetchInspiring();
   }, []);
+
   return (
     <div className="px-5 py-10">
       <p className="flex font-medium text-xs">
-        Welcome Back, User
+        Welcome Back, Admin
         <Image
           src={"/assets/icons/WavingHand.svg"}
           alt="waving hand icon"
@@ -144,15 +133,15 @@ export default function HomePage() {
       <div className="w-[1030px] flex-col">
         {loading ? (
           <div className="flex gap-2 w-full p-0 mb-3">
-            <div className="rounded-xl bg-white shadow-md w-[20%] h-20 skeleton"></div>
-            <div className="rounded-xl bg-white shadow-md w-[20%] h-20 skeleton"></div>
-            <div className="rounded-xl bg-white shadow-md w-[20%] h-20 skeleton"></div>
-            <div className="rounded-xl bg-white shadow-md w-[20%] h-20 skeleton"></div>
-            <div className="rounded-xl bg-white shadow-md w-[20%] h-20 skeleton"></div>
+            <div className="rounded-xl bg-white shadow-[0_0_7px_rgba(0,0,0,0.1)] w-[20%] h-20 skeleton"></div>
+            <div className="rounded-xl bg-white shadow-[0_0_7px_rgba(0,0,0,0.1)] w-[20%] h-20 skeleton"></div>
+            <div className="rounded-xl bg-white shadow-[0_0_7px_rgba(0,0,0,0.1)] w-[20%] h-20 skeleton"></div>
+            <div className="rounded-xl bg-white shadow-[0_0_7px_rgba(0,0,0,0.1)] w-[20%] h-20 skeleton"></div>
+            <div className="rounded-xl bg-white shadow-[0_0_7px_rgba(0,0,0,0.1)] w-[20%] h-20 skeleton"></div>
           </div>
         ) : (
           <div className="flex gap-2 w-full p-0 mb-3">
-            <div className="rounded-xl bg-white shadow-[0_0_7px_rgba(0,0,0,0.1)] w-[20%] h-20 py-2 flex items-center gap-2 justify-between px-4">
+            <div className="rounded-xl hover:shadow-lg transition-shadow duration-300 bg-white shadow-[0_0_7px_rgba(0,0,0,0.1)] w-[20%] h-20 py-2 flex items-center gap-2 justify-between px-4">
               <div className="flex flex-col">
                 <h1 className="font-semibold text-xl text-[#293854]">
                   {totalFoto > 0 ? totalFoto : "Tidak ada"}
@@ -167,7 +156,7 @@ export default function HomePage() {
                 </div>
               </div>
             </div>
-            <div className="rounded-xl bg-white shadow-[0_0_7px_rgba(0,0,0,0.1)] w-[20%] h-20 py-2 flex items-center gap-2 justify-between px-4">
+            <div className="rounded-xl hover:shadow-lg transition-shadow duration-300 bg-white shadow-[0_0_7px_rgba(0,0,0,0.1)] w-[20%] h-20 py-2 flex items-center gap-2 justify-between px-4">
               <div className="flex flex-col">
                 <h1 className="font-semibold text-xl text-[#293854]">
                   {totalVideo > 0 ? totalVideo : "Tidak ada"}
@@ -182,7 +171,7 @@ export default function HomePage() {
                 </div>
               </div>
             </div>
-            <div className="rounded-xl bg-white shadow-[0_0_7px_rgba(0,0,0,0.1)] w-[20%] h-20 py-2 flex items-center gap-2 justify-between px-4">
+            <div className="rounded-xl hover:shadow-lg transition-shadow duration-300 bg-white shadow-[0_0_7px_rgba(0,0,0,0.1)] w-[20%] h-20 py-2 flex items-center gap-2 justify-between px-4">
               <div className="flex flex-col">
                 <h1 className="font-semibold text-xl text-[#293854]">
                   {totalPodcast > 0 ? totalPodcast : "Tidak ada"}
@@ -197,7 +186,7 @@ export default function HomePage() {
                 </div>
               </div>
             </div>
-            <div className="rounded-xl bg-white shadow-[0_0_7px_rgba(0,0,0,0.1)] w-[20%] h-20 py-2 flex items-center gap-2 justify-between px-4">
+            <div className="rounded-xl hover:shadow-lg transition-shadow duration-300 bg-white shadow-[0_0_7px_rgba(0,0,0,0.1)] w-[20%] h-20 py-2 flex items-center gap-2 justify-between px-4">
               <div className="flex flex-col">
                 <h1 className="font-semibold text-xl text-[#293854]">
                   {totalQuotes > 0 ? totalQuotes : "Tidak ada"}
@@ -212,7 +201,7 @@ export default function HomePage() {
                 </div>
               </div>
             </div>
-            <div className="rounded-xl bg-white shadow-[0_0_7px_rgba(0,0,0,0.1)] w-[20%] h-20 py-2 flex items-center gap-2 justify-between px-4">
+            <div className="rounded-xl hover:shadow-lg transition-shadow duration-300 bg-white shadow-[0_0_7px_rgba(0,0,0,0.1)] w-[20%] h-20 py-2 flex items-center gap-2 justify-between px-4">
               <div className="flex flex-col">
                 <h1 className="font-semibold text-xl text-[#293854]">
                   {totalInspiring > 0 ? totalInspiring : "Tidak ada"}
@@ -229,10 +218,9 @@ export default function HomePage() {
             </div>
           </div>
         )}
-
-        <div className="flex">
+        <div className="flex gap-1 h-fit">
           <DashboardPodcastPage />
-          <div className="bg-white drop-shadow-md rounded-xl p-2 w-[30%] h-52"></div>
+          <TotalUploadPodcast />
         </div>
       </div>
     </div>
