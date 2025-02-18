@@ -20,99 +20,48 @@ export default function HomePage() {
   const [totalInspiring, setTotalInspiring] = useState(0);
   const [loading, setLoading] = useState(true);
 
+  const fetchData = async (url : any, dataKey : any) => {
+    try {
+      const response = await axios.get(`http://127.0.0.1:8000/api/${url}`);
+      if (response.data.status && response.data.data[dataKey]) {
+        return response.data.data[dataKey].length;
+      }
+      return 0;
+    } catch (error) {
+      return 0;
+    }
+  };
+  
   useEffect(() => {
-    const fetchFoto = async () => {
+    const fetchAllData = async () => {
       try {
-        const response = await axios.get(
-          "http://127.0.0.1:8000/api/idekontenfoto"
-        );
-
-        if (response.data.status && response.data.data.ide_konten_foto) {
-          const fotoCount = response.data.data.ide_konten_foto.length;
-          setTotalFoto(fotoCount);
-        } else {
-          setTotalFoto(0);
-        }
-      } catch (err) {
+        const [fotoCount, videoCount, podcastCount, quoteCount, inspiringCount] = await Promise.all([
+          fetchData('idekontenfoto', 'ide_konten_foto'),
+          fetchData('idekontenvideo', 'ide_konten_video'),
+          fetchData('podcast', 'podcast'),
+          fetchData('quote', 'quote'),
+          fetchData('inspiringpeople', 'inspiringPeople')
+        ]);
+  
+        setTotalFoto(fotoCount);
+        setTotalVideo(videoCount);
+        setTotalPodcast(podcastCount);
+        setTotalQuotes(quoteCount);
+        setTotalInspiring(inspiringCount);
+      } catch (error) {
+        console.error('Error fetching data:', error);
+        // Set all counts to 0 in case of error
         setTotalFoto(0);
-      } finally {
-        setLoading(false);
-      }
-    };
-    const fetchVideo = async () => {
-      try {
-        const response = await axios.get(
-          "http://127.0.0.1:8000/api/idekontenvideo"
-        );
-
-        if (response.data.status && response.data.data.ide_konten_video) {
-          const videoCount = response.data.data.ide_konten_video.length;
-          setTotalVideo(videoCount);
-        } else {
-          setTotalVideo(0);
-        }
-      } catch (err) {
         setTotalVideo(0);
-      } finally {
-        setLoading(false);
-      }
-    };
-    const fetchPodcast = async () => {
-      try {
-        const response = await axios.get("http://127.0.0.1:8000/api/podcast");
-
-        if (response.data.status && response.data.data.podcast) {
-          const podcastCount = response.data.data.podcast.length;
-          setTotalPodcast(podcastCount);
-        } else {
-          setTotalPodcast(0);
-        }
-      } catch (err) {
         setTotalPodcast(0);
-      } finally {
-        setLoading(false);
-      }
-    };
-    const fetchQuotes = async () => {
-      try {
-        const response = await axios.get("http://127.0.0.1:8000/api/quote");
-
-        if (response.data.status && response.data.data.quote) {
-          const quoteCount = response.data.data.quote.length;
-          setTotalQuotes(quoteCount);
-        } else {
-          setTotalQuotes(0);
-        }
-      } catch (err) {
         setTotalQuotes(0);
-      } finally {
-        setLoading(false);
-      }
-    };
-    const fetchInspiring = async () => {
-      try {
-        const response = await axios.get(
-          "http://127.0.0.1:8000/api/inspiringpeople"
-        );
-
-        if (response.data.status && response.data.data.inspiringPeople) {
-          const inspiringCount = response.data.data.inspiringPeople.length;
-          setTotalInspiring(inspiringCount);
-        } else {
-          setTotalInspiring(0);
-        }
-      } catch (err) {
         setTotalInspiring(0);
       } finally {
         setLoading(false);
       }
     };
-
-    fetchFoto();
-    fetchVideo();
-    fetchPodcast();
-    fetchQuotes();
-    fetchInspiring();
+  
+    fetchAllData();
   }, []);
 
   return (
@@ -131,16 +80,21 @@ export default function HomePage() {
         Dashboard
       </h1>
       <div className="w-[1030px] flex-col">
-        {loading ? (
-          <div className="flex gap-2 w-full p-0 mb-3">
-            <div className="rounded-xl bg-white shadow-[0_0_7px_rgba(0,0,0,0.1)] w-[20%] h-20 skeleton"></div>
-            <div className="rounded-xl bg-white shadow-[0_0_7px_rgba(0,0,0,0.1)] w-[20%] h-20 skeleton"></div>
-            <div className="rounded-xl bg-white shadow-[0_0_7px_rgba(0,0,0,0.1)] w-[20%] h-20 skeleton"></div>
-            <div className="rounded-xl bg-white shadow-[0_0_7px_rgba(0,0,0,0.1)] w-[20%] h-20 skeleton"></div>
-            <div className="rounded-xl bg-white shadow-[0_0_7px_rgba(0,0,0,0.1)] w-[20%] h-20 skeleton"></div>
-          </div>
-        ) : (
-          <div className="flex gap-2 w-full p-0 mb-3">
+        <div className="flex gap-2 w-full p-0 mb-3">
+          {loading ? (
+            <div className="rounded-xl bg-white shadow-[0_0_7px_rgba(0,0,0,0.1)] w-[20%] h-20 py-2 flex items-center gap-2 justify-between px-4 animate-pulse">
+              <div className="flex flex-col gap-2">
+                <div className="h-6 w-16 bg-gray-200 rounded-md"></div>
+                <div className="h-3 w-24 bg-gray-200 rounded-md"></div>
+              </div>
+
+              <div className="rounded-full bg-gray-200 p-[1px]">
+                <div className="bg-white rounded-full p-[2px]">
+                  <div className="bg-gray-200 rounded-full p-2 w-10 h-10  "></div>
+                </div>
+              </div>
+            </div>
+          ) : (
             <div className="rounded-xl hover:shadow-lg transition-shadow duration-300 bg-white shadow-[0_0_7px_rgba(0,0,0,0.1)] w-[20%] h-20 py-2 flex items-center gap-2 justify-between px-4">
               <div className="flex flex-col">
                 <h1 className="font-semibold text-xl text-[#293854]">
@@ -156,6 +110,21 @@ export default function HomePage() {
                 </div>
               </div>
             </div>
+          )}
+          {loading ? (
+            <div className="rounded-xl bg-white shadow-[0_0_7px_rgba(0,0,0,0.1)] w-[20%] h-20 py-2 flex items-center gap-2 justify-between px-4 animate-pulse">
+              <div className="flex flex-col gap-2">
+                <div className="h-6 w-16 bg-gray-200 rounded-md"></div>
+                <div className="h-3 w-24 bg-gray-200 rounded-md"></div>
+              </div>
+
+              <div className="rounded-full bg-gray-200 p-[1px]">
+                <div className="bg-white rounded-full p-[2px]">
+                  <div className="bg-gray-200 rounded-full p-2 w-10 h-10  "></div>
+                </div>
+              </div>
+            </div>
+          ) : (
             <div className="rounded-xl hover:shadow-lg transition-shadow duration-300 bg-white shadow-[0_0_7px_rgba(0,0,0,0.1)] w-[20%] h-20 py-2 flex items-center gap-2 justify-between px-4">
               <div className="flex flex-col">
                 <h1 className="font-semibold text-xl text-[#293854]">
@@ -171,6 +140,21 @@ export default function HomePage() {
                 </div>
               </div>
             </div>
+          )}
+          {loading ? (
+            <div className="rounded-xl bg-white shadow-[0_0_7px_rgba(0,0,0,0.1)] w-[20%] h-20 py-2 flex items-center gap-2 justify-between px-4 animate-pulse">
+              <div className="flex flex-col gap-2">
+                <div className="h-6 w-16 bg-gray-200 rounded-md"></div>
+                <div className="h-3 w-24 bg-gray-200 rounded-md"></div>
+              </div>
+
+              <div className="rounded-full bg-gray-200 p-[1px]">
+                <div className="bg-white rounded-full p-[2px]">
+                  <div className="bg-gray-200 rounded-full p-2 w-10 h-10  "></div>
+                </div>
+              </div>
+            </div>
+          ) : (
             <div className="rounded-xl hover:shadow-lg transition-shadow duration-300 bg-white shadow-[0_0_7px_rgba(0,0,0,0.1)] w-[20%] h-20 py-2 flex items-center gap-2 justify-between px-4">
               <div className="flex flex-col">
                 <h1 className="font-semibold text-xl text-[#293854]">
@@ -186,6 +170,21 @@ export default function HomePage() {
                 </div>
               </div>
             </div>
+          )}
+          {loading ? (
+            <div className="rounded-xl bg-white shadow-[0_0_7px_rgba(0,0,0,0.1)] w-[20%] h-20 py-2 flex items-center gap-2 justify-between px-4 animate-pulse">
+              <div className="flex flex-col gap-2">
+                <div className="h-6 w-16 bg-gray-200 rounded-md"></div>
+                <div className="h-3 w-24 bg-gray-200 rounded-md"></div>
+              </div>
+
+              <div className="rounded-full bg-gray-200 p-[1px]">
+                <div className="bg-white rounded-full p-[2px]">
+                  <div className="bg-gray-200 rounded-full p-2 w-10 h-10  "></div>
+                </div>
+              </div>
+            </div>
+          ) : (
             <div className="rounded-xl hover:shadow-lg transition-shadow duration-300 bg-white shadow-[0_0_7px_rgba(0,0,0,0.1)] w-[20%] h-20 py-2 flex items-center gap-2 justify-between px-4">
               <div className="flex flex-col">
                 <h1 className="font-semibold text-xl text-[#293854]">
@@ -201,6 +200,21 @@ export default function HomePage() {
                 </div>
               </div>
             </div>
+          )}
+          {loading ? (
+            <div className="rounded-xl bg-white shadow-[0_0_7px_rgba(0,0,0,0.1)] w-[20%] h-20 py-2 flex items-center gap-2 justify-between px-4 animate-pulse">
+              <div className="flex flex-col gap-2">
+                <div className="h-6 w-16 bg-gray-200 rounded-md"></div>
+                <div className="h-3 w-24 bg-gray-200 rounded-md"></div>
+              </div>
+
+              <div className="rounded-full bg-gray-200 p-[1px]">
+                <div className="bg-white rounded-full p-[2px]">
+                  <div className="bg-gray-200 rounded-full p-2 w-10 h-10  "></div>
+                </div>
+              </div>
+            </div>
+          ) : (
             <div className="rounded-xl hover:shadow-lg transition-shadow duration-300 bg-white shadow-[0_0_7px_rgba(0,0,0,0.1)] w-[20%] h-20 py-2 flex items-center gap-2 justify-between px-4">
               <div className="flex flex-col">
                 <h1 className="font-semibold text-xl text-[#293854]">
@@ -216,8 +230,8 @@ export default function HomePage() {
                 </div>
               </div>
             </div>
-          </div>
-        )}
+          )}
+        </div>
         <div className="flex gap-1 h-fit">
           <DashboardPodcastPage />
           <TotalUploadPodcast />

@@ -2,7 +2,8 @@ import React, { useEffect, useState } from "react";
 import { Card, CardHeader, CardContent } from "@/components/ui/card";
 import { ArrowUpCircle, Clock, XCircle } from "lucide-react";
 
-const TotalUploadPodcast = () => {
+export default function TotalUploadPodcast() {
+  const [loading, setLoading] = useState(true);
   const [podcastStats, setPodcastStats] = useState({
     uploaded: 0,
     pendingUpload: 0,
@@ -35,6 +36,8 @@ const TotalUploadPodcast = () => {
         }
       } catch (error) {
         console.error("Error fetching podcast data:", error);
+      } finally {
+        setLoading(false);
       }
     };
 
@@ -50,57 +53,60 @@ const TotalUploadPodcast = () => {
           </h2>
         </div>
       </CardHeader>
-      <CardContent className="space-y-4">
-        {/* Uploaded stats */}
-        <div className="bg-gradient-to-r from-green-500 to-green-600 rounded-lg p-4 transform transition-transform duration-200 hover:scale-[1.02]">
-          <div className="flex items-center justify-between">
-            <div>
-              <p className="text-3xl font-bold text-white">
-                {podcastStats.uploaded}
-              </p>
-              <p className="text-sm text-green-100 font-medium">
-                Sudah Terupload
-              </p>
-            </div>
-            <ArrowUpCircle className="w-10 h-10 text-green-100 opacity-80" />
+      {loading ? (
+        <CardContent className="space-y-4">
+          <div className="bg-gray-100 skeleton rounded-lg h-[88px]"></div>
+          <div className="grid grid-cols-2 gap-3">
+            <div className="bg-gray-100 skeleton rounded-lg h-[84px]"></div>
+            <div className="bg-gray-100 skeleton rounded-lg h-[84px]"></div>
           </div>
-        </div>
-
-        {/* Stats grid */}
-        <div className="grid grid-cols-2 gap-3">
-          {/* Pending uploads */}
-          <div className="bg-gradient-to-r from-yellow-400 to-yellow-500 rounded-lg p-4 transform transition-transform duration-200 hover:scale-[1.02]">
-            <div className="flex flex-col">
-              <div className="flex items-center justify-between">
-                <Clock className="w-6 h-6 text-yellow-100 opacity-80" />
-                <p className="text-2xl font-bold text-white">
-                  {podcastStats.pendingUpload}
+        </CardContent>
+      ) : (
+        <CardContent className="space-y-4">
+          <div className="bg-gradient-to-r from-green-500 to-green-600 rounded-lg p-4 transform transition-transform duration-200 hover:scale-[1.02]">
+            <div className="flex items-center justify-between">
+              <div>
+                <p className="text-3xl font-bold text-white">
+                  {podcastStats.uploaded}
+                </p>
+                <p className="text-sm text-green-100 font-medium">
+                  Sudah Terupload
                 </p>
               </div>
-              <p className="text-xs text-yellow-100 font-medium mt-1">
-                Belum Diupload
-              </p>
+              <ArrowUpCircle className="w-10 h-10 text-green-100 opacity-80" />
             </div>
           </div>
 
-          {/* Not shot */}
-          <div className="bg-gradient-to-r from-red-500 to-red-600 rounded-lg p-4 transform transition-transform duration-200 hover:scale-[1.02]">
-            <div className="flex flex-col">
-              <div className="flex items-center justify-between">
-                <XCircle className="w-6 h-6 text-red-100 opacity-80" />
-                <p className="text-2xl font-bold text-white">
-                  {podcastStats.notShot}
+          <div className="grid grid-cols-2 gap-3">
+            <div className="bg-gradient-to-r from-yellow-400 to-yellow-500 rounded-lg p-4 transform transition-transform duration-200 hover:scale-[1.02]">
+              <div className="flex flex-col">
+                <div className="flex items-center justify-between">
+                  <Clock className="w-6 h-6 text-yellow-100 opacity-80" />
+                  <p className="text-2xl font-bold text-white">
+                    {podcastStats.pendingUpload}
+                  </p>
+                </div>
+                <p className="text-xs text-yellow-100 font-medium mt-1">
+                  Belum Diupload
                 </p>
               </div>
-              <p className="text-xs text-red-100 font-medium mt-1">
-                Belum Dishoot
-              </p>
+            </div>
+            <div className="bg-gradient-to-r from-red-500 to-red-600 rounded-lg p-4 transform transition-transform duration-200 hover:scale-[1.02]">
+              <div className="flex flex-col">
+                <div className="flex items-center justify-between">
+                  <XCircle className="w-6 h-6 text-red-100 opacity-80" />
+                  <p className="text-2xl font-bold text-white">
+                    {podcastStats.notShot}
+                  </p>
+                </div>
+                <p className="text-xs text-red-100 font-medium mt-1">
+                  Belum Dishoot
+                </p>
+              </div>
             </div>
           </div>
-        </div>
-      </CardContent>
+        </CardContent>
+      )}
     </Card>
   );
-};
-
-export default TotalUploadPodcast;
+}
