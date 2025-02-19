@@ -70,7 +70,7 @@ export default function InputPodcast() {
       pdc_link: "",
       pdc_catatan: "",
     },
-    resolver: zodResolver(podcastInfoSchema),
+    resolver: zodResolver(podcastInfoSchema(false)),
   });
 
   const onSubmit = async (data: Podcasts) => {

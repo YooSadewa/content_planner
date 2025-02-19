@@ -94,7 +94,7 @@ export default function EditPodcast({
       pdc_catatan: currentNote,
       pdc_link: currentLink,
     },
-    resolver: zodResolver(podcastInfoSchema),
+    resolver: zodResolver(podcastInfoSchema(true, currentShoot)),
   });
 
   const onSubmit = async (data: Podcasts) => {

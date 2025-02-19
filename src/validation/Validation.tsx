@@ -18,54 +18,72 @@ export const speakerInfoSchema = z.object({
     }),
 });
 
-export const podcastInfoSchema = z
-  .object({
-    pdc_jadwal_shoot: z.string().refine(
-      (val) => {
-        const inputDate = new Date(val);
-        const currentDate = new Date();
-        inputDate.setHours(0, 0, 0, 0);
-        currentDate.setHours(0, 0, 0, 0);
-        return !isNaN(inputDate.getTime()) && inputDate >= currentDate;
-      },
-      {
-        message: "Tanggal shooting harus valid dan tidak boleh di masa lalu.",
-      }
-    ),
-    pdc_jadwal_upload: z.string().nullable().optional(),
-    pdc_tema: z
-      .string()
-      .min(1, { message: "Tema harus diisi" })
-      .max(150, { message: "Tema harus terdiri dari maksimal 150 karakter" }),
-    pdc_abstrak: z.string().optional().nullable(),
-    pmb_id: z.string().refine((val) => !isNaN(Number(val)) && Number(val) > 0, {
-      message: "Pilih pembicara yang valid.",
-    }),
-    host_id: z
-      .string()
-      .refine((val) => !isNaN(Number(val)) && Number(val) > 0, {
-        message: "Pilih host yang valid.",
-      }),
-    pdc_catatan: z.string().optional().nullable(),
-  })
-  .superRefine((data, ctx) => {
-    const shootDate = new Date(data.pdc_jadwal_shoot);
+export const podcastInfoSchema = (isEdit: boolean, previousDate?: string) =>
+  z
+    .object({
+      pdc_jadwal_shoot: z.string().refine(
+        (val) => {
+          const inputDate = new Date(val);
+          const currentDate = new Date();
+          currentDate.setHours(0, 0, 0, 0);
+          inputDate.setHours(0, 0, 0, 0);
 
-    if (
-      data.pdc_jadwal_upload !== null &&
-      data.pdc_jadwal_upload !== undefined
-    ) {
-      const uploadDate = new Date(data.pdc_jadwal_upload);
+          if (isEdit && previousDate) {
+            const prevDate = new Date(previousDate);
+            prevDate.setHours(0, 0, 0, 0);
+            if (
+              prevDate < currentDate &&
+              inputDate.getTime() === prevDate.getTime()
+            ) {
+              return true;
+            }
+            if (prevDate < currentDate) {
+              return inputDate >= currentDate;
+            }
+            return inputDate >= prevDate;
+          }
+          return inputDate >= currentDate;
+        },
+        {
+          message: "Tanggal shooting tidak boleh di masa lalu.",
+        }
+      ),
+      pdc_jadwal_upload: z.string().nullable().optional(),
+      pdc_tema: z
+        .string()
+        .min(1, { message: "Tema harus diisi" })
+        .max(150, { message: "Tema maksimal 150 karakter" }),
+      pdc_abstrak: z.string().optional().nullable(),
+      pmb_id: z
+        .string()
+        .refine((val) => !isNaN(Number(val)) && Number(val) > 0, {
+          message: "Pilih pembicara yang valid.",
+        }),
+      host_id: z
+        .string()
+        .refine((val) => !isNaN(Number(val)) && Number(val) > 0, {
+          message: "Pilih host yang valid.",
+        }),
+      pdc_catatan: z.string().optional().nullable(),
+    })
+    .superRefine((data, ctx) => {
+      const shootDate = new Date(data.pdc_jadwal_shoot);
 
-      if (uploadDate < shootDate) {
-        ctx.addIssue({
-          code: "custom",
-          path: ["pdc_jadwal_upload"],
-          message: "Tanggal upload harus setelah tanggal shooting",
-        });
+      if (
+        data.pdc_jadwal_upload !== null &&
+        data.pdc_jadwal_upload !== undefined
+      ) {
+        const uploadDate = new Date(data.pdc_jadwal_upload);
+
+        if (uploadDate < shootDate) {
+          ctx.addIssue({
+            code: "custom",
+            path: ["pdc_jadwal_upload"],
+            message: "Tanggal upload harus setelah tanggal shooting",
+          });
+        }
       }
-    }
-  });
+    });
 
 export const uploadInfoSchema = z.object({
   pdc_link: z
