@@ -45,7 +45,7 @@ export default function TotalUploadPodcast() {
   }, []);
 
   return (
-    <Card className="w-96 bg-white hover:shadow-lg transition-shadow duration-300">
+    <Card className="w-96 bg-white hover:shadow-lg transition-shadow duration-300 h-fit">
       <CardHeader className="pb-2">
         <div className="flex items-center justify-between">
           <h2 className="text-xl font-bold text-gray-800">

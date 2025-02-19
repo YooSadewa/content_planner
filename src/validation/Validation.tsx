@@ -37,7 +37,7 @@ export const podcastInfoSchema = z
       .string()
       .min(1, { message: "Tema harus diisi" })
       .max(150, { message: "Tema harus terdiri dari maksimal 150 karakter" }),
-    pdc_abstrak: z.string(),
+    pdc_abstrak: z.string().optional().nullable(),
     pmb_id: z.string().refine((val) => !isNaN(Number(val)) && Number(val) > 0, {
       message: "Pilih pembicara yang valid.",
     }),
@@ -46,12 +46,11 @@ export const podcastInfoSchema = z
       .refine((val) => !isNaN(Number(val)) && Number(val) > 0, {
         message: "Pilih host yang valid.",
       }),
-    pdc_catatan: z.string(),
+    pdc_catatan: z.string().optional().nullable(),
   })
   .superRefine((data, ctx) => {
     const shootDate = new Date(data.pdc_jadwal_shoot);
 
-    // Tangani kasus null
     if (
       data.pdc_jadwal_upload !== null &&
       data.pdc_jadwal_upload !== undefined
