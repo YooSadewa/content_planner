@@ -127,13 +127,6 @@ export default function PodcastPage() {
                     message: `Jadwal shoot Podcast "${podcast.pdc_tema}" adalah hari ini.`,
                     color: "bg-yellow-300",
                   });
-                } else if (daysToShoot < 0) {
-                  acc.push({
-                    message: `Jadwal shoot Podcast "${
-                      podcast.pdc_tema
-                    }" telah lewat ${Math.abs(daysToShoot)} hari.`,
-                    color: "bg-red-500 text-white",
-                  });
                 }
 
                 // Alert untuk jadwal upload hanya jika ada jadwal upload

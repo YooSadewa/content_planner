@@ -31,21 +31,32 @@ export const podcastInfoSchema = (isEdit: boolean, previousDate?: string) =>
           if (isEdit && previousDate) {
             const prevDate = new Date(previousDate);
             prevDate.setHours(0, 0, 0, 0);
+
+            // Jika previousDate di masa lalu dan tidak diubah, tetap lolos
             if (
               prevDate < currentDate &&
               inputDate.getTime() === prevDate.getTime()
             ) {
               return true;
             }
+
+            // Jika previousDate di masa lalu tapi diubah, minimal harus hari ini
             if (prevDate < currentDate) {
               return inputDate >= currentDate;
             }
-            return inputDate >= prevDate;
+
+            // Jika previousDate di masa depan dan diubah, minimal harus setelah hari ini tetapi boleh di bawah previousDate
+            if (prevDate >= currentDate) {
+              return inputDate >= currentDate;
+            }
           }
+
+          // Jika bukan edit, tetap tidak boleh di masa lalu
           return inputDate >= currentDate;
         },
         {
-          message: "Tanggal shooting tidak boleh di masa lalu.",
+          message:
+            "Tanggal shooting tidak boleh di masa lalu atau sebelum batas yang diizinkan.",
         }
       ),
       pdc_jadwal_upload: z.string().nullable().optional(),

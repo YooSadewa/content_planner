@@ -4,6 +4,7 @@ import DashboardPodcastPage from "./podcast/dashpodcast";
 import {
   Camera,
   Flame,
+  Instagram,
   MessageSquareQuote,
   Podcast,
   Video,
@@ -12,6 +13,7 @@ import { useEffect, useState } from "react";
 import axios from "axios";
 import TotalUploadPodcast from "./podcast/detailupload";
 import { Card, CardContent, CardHeader } from "@/components/ui/card";
+import DashboardQuotePage from "./quotes/dashquote";
 
 export default function HomePage() {
   const [totalFoto, setTotalFoto] = useState(0);
@@ -288,23 +290,29 @@ export default function HomePage() {
         </div>
         <div className="flex gap-1 h-fit">
           {loading ? (
-            <Card className="w-[650px] bg-white hover:shadow-lg transition-shadow duration-300 h-[500px]">
+            <Card className="w-[650px] bg-white hover:shadow-lg transition-shadow duration-300 h-[425px]">
               <CardHeader className="pb-2">
                 <div className="flex items-center justify-between">
                   <h2 className="text-xl font-bold text-gray-800">Podcast</h2>
                 </div>
               </CardHeader>
               <CardContent>
-                <div className="mb-2 h-32 bg-gray-100 rounded-xl p-6 skeleton"></div>
-                <div className="mb-2 h-32 bg-gray-100 rounded-xl p-6 skeleton"></div>
-                <div className="mb-2 h-32 bg-gray-100 rounded-xl p-6 skeleton"></div>
+                <div className="mb-2 h-[106px] bg-gray-100 rounded-xl p-6 skeleton"></div>
+                <div className="mb-2 h-[106px] bg-gray-100 rounded-xl p-6 skeleton"></div>
+                <div className="mb-2 h-[106px] bg-gray-100 rounded-xl p-6 skeleton"></div>
               </CardContent>
             </Card>
           ) : (
             <DashboardPodcastPage podcasts={podcasts} />
           )}
-          <TotalUploadPodcast />
+          <div className="space-y-1">
+            <TotalUploadPodcast />
+            <DashboardQuotePage />
+          </div>
         </div>
+        <Card className="w-full bg-white hover:shadow-lg transition-shadow duration-300 mt-1">
+          s
+        </Card>
       </div>
     </div>
   );
