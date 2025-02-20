@@ -1,6 +1,6 @@
 "use client";
 import Image from "next/image";
-import DashboardPodcastPage from "./podcast/dashpodcast";
+import DashboardPodcastPage from "./podcast/dashboard";
 import {
   Camera,
   Flame,
@@ -13,7 +13,8 @@ import { useEffect, useState } from "react";
 import axios from "axios";
 import TotalUploadPodcast from "./podcast/detailupload";
 import { Card, CardContent, CardHeader } from "@/components/ui/card";
-import DashboardQuotePage from "./quotes/dashquote";
+import DashboardQuotePage from "./quotes/dashboard";
+import DashboardIdeKontenPage from "./ide-konten/dashboard";
 
 export default function HomePage() {
   const [totalFoto, setTotalFoto] = useState(0);
@@ -310,9 +311,7 @@ export default function HomePage() {
             <DashboardQuotePage />
           </div>
         </div>
-        <Card className="w-full bg-white hover:shadow-lg transition-shadow duration-300 mt-1">
-          s
-        </Card>
+          <DashboardIdeKontenPage />
       </div>
     </div>
   );

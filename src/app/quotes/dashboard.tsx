@@ -1,6 +1,6 @@
 import { Card, CardContent, CardHeader } from "@/components/ui/card";
 import axios from "axios";
-import { Instagram } from "lucide-react";
+import { Flame, Instagram, MessageSquareQuote } from "lucide-react";
 import { useEffect, useState } from "react";
 
 interface Quote {
@@ -139,7 +139,11 @@ export default function DashboardQuotePage() {
                     {item.instagram_link}
                   </p>
                 </div>
-                <Instagram className="w-5 h-5 text-gray-400 group-hover:text-pink-500 transition-colors" />
+                {item.type === "quote" ? (
+                  <MessageSquareQuote className="w-5 h-5 text-gray-400 group-hover:text-blue-500 transition-colors" />
+                ) : (
+                  <Flame className="w-5 h-5 text-gray-400 group-hover:text-orange-500 transition-colors" />
+                )}
               </a>
             ))}
           </div>
