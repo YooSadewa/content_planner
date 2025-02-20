@@ -1,6 +1,7 @@
 import { Card, CardContent, CardHeader } from "@/components/ui/card";
+import { LinkPreview } from "@/components/ui/link-preview";
 import axios from "axios";
-import { Flame, Instagram, MessageSquareQuote } from "lucide-react";
+import { Flame, Info, Instagram, MessageSquareQuote } from "lucide-react";
 import { useEffect, useState } from "react";
 
 interface Quote {
@@ -111,28 +112,31 @@ export default function DashboardQuotePage() {
   return (
     <Card className="w-96 bg-white hover:shadow-lg transition-shadow duration-300 h-[227px]">
       <CardHeader className="pb-2">
-        <div className="flex items-center justify-between">
+        <div className="flex items-start flex-col justify-between">
           <h2 className="text-xl font-bold text-gray-800">
             Quotes & Inspiring People
           </h2>
+          <small className="flex flex-row items-center gap-1 text-xs text-gray-400 mt-1">
+            <Info size={14} />
+            Hover untuk lihat preview
+          </small>
         </div>
       </CardHeader>
       <CardContent>
         {loading ? (
           <div className="grid gap-1">
-            <div className="flex items-center p-5 h-[46px] bg-gray-100 skeleton"></div>
-            <div className="flex items-center p-5 h-[46px] bg-gray-100 skeleton"></div>
-            <div className="flex items-center p-5 h-[46px] bg-gray-100 skeleton"></div>
+            <div className="flex items-center h-[42px] p-4 bg-gray-100 skeleton rounded-lg"></div>
+            <div className="flex items-center h-[42px] p-4 bg-gray-100 skeleton rounded-lg"></div>
+            <div className="flex items-center h-[42px] p-4 bg-gray-100 skeleton rounded-lg"></div>
           </div>
         ) : (
           <div className="grid gap-1">
             {combinedData.map((item) => (
-              <a
+              <LinkPreview
+                quality={100}
                 key={item.type === "quote" ? item.qotd_id : item.ins_id}
-                href={item.instagram_link}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="flex items-center p-3 transition-colors group rounded-lg rounded-xl hover:shadow-lg transition-shadow duration-300 bg-white shadow-[0_0_7px_rgba(0,0,0,0.1)] border"
+                url={`${item.instagram_link}embed`}
+                className="flex items-center p-[10px] transition-colors group rounded-lg hover:shadow-lg transition-shadow duration-300 bg-white shadow-[0_0_7px_rgba(0,0,0,0.1)] border"
               >
                 <div className="flex-1">
                   <p className="text-gray-500 text-[10px]">
@@ -144,7 +148,7 @@ export default function DashboardQuotePage() {
                 ) : (
                   <Flame className="w-5 h-5 text-gray-400 group-hover:text-orange-500 transition-colors" />
                 )}
-              </a>
+              </LinkPreview>
             ))}
           </div>
         )}
