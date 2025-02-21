@@ -289,7 +289,8 @@ export default function HomePage() {
             </div>
           )}
         </div>
-        <div className="flex gap-1 h-fit">
+        <DashboardIdeKontenPage />
+        <div className="flex gap-1 h-fit mt-1">
           {loading ? (
             <Card className="w-[650px] bg-white hover:shadow-lg transition-shadow duration-300 h-[425px]">
               <CardHeader className="pb-2">
@@ -311,7 +312,6 @@ export default function HomePage() {
             <DashboardQuotePage />
           </div>
         </div>
-          <DashboardIdeKontenPage />
       </div>
     </div>
   );

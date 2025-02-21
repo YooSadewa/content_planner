@@ -6,11 +6,11 @@ import {
 } from "@/components/ui/breadcrumb";
 import { Slash } from "lucide-react";
 import { DataTable } from "./ide-konten-foto/datatable";
+import { DataTableVideo } from "./ide-konten-video/datatable";
 import { columns } from "./ide-konten-foto/columns";
 import { useEffect, useState } from "react";
 import axios from "axios";
 import CreateKontenFoto from "./ide-konten-foto/adddata";
-import { DataTableVideo } from "./ide-konten-video/datatable";
 import CreateKontenVideo from "./ide-konten-video/adddata";
 
 export default function IdeKontenPage() {
