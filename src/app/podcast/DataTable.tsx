@@ -95,7 +95,7 @@ export function DataTable<TData, TValue>({
 
   return (
     <>
-      <div className="shadow-md border-t rounded-xl">
+      <div className="">
         <div className="w-[1010px] h-[520px]">
           <div className="flex gap-2">
             <div className="flex justify-between mb-1 w-full m-3">
@@ -161,7 +161,7 @@ export function DataTable<TData, TValue>({
             onClick={() => table.previousPage()}
             disabled={!table.getCanPreviousPage()}
             variant="outline"
-            className="px-2 py-1 m-4"
+            className="px-2 py-1 m-4 bg-white"
           >
             <ChevronLeft className="h-4 w-4" />
           </Button>
@@ -173,7 +173,7 @@ export function DataTable<TData, TValue>({
             onClick={() => table.nextPage()}
             disabled={!table.getCanNextPage()}
             variant="outline"
-            className="px-2 py-1 m-4"
+            className="px-2 py-1 m-4 bg-white"
           >
             <ChevronRight className="h-4 w-4" />
           </Button>

@@ -241,7 +241,7 @@ export default function PodcastPage() {
         {loading ? (
           <>
             <div className="shadow-md border-t rounded-xl">
-              <div className="w-[1010px] h-[535px]">
+              <div className="w-full h-[570px]">
                 <div className="flex gap-2">
                   <div className="flex justify-between mb-1 w-full m-3">
                     <h1 className="text-xl font-bold flex items-center">
@@ -258,14 +258,8 @@ export default function PodcastPage() {
                   </div>
                 </div>
                 <div className="pb-[72px] flex flex-col py-2 ps-2 pe-[7px] gap-4">
-                  <div className="flex gap-5">
-                    <div className="bg-gray-100 skeleton w-[482px] h-[200px] shadow-md rounded" />
-                    <div className="bg-gray-100 skeleton w-[482px] h-[200px] shadow-md rounded" />
-                  </div>
-                  <div className="flex gap-5 mt-[4px]">
-                    <div className="bg-gray-100 skeleton w-[482px] h-[200px] shadow-md rounded" />
-                    <div className="bg-gray-100 skeleton w-[482px] h-[200px] shadow-md rounded" />
-                  </div>
+                  <div className="bg-white animate-pulse w-full h-[220px] shadow-md rounded" />
+                  <div className="bg-white animate-pulse w-full h-[220px] shadow-md rounded" />
                 </div>
               </div>
             </div>

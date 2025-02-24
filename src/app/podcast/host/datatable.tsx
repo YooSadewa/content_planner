@@ -107,7 +107,7 @@ DataTableProps<TData, TValue>) {
           onClick={() => table.previousPage()}
           disabled={!table.getCanPreviousPage()}
           variant="outline"
-          className="px-2 py-1"
+          className="px-2 py-1 bg-white"
         >
           <ChevronLeft className="h-4 w-4" />
         </Button>
@@ -119,7 +119,7 @@ DataTableProps<TData, TValue>) {
           onClick={() => table.nextPage()}
           disabled={!table.getCanNextPage()}
           variant="outline"
-          className="px-2 py-1"
+          className="px-2 py-1 bg-white"
         >
           <ChevronRight className="h-4 w-4" />
         </Button>
