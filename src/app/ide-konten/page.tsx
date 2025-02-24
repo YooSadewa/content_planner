@@ -91,13 +91,35 @@ export default function IdeKontenPage() {
           <h1 className="font-bold text-2xl ps-1 text-[#293854] me-auto">
             Ide Konten Foto
           </h1>
-          <DataTable data={tableData} onOpen={onOpen} />
+          {loading ? (
+            <div className="p-2">
+              <div className="w-[975px] h-[240px] bg-gray-100 skeleton rounded-none"></div>
+              <div className="mt-4 flex justify-between">
+                <span className="w-8 h-9 bg-gray-100 skeleton rounded-md" />
+                <p className="text-sm flex items-center">Halaman 0 dari 0</p>
+                <span className="w-8 h-9 bg-gray-100 skeleton rounded-md" />
+              </div>
+            </div>
+          ) : (
+            <DataTable data={tableData} onOpen={onOpen} />
+          )}
         </div>
         <div className="px-3 pt-5 mt-5 rounded-xl bg-white flex flex-col items-center">
           <h1 className="font-bold text-2xl ps-1 text-[#293854] me-auto">
             Ide Konten Video
           </h1>
-          <DataTableVideo data={tableDataVideo} onOpen={onOpen} />
+          {loading ? (
+            <div className="p-2">
+              <div className="w-[975px] h-[240px] bg-gray-100 skeleton rounded-none"></div>
+              <div className="mt-4 flex justify-between">
+                <span className="w-8 h-9 bg-gray-100 skeleton rounded-md" />
+                <p className="text-sm flex items-center">Halaman 0 dari 0</p>
+                <span className="w-8 h-9 bg-gray-100 skeleton rounded-md" />
+              </div>
+            </div>
+          ) : (
+            <DataTableVideo data={tableDataVideo} onOpen={onOpen} />
+          )}
         </div>
       </div>
     </div>
