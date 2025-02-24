@@ -157,7 +157,7 @@ export default function HomePage() {
                 <h1 className="font-semibold text-xl text-[#293854]">
                   {totalFoto > 0 ? totalFoto : "Tidak ada"}
                 </h1>
-                <p className="text-[10px]">Total Ide Konten Foto</p>
+                <p className="text-[9px]">Total Ide Konten Foto</p>
               </div>
               <div className="rounded-full bg-[#f7b500] p-[1px]">
                 <div className="bg-white rounded-full p-[2px]">
@@ -187,7 +187,7 @@ export default function HomePage() {
                 <h1 className="font-semibold text-xl text-[#293854]">
                   {totalVideo > 0 ? totalVideo : "Tidak ada"}
                 </h1>
-                <p className="text-[10px]">Total Ide Konten Video</p>
+                <p className="text-[9px]">Total Ide Konten Video</p>
               </div>
               <div className="rounded-full bg-[#f7b500] p-[1px]">
                 <div className="bg-white rounded-full p-[2px]">
@@ -217,7 +217,7 @@ export default function HomePage() {
                 <h1 className="font-semibold text-xl text-[#293854]">
                   {totalPodcast > 0 ? totalPodcast : "Tidak ada"}
                 </h1>
-                <p className="text-[10px]">Total Podcast</p>
+                <p className="text-[9px]">Total Podcast</p>
               </div>
               <div className="rounded-full bg-[#f7b500] p-[1px]">
                 <div className="bg-white rounded-full p-[2px]">
@@ -247,7 +247,7 @@ export default function HomePage() {
                 <h1 className="font-semibold text-xl text-[#293854]">
                   {totalQuotes > 0 ? totalQuotes : "Tidak ada"}
                 </h1>
-                <p className="text-[10px]">Total Quote</p>
+                <p className="text-[9px]">Total Quote</p>
               </div>
               <div className="rounded-full bg-[#f7b500] p-[1px]">
                 <div className="bg-white rounded-full p-[2px]">
@@ -277,7 +277,7 @@ export default function HomePage() {
                 <h1 className="font-semibold text-xl text-[#293854]">
                   {totalInspiring > 0 ? totalInspiring : "Tidak ada"}
                 </h1>
-                <p className="text-[10px]">Total Inspiring People</p>
+                <p className="text-[9px]">Total Inspiring People</p>
               </div>
               <div className="rounded-full bg-[#f7b500] p-[1px]">
                 <div className="bg-white rounded-full p-[2px]">

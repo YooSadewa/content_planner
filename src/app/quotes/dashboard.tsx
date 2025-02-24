@@ -135,7 +135,8 @@ export default function DashboardQuotePage() {
               <LinkPreview
                 quality={100}
                 key={item.type === "quote" ? item.qotd_id : item.ins_id}
-                url={`${item.instagram_link}embed`}
+                url={item.instagram_link} // This will be the main Instagram URL
+                previewUrl={`${item.instagram_link}embed`} // This will be used for the preview image
                 className="flex items-center p-[10px] transition-colors group rounded-lg hover:shadow-lg transition-shadow duration-300 bg-white shadow-[0_0_7px_rgba(0,0,0,0.1)] border"
               >
                 <div className="flex-1">
