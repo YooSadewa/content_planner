@@ -91,7 +91,7 @@ export default function PembicaraPage() {
   };
 
   return (
-    <div className="w-6/12 w-6/12 shadow-md rounded-md border-t p-5">
+    <div className="w-6/12 w-6/12 shadow-md rounded-md border-t p-5 bg-white">
       <DataSpeakerTable
         columns={columns}
         data={tableData}

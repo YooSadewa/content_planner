@@ -7,7 +7,7 @@ import {
   BreadcrumbLink,
   BreadcrumbSeparator,
 } from "@/components/ui/breadcrumb";
-import { Plus, Search, Slash } from "lucide-react";
+import { ChevronLeft, ChevronRight, Plus, Search, Slash } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { DataTable } from "./DataTable";
@@ -240,8 +240,8 @@ export default function PodcastPage() {
         )}
         {loading ? (
           <>
-            <div className="shadow-md border-t rounded-xl">
-              <div className="w-full h-[570px]">
+            <div className="">
+              <div className="w-[1010px]">
                 <div className="flex gap-2">
                   <div className="flex justify-between mb-1 w-full m-3">
                     <h1 className="text-xl font-bold flex items-center">
@@ -257,9 +257,26 @@ export default function PodcastPage() {
                     </div>
                   </div>
                 </div>
-                <div className="pb-[72px] flex flex-col py-2 ps-2 pe-[7px] gap-4">
-                  <div className="bg-white animate-pulse w-full h-[220px] shadow-md rounded" />
-                  <div className="bg-white animate-pulse w-full h-[220px] shadow-md rounded" />
+                <div className=" mt-1 flex flex-col py-2 ps-3 pe-[8px] gap-5">
+                  <div className="bg-white animate-pulse w-full h-[212px] shadow-md rounded" />
+                  <div className="bg-white animate-pulse w-full h-[212px] shadow-md rounded" />
+                </div>
+                <div className="flex justify-between items-center w-full mt-5">
+                  <Button
+                    variant="outline"
+                    className="px-2 py-1 m-4 bg-gray-100"
+                  >
+                    <ChevronLeft className="h-4 w-4" />
+                  </Button>
+                  <span className="text-sm m-4">
+                    Halaman 0 dari 0
+                  </span>
+                  <Button
+                    variant="outline"
+                    className="px-2 py-1 m-4 bg-gray-100"
+                  >
+                    <ChevronRight className="h-4 w-4" />
+                  </Button>
                 </div>
               </div>
             </div>
