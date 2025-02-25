@@ -226,18 +226,20 @@ export default function PodcastPage() {
             <InputPembicara />
           </div>
         </div>
-        {alerts.length > 0 && (
-          <div className="mb-4">
-            {alerts.map((alert, index) => (
-              <div
-                key={index}
-                className={`py-2 px-3 rounded-md ${alert.color} mb-2 text-sm uppercase font-bold`}
-              >
-                {alert.message}
-              </div>
-            ))}
-          </div>
-        )}
+        <div className="h-20 overflow-auto">
+          {alerts.length > 0 && (
+            <div className="">
+              {alerts.map((alert, index) => (
+                <div
+                  key={index}
+                  className={`py-2 px-3 rounded-md ${alert.color} mb-1 text-sm uppercase font-bold`}
+                >
+                  {alert.message}
+                </div>
+              ))}
+            </div>
+          )}
+        </div>
         {loading ? (
           <>
             <div className="">
@@ -268,9 +270,7 @@ export default function PodcastPage() {
                   >
                     <ChevronLeft className="h-4 w-4" />
                   </Button>
-                  <span className="text-sm m-4">
-                    Halaman 0 dari 0
-                  </span>
+                  <span className="text-sm m-4">Halaman 0 dari 0</span>
                   <Button
                     variant="outline"
                     className="px-2 py-1 m-4 bg-gray-100"
