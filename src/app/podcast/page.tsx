@@ -7,8 +7,7 @@ import {
   BreadcrumbLink,
   BreadcrumbSeparator,
 } from "@/components/ui/breadcrumb";
-import { ChevronLeft, ChevronRight, Plus, Search, Slash } from "lucide-react";
-import { Button } from "@/components/ui/button";
+import { AlertTriangle, Slash } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { DataTable } from "./DataTable";
 import {
@@ -20,11 +19,20 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
+import {
+  Pagination,
+  PaginationContent,
+  PaginationItem,
+  PaginationLink,
+  PaginationNext,
+  PaginationPrevious,
+} from "@/components/ui/pagination";
 import InputPodcast from "@/app/podcast/manage/create";
 import { Label } from "@/components/ui/label";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { uploadInfoSchema } from "@/validation/Validation";
+import { Button } from "@/components/ui/button";
 
 const calculateDaysDifference = (date: string): number => {
   const today = new Date();
@@ -202,6 +210,44 @@ export default function PodcastPage() {
             <InputPodcast />
           </div>
         </div>
+        <div className="flex flex-col gap-1 max-h-16 overflow-auto">
+          {alerts.length > 0 && (
+            <div className="space-y-2">
+              {alerts.map((alert, index) => (
+                <div
+                  key={index}
+                  className={`${alert.color} py-2 px-3 rounded-md shadow-sm flex items-center justify-between`}
+                >
+                  <div className="flex items-center">
+                    <AlertTriangle className="mr-2 h-4 w-4" />
+                    <span className="font-medium">{alert.message}</span>
+                  </div>
+                  <button
+                    onClick={() => {
+                      setAlerts(alerts.filter((_, i) => i !== index));
+                    }}
+                    className="text-gray-700 hover:text-black focus:outline-none"
+                  >
+                    <svg
+                      xmlns="http://www.w3.org/2000/svg"
+                      className="h-4 w-4"
+                      fill="none"
+                      viewBox="0 0 24 24"
+                      stroke="currentColor"
+                    >
+                      <path
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        strokeWidth={2}
+                        d="M6 18L18 6M6 6l12 12"
+                      />
+                    </svg>
+                  </button>
+                </div>
+              ))}
+            </div>
+          )}
+        </div>
         {loading ? (
           <>
             <div className="">
@@ -225,20 +271,27 @@ export default function PodcastPage() {
                   <div className="bg-white animate-pulse w-full h-[212px] shadow-md rounded" />
                   <div className="bg-white animate-pulse w-full h-[212px] shadow-md rounded" />
                 </div>
-                <div className="flex justify-end items-center w-full mt-5">
-                  <Button
-                    variant="outline"
-                    className="px-2 py-1 m-4 bg-gray-100"
-                  >
-                    <ChevronLeft className="h-4 w-4" />
-                  </Button>
-                  <span className="text-sm m-4">Halaman 0 dari 0</span>
-                  <Button
-                    variant="outline"
-                    className="px-2 py-1 m-4 bg-gray-100"
-                  >
-                    <ChevronRight className="h-4 w-4" />
-                  </Button>
+                <div className="w-full mt-3 py-[7px] pe-1">
+                <Pagination>
+                  <PaginationContent>
+                    <PaginationItem>
+                      <PaginationPrevious
+                        aria-disabled
+                        className={"pointer-events-none opacity-50"}
+                      />
+                    </PaginationItem>
+                    <PaginationItem>
+                      <PaginationLink aria-disabled><Button size="icon" variant="outline">1</Button></PaginationLink>
+                    </PaginationItem>
+
+                    <PaginationItem>
+                      <PaginationNext
+                        aria-disabled
+                        className={"pointer-events-none opacity-50"}
+                      />
+                    </PaginationItem>
+                  </PaginationContent>
+                </Pagination>
                 </div>
               </div>
             </div>

@@ -11,6 +11,14 @@ import {
   getSortedRowModel,
   useReactTable,
 } from "@tanstack/react-table";
+import {
+  Pagination,
+  PaginationContent,
+  PaginationItem,
+  PaginationLink,
+  PaginationNext,
+  PaginationPrevious,
+} from "@/components/ui/pagination";
 
 import { rankItem } from "@tanstack/match-sorter-utils";
 
@@ -156,27 +164,46 @@ export function DataTable<TData, TValue>({
             </Table>
           </div>
         </div>
-        <div className="flex justify-end items-center w-full mt-8 py-[5px]">
-          <Button
-            onClick={() => table.previousPage()}
-            disabled={!table.getCanPreviousPage()}
-            variant="outline"
-            className="px-2 py-1 m-4 bg-white"
-          >
-            <ChevronLeft className="h-4 w-4" />
-          </Button>
-          <span className="text-sm m-4">
-            Halaman {table.getState().pagination.pageIndex + 1} dari{" "}
-            {table.getPageCount()}
-          </span>
-          <Button
-            onClick={() => table.nextPage()}
-            disabled={!table.getCanNextPage()}
-            variant="outline"
-            className="px-2 py-1 m-4 bg-white"
-          >
-            <ChevronRight className="h-4 w-4" />
-          </Button>
+        <div className="w-full mt-8 py-[5px] pe-1">
+          <Pagination>
+            <PaginationContent>
+              <PaginationItem className="cursor-pointer">
+                <PaginationPrevious
+                  aria-disabled={!table.getCanPreviousPage()}
+                  onClick={() => table.previousPage()}
+                  className={
+                    !table.getCanPreviousPage()
+                      ? "pointer-events-none opacity-50"
+                      : ""
+                  }
+                />
+              </PaginationItem>
+
+              {/* Generate page numbers */}
+              {Array.from({ length: table.getPageCount() }, (_, i) => (
+                <PaginationItem key={i} className="cursor-pointer">
+                  <PaginationLink
+                    onClick={() => table.setPageIndex(i)}
+                    isActive={table.getState().pagination.pageIndex === i}
+                  >
+                    {i + 1}
+                  </PaginationLink>
+                </PaginationItem>
+              ))}
+
+              <PaginationItem className="cursor-pointer">
+                <PaginationNext
+                  onClick={() => table.nextPage()}
+                  aria-disabled={!table.getCanPreviousPage()}
+                  className={
+                    !table.getCanNextPage()
+                      ? "pointer-events-none opacity-50"
+                      : ""
+                  }
+                />
+              </PaginationItem>
+            </PaginationContent>
+          </Pagination>
         </div>
       </div>
     </>
