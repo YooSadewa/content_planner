@@ -11,29 +11,20 @@ import { ChevronLeft, ChevronRight, Plus, Search, Slash } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { DataTable } from "./DataTable";
-import HostPage from "./host/page";
-import PembicaraPage from "./pembicara/page";
 import {
   AlertDialog,
   AlertDialogAction,
   AlertDialogCancel,
   AlertDialogContent,
-  AlertDialogDescription,
   AlertDialogFooter,
   AlertDialogHeader,
   AlertDialogTitle,
-  AlertDialogTrigger,
 } from "@/components/ui/alert-dialog";
-import InputHost from "@/components/(Podcast)/HostManage/AddData";
-import InputPembicara from "@/components/(Podcast)/PembicaraManage/AddData";
-import InputPodcast from "@/components/(Podcast)/Podcast/AddData";
+import InputPodcast from "@/app/podcast/manage/create";
 import { Label } from "@/components/ui/label";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { uploadInfoSchema } from "@/validation/Validation";
-import { useRouter } from "next/navigation";
-import { Table, TableHead, TableHeader, TableRow } from "@/components/ui/table";
-import EditPodcast from "@/components/(Podcast)/Podcast/EditData";
 
 const calculateDaysDifference = (date: string): number => {
   const today = new Date();
@@ -116,19 +107,6 @@ export default function PodcastPage() {
               );
 
               if (!podcast.pdc_link) {
-                // Alert untuk jadwal shoot
-                if (daysToShoot > 0 && daysToShoot <= 3) {
-                  acc.push({
-                    message: `Jadwal shoot Podcast "${podcast.pdc_tema}" tinggal ${daysToShoot} hari lagi.`,
-                    color: "bg-yellow-300",
-                  });
-                } else if (daysToShoot === 0) {
-                  acc.push({
-                    message: `Jadwal shoot Podcast "${podcast.pdc_tema}" adalah hari ini.`,
-                    color: "bg-yellow-300",
-                  });
-                }
-
                 // Alert untuk jadwal upload hanya jika ada jadwal upload
                 if (podcast.pdc_jadwal_upload) {
                   const daysToUpload = calculateDaysDifference(
@@ -210,7 +188,7 @@ export default function PodcastPage() {
   return (
     <div className="bg-gray-100">
       <div className="p-5 w-12/12 overflow-auto">
-        <div className="flex justify-between">
+        <div className="flex mb-2 justify-between">
           <div className="flex items-center">
             <Bread>
               <BreadcrumbLink href="/">Beranda</BreadcrumbLink>
@@ -220,32 +198,16 @@ export default function PodcastPage() {
               <BreadcrumbLink href="/podcast">Podcast</BreadcrumbLink>
             </Bread>
           </div>
-          <div className="flex gap-1 mb-5">
+          <div className="flex">
             <InputPodcast />
-            <InputHost />
-            <InputPembicara />
           </div>
-        </div>
-        <div className="h-20 overflow-auto">
-          {alerts.length > 0 && (
-            <div className="">
-              {alerts.map((alert, index) => (
-                <div
-                  key={index}
-                  className={`py-2 px-3 rounded-md ${alert.color} mb-1 text-sm uppercase font-bold`}
-                >
-                  {alert.message}
-                </div>
-              ))}
-            </div>
-          )}
         </div>
         {loading ? (
           <>
             <div className="">
               <div className="w-[1010px]">
                 <div className="flex gap-2">
-                  <div className="flex justify-between mb-1 w-full m-3">
+                  <div className="flex justify-between w-full mx-3 mt-2 mb-0">
                     <h1 className="text-xl font-bold flex items-center">
                       Data Podcast
                     </h1>
@@ -263,7 +225,7 @@ export default function PodcastPage() {
                   <div className="bg-white animate-pulse w-full h-[212px] shadow-md rounded" />
                   <div className="bg-white animate-pulse w-full h-[212px] shadow-md rounded" />
                 </div>
-                <div className="flex justify-between items-center w-full mt-5">
+                <div className="flex justify-end items-center w-full mt-5">
                   <Button
                     variant="outline"
                     className="px-2 py-1 m-4 bg-gray-100"
@@ -337,22 +299,6 @@ export default function PodcastPage() {
           </AlertDialog>
         )}
       </div>
-      <h1 className="text-center text-2xl font-bold">
-        Data Host dan Pembicara
-      </h1>
-      {loading ? (
-        <div className="flex w-12/12 px-8 my-5 mb-7 gap-4">
-          <div className="skeleton bg-gray-100 w-6/12 h-36 border rounded-none" />
-          <div className="skeleton bg-gray-100 w-6/12 h-36 border rounded-none" />
-        </div>
-      ) : (
-        <>
-          <div className="flex w-12/12 px-8 gap-4 my-5">
-            <HostPage />
-            <PembicaraPage />
-          </div>
-        </>
-      )}
     </div>
   );
 }

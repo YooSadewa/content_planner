@@ -1,6 +1,6 @@
 "use client";
-import { Pencil } from "lucide-react";
-import { Button } from "../../ui/button";
+import { Plus } from "lucide-react";
+import { Button } from "../../../components/ui/button";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -9,10 +9,10 @@ import {
   AlertDialogFooter,
   AlertDialogHeader,
   AlertDialogTitle,
-} from "../../ui/alert-dialog";
-import { Label } from "../../ui/label";
-import { Input } from "../../ui/input";
-import { useState, useEffect } from "react";
+} from "../../../components/ui/alert-dialog";
+import { Label } from "../../../components/ui/label";
+import { Input } from "../../../components/ui/input";
+import { useEffect, useState } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { podcastInfoSchema } from "@/validation/Validation";
@@ -23,78 +23,40 @@ type Podcasts = {
   pdc_jadwal_upload: string;
   pdc_tema: string;
   pdc_abstrak: string;
-  pmb_id: Speakers;
-  host_id: Hosts;
+  pdc_host: string;
+  pdc_speaker: string;
   pdc_link: string;
   pdc_catatan: string;
 };
 
-type Speakers = {
-  pmb_id: string;
-  pmb_nama: string;
-};
-
-type Hosts = {
-  host_id: string;
-  host_nama: string;
-};
-
-type EditPodcastProps = {
-  id: string | number;
-  currentName: string;
-  currentAbstract: string;
-  currentSpeaker: any;
-  currentHost: any;
-  currentShoot: string;
-  currentUpload: string;
-  currentNote: string;
-  currentLink: string;
-  currentSpeakerId: number;
-  speakers: Speakers[];
-  hosts: Hosts[];
-};
-
-export default function EditPodcast({
-  id,
-  currentName,
-  currentAbstract,
-  currentHost,
-  currentLink,
-  currentNote,
-  currentShoot,
-  currentUpload,
-  currentSpeaker,
-  speakers,
-  hosts,
-}: EditPodcastProps) {
+export default function InputPodcast() {
+  const [error, setError] = useState("");
   const [isModalPodcastOpen, setModalPodcastOpen] = useState(false);
   const [loading, setLoading] = useState(false);
   const [errorMessage, setErrorMessage] = useState("");
   const [successMessage, setSuccessMessage] = useState("");
 
-  const onEditPodcast = () => {
+  const onAddPodcast = () => {
     setModalPodcastOpen(true);
   };
 
-  console.log("Speaker data", currentLink);
-
   const {
     register,
+    setValue,
     handleSubmit,
     formState: { errors, isSubmitting },
-    reset,
   } = useForm<Podcasts>({
     defaultValues: {
-      pdc_tema: currentName,
-      pdc_abstrak: currentAbstract,
-      host_id: currentHost.host_id,
-      pmb_id: currentSpeaker.speaker_id,
-      pdc_jadwal_shoot: currentShoot,
-      pdc_jadwal_upload: currentUpload,
-      pdc_catatan: currentNote,
-      pdc_link: currentLink,
+      pdc_jadwal_shoot: "",
+      pdc_jadwal_upload: "",
+      pdc_tema: "",
+      pdc_abstrak: "",
+      pdc_host: "",
+      pdc_speaker: "",
+      pdc_link: "",
+      pdc_catatan: "",
     },
-    resolver: zodResolver(podcastInfoSchema(true, currentShoot)),
+    resolver: zodResolver(podcastInfoSchema(false)),
   });
 
   const onSubmit = async (data: Podcasts) => {
@@ -103,16 +65,16 @@ export default function EditPodcast({
     setSuccessMessage("");
 
     try {
-      const response = await axios.put(
-        `http://127.0.0.1:8000/api/podcast/update/${id}`,
+      const response = await axios.post(
+        "http://127.0.0.1:8000/api/podcast/create",
         data
       );
-      if (response.status === 200) {
+      if (response.status === 200 || response.status === 201) {
         window.location.reload();
-        setSuccessMessage("podcast berhasil diperbarui.");
+        setSuccessMessage("Podcast berhasil ditambahkan.");
         setModalPodcastOpen(false);
       } else {
-        setErrorMessage("Terjadi kesalahan saat memperbarui podcast.");
+        setErrorMessage("Terjadi kesalahan saat menambahkan pembicara.");
       }
     } catch (error) {
       setErrorMessage("Podcast sudah tersedia.");
@@ -122,23 +84,21 @@ export default function EditPodcast({
   };
 
   const handleCancel = () => {
-    reset();
     setModalPodcastOpen(false);
   };
 
-  console.log(currentShoot, currentUpload);
-
   return (
     <div>
-      <Button size="sm" onClick={onEditPodcast} variant="outline">
-        <Pencil className="h-4 w-4" />
+      <Button size="sm" variant="default" onClick={onAddPodcast}>
+        <Plus />
+        Tambahkan Podcast
       </Button>
       {isModalPodcastOpen && (
         <AlertDialog defaultOpen open>
           <AlertDialogContent>
             <form onSubmit={handleSubmit(onSubmit)}>
               <AlertDialogHeader>
-                <AlertDialogTitle>Edit Podcast</AlertDialogTitle>
+                <AlertDialogTitle>Tambahkan Podcast</AlertDialogTitle>
                 <div className="pt-1 pb-4 w-full">
                   <div className="flex gap-5">
                     <div className="grid w-full items-center gap-1.5 mb-3">
@@ -230,31 +190,19 @@ export default function EditPodcast({
                   </div>
                   <div className="flex gap-5">
                     <div className="grid w-full items-center gap-1.5 mb-3">
-                      <Label htmlFor="pmb_id">
-                        Pembicara <span className="text-red-500">*</span>
+                      <Label htmlFor="pdc_host">
+                        Nama Host <span className="text-red-500">*</span>
                       </Label>
-                      <select
-                        id="pmb_id"
+                      <Input
+                        type="text"
+                        id="pdc_host"
                         disabled={isSubmitting || loading}
-                        {...register("pmb_id")}
-                        className="border p-2 rounded text-sm w-full"
-                      >
-                        <option value="Pilih" disabled hidden>
-                          Pilih Pembicara
-                        </option>
-                        {speakers.map((speaker) => (
-                          <option
-                            key={speaker.pmb_id}
-                            value={speaker.pmb_id}
-                            className="capitalize"
-                          >
-                            {speaker.pmb_nama}
-                          </option>
-                        ))}
-                      </select>
-                      {errors.pmb_id?.message && (
+                        placeholder="Nama Host Podcast"
+                        {...register("pdc_host")}
+                      />
+                      {errors.pdc_host?.message && (
                         <div className="text-red-500 text-xs">
-                          {errors.pmb_id?.message}
+                          {errors.pdc_host?.message}
                         </div>
                       )}
                       {errorMessage && (
@@ -265,31 +213,19 @@ export default function EditPodcast({
                       )}
                     </div>
                     <div className="grid w-full items-center gap-1.5 mb-3">
-                      <Label htmlFor="host_id">
-                        Host <span className="text-red-500">*</span>
+                      <Label htmlFor="pdc_speaker">
+                        Nama Pembicara <span className="text-red-500">*</span>
                       </Label>
-                      <select
-                        id="host_id"
+                      <Input
+                        type="text"
+                        id="pdc_speaker"
                         disabled={isSubmitting || loading}
-                        {...register("host_id")}
-                        className="border p-2 rounded text-sm w-full"
-                      >
-                        <option value="Pilih" disabled hidden>
-                          Pilih Host
-                        </option>
-                        {hosts.map((host) => (
-                          <option
-                            key={host.host_id}
-                            value={host.host_id}
-                            className="capitalize"
-                          >
-                            {host.host_nama}
-                          </option>
-                        ))}
-                      </select>
-                      {errors.host_id?.message && (
+                        placeholder="Nama Pembicara Podcast"
+                        {...register("pdc_speaker")}
+                      />
+                      {errors.pdc_speaker?.message && (
                         <div className="text-red-500 text-xs">
-                          {errors.host_id?.message}
+                          {errors.pdc_speaker?.message}
                         </div>
                       )}
                       {errorMessage && (

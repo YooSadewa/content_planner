@@ -1,4 +1,3 @@
-import EditPodcast from "@/components/(Podcast)/Podcast/EditData";
 import { AbstractAlert } from "@/components/AbstractAlert";
 import { Button } from "@/components/ui/button";
 import { ColumnDef } from "@tanstack/react-table";
@@ -9,46 +8,32 @@ import moment from "moment";
 import "moment/locale/id";
 import { useEffect, useState } from "react";
 import axios from "axios";
+import EditPodcast from "./manage/update";
 
 type Podcast = {
-  host_id: number;
-  host_nama: string;
   pdc_abstrak: string;
   pdc_catatan: string;
   pdc_id: number;
   pdc_jadwal_shoot: string;
   pdc_jadwal_upload: string;
   pdc_link: string;
-  pdc_nama: string;
   pdc_tema: string;
-  pmb_id: number;
-};
-
-type Speakers = {
-  pmb_id: string;
-  pmb_nama: string;
-  pmb_isactive: string;
-};
-
-type Hosts = {
-  host_id: string;
-  host_nama: string;
+  pdc_host: string;
+  pdc_speaker: string;
 };
 
 export const columns: ColumnDef<Podcast>[] = [
   {
     accessorKey: "pdc_id",
     accessorFn: (row) =>
-      `${row.host_nama} ${row.pdc_abstrak} ${row.pdc_catatan} ${row.pdc_jadwal_shoot} ${row.pdc_jadwal_upload} ${row.pdc_link} ${row.pdc_nama} ${row.pdc_tema}`,
+      `${row.pdc_host} ${row.pdc_abstrak} ${row.pdc_catatan} ${row.pdc_jadwal_shoot} ${row.pdc_jadwal_upload} ${row.pdc_link} ${row.pdc_speaker} ${row.pdc_tema}`,
     header: "",
     cell: ({ row, table }) => {
       const idPodcast = row.original.pdc_id;
       const title = row.original.pdc_tema;
       const abstractContent = row.original.pdc_abstrak;
-      const speaker = row.original.pdc_nama;
-      const speakerId = row.original.pmb_id;
-      const host = row.original.host_nama;
-      const hostId = row.original.host_id;
+      const speaker = row.original.pdc_speaker;
+      const host = row.original.pdc_host;
       const shootDate = moment(row.original.pdc_jadwal_shoot).format(
         "D MMMM YYYY"
       );
@@ -58,60 +43,6 @@ export const columns: ColumnDef<Podcast>[] = [
       const notes = row.original.pdc_catatan;
       const link = row.original.pdc_link;
       const meta = table.options.meta as any;
-
-      const [speakers, setSpeakers] = useState<Speakers[]>([]);
-      const [error, setError] = useState("");
-      useEffect(() => {
-        const fetchSpeaker = async () => {
-          try {
-            const response = await axios.get(
-              "http://127.0.0.1:8000/api/pembicara"
-            );
-
-            if (response.data.status && response.data.data.pembicara) {
-              const filteredSpeakers = response.data.data.pembicara.filter(
-                (speaker: any) =>
-                  speaker.pmb_id === speakerId || speaker.pmb_isactive === "Y"
-              );
-
-              console.log("Speaker: ", response.data.data.pembicara);
-              setSpeakers(filteredSpeakers);
-            } else {
-              setError("Format data tidak sesuai");
-            }
-          } catch (err) {
-            setError("Gagal mengambil data dari API.");
-          }
-        };
-
-        fetchSpeaker();
-      }, [speakerId]);
-
-      const [hosts, setHosts] = useState<Hosts[]>([]);
-      useEffect(() => {
-        const fetchHost = async () => {
-          try {
-            const response = await axios.get("http://127.0.0.1:8000/api/host");
-            console.log("Full API Response:", response.data);
-
-            if (response.data.status && response.data.data.host) {
-              const filteredHosts = response.data.data.host.filter(
-                (host: any) =>
-                  host.host_id === hostId || host.host_isactive === "Y"
-              );
-
-              console.log("Host: ", response.data.data.host);
-              setHosts(filteredHosts);
-            } else {
-              setError("Format data tidak sesuai");
-            }
-          } catch (err) {
-            setError("Gagal mengambil data dari API.");
-          }
-        };
-
-        fetchHost();
-      }, []);
       const isLoading = meta?.loading || false;
       return (
         <>
@@ -191,11 +122,8 @@ export const columns: ColumnDef<Podcast>[] = [
                   currentLink={link}
                   currentNote={notes}
                   currentShoot={row.original.pdc_jadwal_shoot}
-                  currentSpeakerId={speakerId}
                   currentSpeaker={speaker}
                   currentUpload={row.original.pdc_jadwal_upload}
-                  speakers={speakers}
-                  hosts={hosts}
                 />
                 <span className="w-[1px] h-5 bg-[#f7b500] my-auto" />
                 <Button

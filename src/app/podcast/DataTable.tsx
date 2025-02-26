@@ -96,9 +96,9 @@ export function DataTable<TData, TValue>({
   return (
     <>
       <div className="">
-        <div className="w-[1010px] h-[520px]">
+        <div className="w-[1010px] h-[490px]">
           <div className="flex gap-2">
-            <div className="flex justify-between mb-1 w-full m-3">
+            <div className="flex justify-between w-full mx-3 mt-2 mb-0">
               <h1 className="text-xl font-bold flex items-center">
                 Data Podcast
               </h1>
@@ -156,7 +156,7 @@ export function DataTable<TData, TValue>({
             </Table>
           </div>
         </div>
-        <div className="flex justify-between items-center w-full mt-4">
+        <div className="flex justify-end items-center w-full mt-8 py-[5px]">
           <Button
             onClick={() => table.previousPage()}
             disabled={!table.getCanPreviousPage()}

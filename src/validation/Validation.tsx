@@ -1,23 +1,5 @@
 import { z } from "zod";
 
-export const hostInfoSchema = z.object({
-  host_nama: z
-    .string()
-    .min(3, { message: "Nama host harus terdiri dari minimal 3 karakter" })
-    .max(100, {
-      message: "Nama host harus terdiri dari maksimal 100 karakter",
-    }),
-});
-
-export const speakerInfoSchema = z.object({
-  pmb_nama: z
-    .string()
-    .min(3, { message: "Nama pembicara harus terdiri dari minimal 3 karakter" })
-    .max(100, {
-      message: "Nama pembicara harus terdiri dari maksimal 100 karakter",
-    }),
-});
-
 export const podcastInfoSchema = (isEdit: boolean, previousDate?: string) =>
   z
     .object({
@@ -56,7 +38,7 @@ export const podcastInfoSchema = (isEdit: boolean, previousDate?: string) =>
         },
         {
           message:
-            "Tanggal shooting tidak boleh di masa lalu atau sebelum batas yang diizinkan.",
+            "Tanggal shooting tidak boleh di masa lalu",
         }
       ),
       pdc_jadwal_upload: z.string().nullable().optional(),
@@ -65,16 +47,8 @@ export const podcastInfoSchema = (isEdit: boolean, previousDate?: string) =>
         .min(1, { message: "Tema harus diisi" })
         .max(150, { message: "Tema maksimal 150 karakter" }),
       pdc_abstrak: z.string().optional().nullable(),
-      pmb_id: z
-        .string()
-        .refine((val) => !isNaN(Number(val)) && Number(val) > 0, {
-          message: "Pilih pembicara yang valid.",
-        }),
-      host_id: z
-        .string()
-        .refine((val) => !isNaN(Number(val)) && Number(val) > 0, {
-          message: "Pilih host yang valid.",
-        }),
+      pdc_host: z.string().min(1, { message: "Host harus diisi" }),
+      pdc_speaker: z.string().min(1, { message: "Pembicara harus diisi" }),
       pdc_catatan: z.string().optional().nullable(),
     })
     .superRefine((data, ctx) => {

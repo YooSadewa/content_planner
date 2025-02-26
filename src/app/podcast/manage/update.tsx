@@ -1,6 +1,10 @@
 "use client";
-import { Plus } from "lucide-react";
-import { Button } from "../../ui/button";
+import { Pencil } from "lucide-react";
+import { useState, useEffect } from "react";
+import { useForm } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { podcastInfoSchema } from "@/validation/Validation";
+import axios from "axios";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -9,68 +13,73 @@ import {
   AlertDialogFooter,
   AlertDialogHeader,
   AlertDialogTitle,
-} from "../../ui/alert-dialog";
-import { Label } from "../../ui/label";
-import { Input } from "../../ui/input";
-import { useEffect, useState } from "react";
-import { useForm } from "react-hook-form";
-import { zodResolver } from "@hookform/resolvers/zod";
-import { podcastInfoSchema } from "@/validation/Validation";
-import axios from "axios";
+} from "@/components/ui/alert-dialog";
+import { Button } from "@/components/ui/button";
+import { Label } from "@/components/ui/label";
+import { Input } from "@/components/ui/input";
 
 type Podcasts = {
   pdc_jadwal_shoot: string;
   pdc_jadwal_upload: string;
   pdc_tema: string;
   pdc_abstrak: string;
-  pmb_id: Speakers;
-  host_id: Hosts;
+  pdc_host: string;
+  pdc_speaker: string;
   pdc_link: string;
   pdc_catatan: string;
 };
 
-type Speakers = {
-  pmb_id: string;
-  pmb_nama: string;
-  pmb_isactive: string;
+type EditPodcastProps = {
+  id: string | number;
+  currentName: string;
+  currentAbstract: string;
+  currentSpeaker: any;
+  currentHost: any;
+  currentShoot: string;
+  currentUpload: string;
+  currentNote: string;
+  currentLink: string;
 };
 
-type Hosts = {
-  host_id: string;
-  host_nama: string;
-  host_isactive: string;
-};
-
-export default function InputPodcast() {
-  const [hosts, setHosts] = useState<Hosts[]>([]);
-  const [speakers, setSpeakers] = useState<Speakers[]>([]);
-  const [error, setError] = useState("");
+export default function EditPodcast({
+  id,
+  currentName,
+  currentAbstract,
+  currentHost,
+  currentLink,
+  currentNote,
+  currentShoot,
+  currentUpload,
+  currentSpeaker,
+}: EditPodcastProps) {
   const [isModalPodcastOpen, setModalPodcastOpen] = useState(false);
   const [loading, setLoading] = useState(false);
   const [errorMessage, setErrorMessage] = useState("");
   const [successMessage, setSuccessMessage] = useState("");
 
-  const onAddPodcast = () => {
+  const onEditPodcast = () => {
     setModalPodcastOpen(true);
   };
 
+  console.log("Speaker data", currentLink);
+
   const {
     register,
-    setValue,
     handleSubmit,
     formState: { errors, isSubmitting },
+    reset,
   } = useForm<Podcasts>({
     defaultValues: {
-      pdc_jadwal_shoot: "",
-      pdc_jadwal_upload: "",
-      pdc_tema: "",
-      pdc_abstrak: "",
-      pmb_id: { pmb_id: "", pmb_nama: "" },
-      host_id: { host_id: "", host_nama: "" },
-      pdc_link: "",
-      pdc_catatan: "",
+      pdc_tema: currentName,
+      pdc_abstrak: currentAbstract,
+      pdc_host: currentHost,
+      pdc_speaker: currentSpeaker,
+      pdc_jadwal_shoot: currentShoot,
+      pdc_jadwal_upload: currentUpload,
+      pdc_catatan: currentNote,
+      pdc_link: currentLink,
     },
-    resolver: zodResolver(podcastInfoSchema(false)),
+    resolver: zodResolver(podcastInfoSchema(true, currentShoot)),
   });
 
   const onSubmit = async (data: Podcasts) => {
@@ -79,16 +88,16 @@ export default function InputPodcast() {
     setSuccessMessage("");
 
     try {
-      const response = await axios.post(
-        "http://127.0.0.1:8000/api/podcast/create",
+      const response = await axios.put(
+        `http://127.0.0.1:8000/api/podcast/update/${id}`,
         data
       );
-      if (response.status === 200 || response.status === 201) {
+      if (response.status === 200) {
         window.location.reload();
-        setSuccessMessage("Podcast berhasil ditambahkan.");
+        setSuccessMessage("podcast berhasil diperbarui.");
         setModalPodcastOpen(false);
       } else {
-        setErrorMessage("Terjadi kesalahan saat menambahkan pembicara.");
+        setErrorMessage("Terjadi kesalahan saat memperbarui podcast.");
       }
     } catch (error) {
       setErrorMessage("Podcast sudah tersedia.");
@@ -98,76 +107,23 @@ export default function InputPodcast() {
   };
 
   const handleCancel = () => {
+    reset();
     setModalPodcastOpen(false);
   };
 
-  useEffect(() => {
-    setValue("host_id", "Pilih" as any);
-    setValue("pmb_id", "Pilih" as any);
-  }, [setValue]);
-
-  useEffect(() => {
-    const fetchHost = async () => {
-      try {
-        const response = await axios.get("http://127.0.0.1:8000/api/host");
-        console.log("Full API Response:", response.data);
-
-        if (response.data.status && response.data.data.host) {
-          console.log("Hosts Data:", response.data.data.host);
-
-          const activeHosts = response.data.data.host.filter(
-            (host: any) => host.host_isactive === "Y"
-          );
-
-          setHosts(activeHosts);
-        } else {
-          setError("Format data tidak sesuai");
-        }
-      } catch (err) {
-        setError("Gagal mengambil data dari API.");
-      }
-    };
-
-    fetchHost();
-  }, []);
-
-  useEffect(() => {
-    const fetchSpeaker = async () => {
-      try {
-        const response = await axios.get("http://127.0.0.1:8000/api/pembicara");
-        console.log("Full API Response:", response.data);
-
-        if (response.data.status && response.data.data.pembicara) {
-          console.log("Speakers Data:", response.data.data.pembicara);
-
-          const activeSpeakers = response.data.data.pembicara.filter(
-            (speaker: any) => speaker.pmb_isactive === "Y"
-          );
-
-          setSpeakers(activeSpeakers);
-        } else {
-          setError("Format data tidak sesuai");
-        }
-      } catch (err) {
-        setError("Gagal mengambil data dari API.");
-      }
-    };
-
-    fetchSpeaker();
-  }, []);
+  console.log(currentShoot, currentUpload);
 
   return (
     <div>
-      <Button size="sm" variant="default" onClick={onAddPodcast}>
-        <Plus />
-        Tambahkan Podcast
+      <Button size="sm" onClick={onEditPodcast} variant="outline">
+        <Pencil className="h-4 w-4" />
       </Button>
       {isModalPodcastOpen && (
         <AlertDialog defaultOpen open>
           <AlertDialogContent>
             <form onSubmit={handleSubmit(onSubmit)}>
               <AlertDialogHeader>
-                <AlertDialogTitle>Tambahkan Podcast</AlertDialogTitle>
+                <AlertDialogTitle>Edit Podcast</AlertDialogTitle>
                 <div className="pt-1 pb-4 w-full">
                   <div className="flex gap-5">
                     <div className="grid w-full items-center gap-1.5 mb-3">
@@ -259,31 +215,19 @@ export default function InputPodcast() {
                   </div>
                   <div className="flex gap-5">
                     <div className="grid w-full items-center gap-1.5 mb-3">
-                      <Label htmlFor="pmb_id">
-                        Pembicara <span className="text-red-500">*</span>
+                      <Label htmlFor="pdc_host">
+                        Nama Host <span className="text-red-500">*</span>
                       </Label>
-                      <select
-                        id="pmb_id"
+                      <Input
+                        type="text"
+                        id="pdc_host"
                         disabled={isSubmitting || loading}
-                        {...register("pmb_id")}
-                        className="border p-2 rounded text-sm w-full"
-                      >
-                        <option value="Pilih" disabled hidden>
-                          Pilih Pembicara
-                        </option>
-                        {speakers.map((speaker) => (
-                          <option
-                            key={speaker.pmb_id}
-                            value={speaker.pmb_id}
-                            className="capitalize"
-                          >
-                            {speaker.pmb_nama}
-                          </option>
-                        ))}
-                      </select>
-                      {errors.pmb_id?.message && (
+                        placeholder="Nama Host Podcast"
+                        {...register("pdc_host")}
+                      />
+                      {errors.pdc_host?.message && (
                         <div className="text-red-500 text-xs">
-                          {errors.pmb_id?.message}
+                          {errors.pdc_host?.message}
                         </div>
                       )}
                       {errorMessage && (
@@ -294,31 +238,19 @@ export default function InputPodcast() {
                       )}
                     </div>
                     <div className="grid w-full items-center gap-1.5 mb-3">
-                      <Label htmlFor="host_id">
-                        Host <span className="text-red-500">*</span>
+                      <Label htmlFor="pdc_speaker">
+                        Nama Pembicara <span className="text-red-500">*</span>
                       </Label>
-                      <select
-                        id="host_id"
+                      <Input
+                        type="text"
+                        id="pdc_speaker"
                         disabled={isSubmitting || loading}
-                        {...register("host_id")}
-                        className="border p-2 rounded text-sm w-full"
-                      >
-                        <option value="Pilih" disabled hidden>
-                          Pilih Host
-                        </option>
-                        {hosts.map((host) => (
-                          <option
-                            key={host.host_id}
-                            value={host.host_id}
-                            className="capitalize"
-                          >
-                            {host.host_nama}
-                          </option>
-                        ))}
-                      </select>
-                      {errors.host_id?.message && (
+                        placeholder="Nama Pembicara Podcast"
+                        {...register("pdc_speaker")}
+                      />
+                      {errors.pdc_speaker?.message && (
                         <div className="text-red-500 text-xs">
-                          {errors.host_id?.message}
+                          {errors.pdc_speaker?.message}
                         </div>
                       )}
                       {errorMessage && (
