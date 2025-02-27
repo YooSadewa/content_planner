@@ -1,3 +1,10 @@
+import React, { useState } from "react";
+import {
+  useReactTable,
+  getCoreRowModel,
+  getPaginationRowModel,
+  flexRender,
+} from "@tanstack/react-table";
 import {
   Table,
   TableBody,
@@ -7,32 +14,35 @@ import {
   TableRow,
 } from "@/components/ui/tablecontent";
 import {
-  flexRender,
-  getCoreRowModel,
-  getPaginationRowModel,
-  useReactTable,
-} from "@tanstack/react-table";
-import {
   Sheet,
   SheetContent,
   SheetDescription,
   SheetHeader,
   SheetTitle,
 } from "@/components/ui/sheet";
-import { columns } from "./columns";
-import { useState } from "react";
-import axios from "axios";
-import { Button } from "@/components/ui/button";
+import {
+  Pagination,
+  PaginationContent,
+  PaginationItem,
+  PaginationLink,
+  PaginationNext,
+  PaginationPrevious,
+} from "@/components/ui/pagination";
 import {
   AlertCircle,
+  BookMarked,
+  Calendar,
   CalendarArrowUp,
   CalendarDays,
   ChevronLeft,
   ChevronRight,
   FileText,
   Info,
+  LinkIcon,
   User,
 } from "lucide-react";
+import axios from "axios";
+import { columns } from "./columns";
 import Link from "next/link";
 import { Separator } from "@/components/ui/separator";
 
@@ -44,6 +54,7 @@ type IdeKontenVideo = {
   ikv_pic: string;
   ikv_status: string;
   ikv_skrip: string;
+  ikv_referensi: string;
   ikv_upload: string;
 };
 
@@ -56,6 +67,7 @@ export function DataTableVideo({ data }: DataTableProps) {
   const [selectedItem, setSelectedItem] = useState<IdeKontenVideo | null>(null);
   const [hoveredRow, setHoveredRow] = useState<number | null>(null);
   const [error, setError] = useState("");
+
   const formatNameDate = (dateString: string) => {
     const date = new Date(dateString);
     return date.toLocaleDateString("id-ID", {
@@ -64,6 +76,7 @@ export function DataTableVideo({ data }: DataTableProps) {
       year: "numeric",
     });
   };
+
   const table = useReactTable({
     data,
     columns,
@@ -77,15 +90,15 @@ export function DataTableVideo({ data }: DataTableProps) {
     meta: {
       hoveredRow,
       setSelectedItem,
-      handleDelete: async (idIkv: number) => {
+      handleDelete: async (idikv: number) => {
         try {
           const response = await axios.delete(
-            `http://127.0.0.1:8000/api/idekontenvideo/delete/${idIkv}`
+            `http://127.0.0.1:8000/api/idekontenvideo/delete/${idikv}`
           );
 
           if (response.data.status) {
             window.location.reload();
-            console.log(`Quote dengan ID ${idIkv} berhasil dihapus.`);
+            console.log(`Quote dengan ID ${idikv} berhasil dihapus.`);
           } else {
             console.error("Deletion failed:", response.data.message);
           }
@@ -106,8 +119,9 @@ export function DataTableVideo({ data }: DataTableProps) {
         return "bg-yellow-100 text-black capitalize";
     }
   };
+
   return (
-    <div className="p-2">
+    <div className="px-2">
       <div className="w-[975px] overflow-x-auto">
         <Table>
           <TableHeader>
@@ -146,27 +160,43 @@ export function DataTableVideo({ data }: DataTableProps) {
           </TableBody>
         </Table>
       </div>
-      <div className="flex justify-between items-center w-full mt-4">
-        <Button
-          onClick={() => table.previousPage()}
-          disabled={!table.getCanPreviousPage()}
-          variant="outline"
-          className="px-2 py-1"
-        >
-          <ChevronLeft className="h-4 w-4" />
-        </Button>
-        <span className="text-sm">
-          Halaman {table.getState().pagination.pageIndex + 1} dari{" "}
-          {table.getPageCount()}
-        </span>
-        <Button
-          onClick={() => table.nextPage()}
-          disabled={!table.getCanNextPage()}
-          variant="outline"
-          className="px-2 py-1"
-        >
-          <ChevronRight className="h-4 w-4" />
-        </Button>
+      <div className="w-full mt-6 py-[7px] pe-1 mb-[22px]">
+        <Pagination>
+          <PaginationContent>
+            <PaginationItem className="cursor-pointer">
+              <PaginationPrevious
+                aria-disabled={!table.getCanPreviousPage()}
+                onClick={() => table.previousPage()}
+                className={
+                  !table.getCanPreviousPage()
+                    ? "pointer-events-none opacity-50"
+                    : ""
+                }
+              />
+            </PaginationItem>
+            {Array.from({ length: table.getPageCount() }, (_, i) => (
+              <PaginationItem key={i} className="cursor-pointer">
+                <PaginationLink
+                  onClick={() => table.setPageIndex(i)}
+                  isActive={table.getState().pagination.pageIndex === i}
+                >
+                  {i + 1}
+                </PaginationLink>
+              </PaginationItem>
+            ))}
+            <PaginationItem className="cursor-pointer">
+              <PaginationNext
+                onClick={() => table.nextPage()}
+                aria-disabled={!table.getCanPreviousPage()}
+                className={
+                  !table.getCanNextPage()
+                    ? "pointer-events-none opacity-50"
+                    : ""
+                }
+              />
+            </PaginationItem>
+          </PaginationContent>
+        </Pagination>
       </div>
       {selectedItem && (
         <Sheet open={!!selectedItem} onOpenChange={() => setSelectedItem(null)}>
@@ -247,6 +277,24 @@ export function DataTableVideo({ data }: DataTableProps) {
                         className="text-blue-500 hover:text-blue-600 underline"
                       >
                         Unduh Skrip
+                      </Link>
+                    </SheetDescription>
+                  </div>
+                </div>
+                <div className="bg-gray-50 p-4 rounded-lg">
+                  <div className="flex items-center space-x-2">
+                    <FileText className="w-4 h-4 text-gray-500" />
+                    <SheetDescription className="sentence-case">
+                      <span className="font-semibold text-gray-700">
+                        Referensi:{" "}
+                      </span>
+                      <Link
+                        href={selectedItem.ikv_referensi}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="text-blue-500 hover:text-blue-600 underline"
+                      >
+                        Lihat Referensi
                       </Link>
                     </SheetDescription>
                   </div>

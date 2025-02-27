@@ -146,13 +146,13 @@ export function DataTable<TData, TValue>({
                     <TableRow>
                       <TableCell
                         colSpan={columns.length}
-                        className="text-center flex flex-col m-auto h-[480px] items-center justify-center gap-5 font-semibold"
+                        className="text-center flex flex-col m-auto h-[480px] items-center justify-center gap-5 font-medium"
                       >
                         <Image
                           src={"/assets/nodata.svg"}
                           alt="No data"
-                          width={200}
-                          height={200}
+                          width={300}
+                          height={300}
                           className="mx-auto"
                         />
                         Tidak ada data podcast

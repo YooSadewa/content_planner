@@ -10,6 +10,7 @@ import {
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { Select, SelectContent, SelectGroup, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { picContentInfoSchema } from "@/validation/Validation";
 import { zodResolver } from "@hookform/resolvers/zod";
 import axios from "axios";
@@ -18,10 +19,15 @@ import { useState } from "react";
 import { useForm } from "react-hook-form";
 
 type PicContent = {
+  ikf_id: number;
   ikf_tgl: string;
   ikf_judul_konten: string;
   ikf_ringkasan: string;
+  ikf_pic: string;
+  ikf_status: string;
+  ikf_skrip: string;
   ikf_referensi: string;
+  ikf_upload: string;
 };
 
 export default function CreateKontenFoto() {
@@ -33,13 +39,18 @@ export default function CreateKontenFoto() {
   const {
     register,
     handleSubmit,
+    setValue,
     formState: { errors, isSubmitting },
   } = useForm<PicContent>({
     defaultValues: {
-      ikf_tgl: new Date().toISOString().split("T")[0],
+      ikf_tgl: "",
       ikf_judul_konten: "",
       ikf_ringkasan: "",
+      ikf_pic: "",
+      ikf_status: "",
+      ikf_skrip: "",
       ikf_referensi: "",
+      ikf_upload: "",
     },
     resolver: zodResolver(picContentInfoSchema),
   });
@@ -88,7 +99,9 @@ export default function CreateKontenFoto() {
                 <AlertDialogTitle>Tambahkan Konten</AlertDialogTitle>
                 <div className="pt-1 pb-4 w-full flex flex-col gap-3">
                   <div className="grid w-full items-center gap-1.5">
-                    <Label htmlFor="ikf_judul_konten">Judul Konten <span className="text-red-600">*</span></Label>
+                    <Label htmlFor="ikf_judul_konten">
+                      Judul Konten <span className="text-red-600">*</span>
+                    </Label>
                     <Input
                       type="text"
                       id="ikf_judul_konten"
@@ -108,18 +121,54 @@ export default function CreateKontenFoto() {
                       <div className="text-green-500">{successMessage}</div>
                     )}
                   </div>
-                  <div className="grid w-full items-center gap-1.5">
-                    <Label htmlFor="ikf_tgl">Tanggal</Label>
-                    <Input
-                      type="text"
-                      id="ikf_tgl"
-                      className="cursor-not-allowed"
-                      readOnly
-                      {...register("ikf_tgl")}
-                    />
+                  <div className="flex gap-5">
+                    <div className="grid w-full items-center gap-1.5 h-fit">
+                      <Label htmlFor="ikf_tgl">Tanggal</Label>
+                      <Input
+                        type="date"
+                        id="ikf_tgl"
+                        disabled={isSubmitting || loading}
+                        {...register("ikf_tgl")}
+                      />
+                      {errors.ikf_tgl?.message && (
+                        <div className="text-red-500 text-xs">
+                          {errors.ikf_tgl?.message}
+                        </div>
+                      )}
+                      {errorMessage && (
+                        <div className="text-red-500">{errorMessage}</div>
+                      )}
+                      {successMessage && (
+                        <div className="text-green-500">{successMessage}</div>
+                      )}
+                    </div>
+                    <div className="grid w-full items-center gap-1.5">
+                      <Label htmlFor="ikf_pic">
+                        PIC <span className="text-red-500">*</span>
+                      </Label>
+                      <Input
+                        type="text"
+                        id="ikf_pic"
+                        disabled={isSubmitting || loading}
+                        {...register("ikf_pic")}
+                      />
+                      {errors.ikf_pic?.message && (
+                        <div className="text-red-500 text-xs">
+                          {errors.ikf_pic?.message}
+                        </div>
+                      )}
+                      {errorMessage && (
+                        <div className="text-red-500">{errorMessage}</div>
+                      )}
+                      {successMessage && (
+                        <div className="text-green-500">{successMessage}</div>
+                      )}
+                    </div>
                   </div>
                   <div className="grid w-full items-center gap-1.5">
-                    <Label htmlFor="ikf_ringkasan">Ringkasan Konten <span className="text-red-600">*</span></Label>
+                    <Label htmlFor="ikf_ringkasan">
+                      Ringkasan Konten <span className="text-red-600">*</span>
+                    </Label>
                     <textarea
                       id="ikf_ringkasan"
                       disabled={isSubmitting || loading}
@@ -136,6 +185,62 @@ export default function CreateKontenFoto() {
                     {successMessage && (
                       <div className="text-green-500">{successMessage}</div>
                     )}
+                  </div>
+                  <div className="flex gap-5">
+                    <div className="grid w-full items-center gap-1.5">
+                      <Label htmlFor="ikf_status">
+                        Status Pengerjaan{" "}
+                        <span className="text-red-600">*</span>
+                      </Label>
+                      <Select
+                        onValueChange={(value) => setValue("ikf_status", value)}
+                      >
+                        <SelectTrigger className="w-full text-black">
+                          <SelectValue placeholder="Pilih Status" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          <SelectGroup>
+                            <SelectItem value="scheduled">Scheduled</SelectItem>
+                            <SelectItem value="on hold">On Hold</SelectItem>
+                          </SelectGroup>
+                        </SelectContent>
+                      </Select>
+                      {errors.ikf_status?.message && (
+                        <div className="text-red-500 text-xs">
+                          {errors.ikf_status?.message}
+                        </div>
+                      )}
+                      {errorMessage && (
+                        <div className="text-red-500">{errorMessage}</div>
+                      )}
+                      {successMessage && (
+                        <div className="text-green-500">{successMessage}</div>
+                      )}
+                    </div>
+                    <div className="grid w-full items-center gap-1.5 h-fit">
+                      <Label htmlFor="ikf_skrip">Skrip Konten</Label>
+                      <div className="relative w-full">
+                        <Input
+                          type="file"
+                          id="ikf_skrip"
+                          disabled={isSubmitting || loading}
+                          accept=".pdf,.doc,.docx"
+                          className="w-full h-full p-[7px] cursor-pointer"
+                          {...register("ikf_skrip")}
+                        />
+                      </div>
+                      {errors.ikf_skrip?.message && (
+                        <div className="text-red-500 text-xs">
+                          {errors.ikf_skrip?.message}
+                        </div>
+                      )}
+                      {errorMessage && (
+                        <div className="text-red-500">{errorMessage}</div>
+                      )}
+                      {successMessage && (
+                        <div className="text-green-500">{successMessage}</div>
+                      )}
+                    </div>
                   </div>
                   <div className="grid w-full items-center gap-1.5">
                     <Label htmlFor="ikf_referensi">Referensi Konten</Label>

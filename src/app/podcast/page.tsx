@@ -268,8 +268,8 @@ export default function PodcastPage() {
                   </div>
                 </div>
                 <div className=" mt-1 flex flex-col py-2 ps-3 pe-[8px] gap-5">
-                  <div className="bg-white animate-pulse w-full h-[212px] shadow-md rounded" />
-                  <div className="bg-white animate-pulse w-full h-[212px] shadow-md rounded" />
+                  <div className="bg-white animate-pulse w-full h-[212px] rounded" />
+                  <div className="bg-white animate-pulse w-full h-[212px] rounded" />
                 </div>
                 <div className="w-full mt-3 py-[7px] pe-1">
                   <Pagination>

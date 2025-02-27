@@ -163,15 +163,6 @@ export default function QuotesPage() {
     }
   };
 
-  // Add a refresh button handler
-  const handleRefresh = () => {
-    if (activeTab === "quotes") {
-      fetchQuoteData();
-    } else {
-      fetchInspiringData();
-    }
-  };
-
   return (
     <div className="bg-gray-100 w-[1050px]">
       <div className="p-5 overflow-auto">
@@ -185,30 +176,35 @@ export default function QuotesPage() {
               <BreadcrumbLink href="/quotes">Quotes</BreadcrumbLink>
             </Bread>
           </div>
-          {activeTab === "quotes" ? <CreateQuote /> : <CreateInspiring />}
+          <div className="flex gap-1">
+            <CreateQuote />
+            <CreateInspiring />
+          </div>
         </div>
 
         <div className="bg-white p-5 rounded-xl mt-5 flex flex-col w-full">
-          <h1 className="font-bold text-2xl ps-1 text-[#293854] me-auto mb-4">
-            Postingan Quote & Inspiring People
-          </h1>
           <Tabs defaultValue="quotes" onValueChange={setActiveTab}>
-            <TabsList className="mb-4 flex gap-1 bg-white w-fit rounded-lg shadow-[0_0_7px_rgba(0,0,0,0.1)]">
-              <TabsTrigger
-                value="quotes"
-                className="px-4 py-2 rounded-md text-gray-700 dark:text-gray-300 
-                   hover:bg-gray-200 dark:hover:bg-gray-700 transition-all"
-              >
-                Quote
-              </TabsTrigger>
-              <TabsTrigger
-                value="inspiring"
-                className="px-4 py-2 rounded-md text-gray-700 dark:text-gray-300 
-                   hover:bg-gray-200 dark:hover:bg-gray-700 transition-all"
-              >
-                Inspiring People
-              </TabsTrigger>
-            </TabsList>
+            <div className="flex justify-between">
+              <h1 className="font-bold text-2xl ps-1 text-[#293854] me-auto mb-4">
+                Postingan Quote & Inspiring People
+              </h1>
+              <TabsList className="mb-4 flex gap-1 bg-white w-fit rounded-lg shadow-[0_0_7px_rgba(0,0,0,0.1)]">
+                <TabsTrigger
+                  value="quotes"
+                  className="px-4 py-2 rounded-md text-gray-700 dark:text-gray-300 
+                hover:bg-gray-200 dark:hover:bg-gray-700 transition-all"
+                >
+                  Quote
+                </TabsTrigger>
+                <TabsTrigger
+                  value="inspiring"
+                  className="px-4 py-2 rounded-md text-gray-700 dark:text-gray-300 
+                hover:bg-gray-200 dark:hover:bg-gray-700 transition-all"
+                >
+                  Inspiring People
+                </TabsTrigger>
+              </TabsList>
+            </div>
 
             <TabsContent value="quotes">
               {quoteLoading ? (

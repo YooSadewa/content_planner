@@ -79,8 +79,6 @@ export function DataTable<TData>({
                 }
               />
             </PaginationItem>
-
-            {/* Generate page numbers */}
             {Array.from({ length: table.getPageCount() }, (_, i) => (
               <PaginationItem key={i} className="cursor-pointer">
                 <PaginationLink
@@ -91,7 +89,6 @@ export function DataTable<TData>({
                 </PaginationLink>
               </PaginationItem>
             ))}
-
             <PaginationItem className="cursor-pointer">
               <PaginationNext
                 onClick={() => table.nextPage()}

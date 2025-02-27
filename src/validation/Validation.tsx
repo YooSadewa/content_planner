@@ -93,15 +93,18 @@ export const inspiringInfoSchema = z.object({
 });
 
 export const picContentInfoSchema = z.object({
-  ikf_tgl: z.string().min(1, { message: "Tanggal harus diisi" }),
   ikf_judul_konten: z
     .string()
     .min(1, { message: "Judul konten harus diisi" })
     .max(150, { message: "Judul konten melebihi batas 150 karakter" }),
+  ikf_tgl: z.string().nullable().optional(),
+  ikf_pic: z.string().min(1, {message: "Person in Charge harus diisi"}),
   ikf_ringkasan: z
     .string()
     .min(1, { message: "Ringkasan harus diisi" })
     .max(150, { message: "Ringkasan melebihi batas 150 karakter" }),
+  ikf_status: z.string().min(1, { message: "Status harus diisi" }),
+  ikf_skrip: z.any().nullable().optional(),
   ikf_referensi: z
     .string()
     .url("Link Harus Valid")

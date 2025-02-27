@@ -7,8 +7,18 @@ import {
   BookMarked,
   Waypoints,
   Trash,
+  User,
+  CalendarCheck,
+  ScrollText,
+  CalendarArrowUp,
+  Hourglass,
+  PauseCircle,
+  CheckCircle,
+  ArrowBigDownDash,
+  Link,
+  Eye,
 } from "lucide-react";
-import Link from "next/link";
+import Link2 from "next/link";
 import UpdateKontenFoto from "./editdata";
 
 type IdeKontenFoto = {
@@ -38,14 +48,6 @@ export const columns: ColumnDef<IdeKontenFoto>[] = [
           <p className="block pt-2 ps-2 sentence-case truncate w-[290px] min-w-0">
             {row.getValue("ikf_judul_konten")}
           </p>
-          {meta.hoveredRow === row.original.ikf_id && (
-            <Button
-              onClick={() => meta.setSelectedItem(row.original)}
-              className="h-7 text-[10px] px-3 mt-1 me-1 text-white absolute right-0"
-            >
-              Detail
-            </Button>
-          )}
         </div>
       );
     },
@@ -78,30 +80,156 @@ export const columns: ColumnDef<IdeKontenFoto>[] = [
     ),
   },
   {
+    accessorKey: "ikf_pic",
+    header: () => (
+      <div className="flex gap-2 w-44 p-2">
+        <User size={18} />
+        <p>Person In Charge</p>
+      </div>
+    ),
+    cell: ({ row }) => (
+      <div className="w-44 truncate sentence-case p-2">
+        {row.getValue("ikf_pic")}
+      </div>
+    ),
+  },
+  {
+    accessorKey: "ikf_status",
+    header: () => (
+      <div className="flex gap-2 w-44 p-2">
+        <CalendarCheck size={18} />
+        <p>Status Pengerjaan</p>
+      </div>
+    ),
+    cell: ({ row }) => {
+      const status = row.getValue("ikf_status") as string;
+      const statusConfig: Record<
+        string,
+        { icon: React.ReactNode; className: string }
+      > = {
+        scheduled: {
+          icon: <Hourglass className="w-4 h-4 mr-1" />,
+          className: "border-yellow-500 ",
+        },
+        "on hold": {
+          icon: <PauseCircle className="w-4 h-4 mr-1" />,
+          className: "border-blue-500 ",
+        },
+        done: {
+          icon: <CheckCircle className="w-4 h-4 mr-1" />,
+          className: "border-green-500 ",
+        },
+      };
+
+      const { icon, className } = statusConfig[status] || {
+        icon: <Hourglass className="w-4 h-4 mr-1" />,
+        className: "bg-gray-500 text-white",
+      };
+
+      return (
+        <div className="w-44 p-1 flex items-center justify-center">
+          <div
+            className={`h-8 w-full flex items-center justify-center capitalize font-semibold text-sm px-4 rounded-xl border-2 ${
+              className || ""
+            }`}
+          >
+            {icon}
+            {status}
+          </div>
+        </div>
+      );
+    },
+  },
+  {
+    accessorKey: "ikf_skrip",
+    header: () => (
+      <div className="flex gap-2 w-36 p-2">
+        <ScrollText size={18} />
+        <p>Skrip Konten</p>
+      </div>
+    ),
+    cell: ({ row }) => {
+      return (
+        <div className="w-36 p-1 flex items-center justify-center">
+          {row.getValue("ikf_skrip") ? (
+            <Button className="h-8 w-full flex items-center justify-center capitalize font-semibold text-xs px-4 rounded-xl border-2 bg-blue-500 hover:bg-blue-600">
+              <ArrowBigDownDash />
+              <Link2
+                href={`http://localhost:8000/uploads/${row.getValue(
+                  "ikf_skrip"
+                )}`}
+                target="_blank"
+                rel="noopener noreferrer"
+              >
+                Unduh Skrip
+              </Link2>
+            </Button>
+          ) : (
+            <span className="text-black text-xs font-medium mt-2">
+              Tidak Ada Skrip
+            </span>
+          )}
+        </div>
+      );
+    },
+  },
+  {
     accessorKey: "ikf_referensi",
     header: () => (
-      <div className="flex gap-2 w-32 p-2">
-        <BookMarked size={18} />
+      <div className="flex gap-2 w-36 p-2">
+        <ScrollText size={18} />
         <p>Referensi</p>
       </div>
     ),
     cell: ({ row }) => {
-      const referensi = row.getValue("ikf_referensi") as string;
       return (
-        <div className="w-32 p-2">
-          <Button
-            variant="upload"
-            className="h-5 text-[10px] px-4 text-white font-semibold"
-            disabled={!referensi}
-          >
-            {referensi ? (
-              <Link href={referensi} target="_blank" rel="noopener noreferrer">
+        <div className="w-36 p-1 flex items-center justify-center text-xs font-medium">
+          {row.getValue("ikf_referensi") ? (
+            <Button className="h-8 w-full flex items-center justify-center capitalize font-semibold text-xs px-4 rounded-xl border-2 bg-purple-500 hover:bg-purple-600">
+              <Link />
+              <Link2
+                href={row.getValue("ikf_referensi")}
+                target="_blank"
+                className="text-white"
+              >
                 Lihat Referensi
-              </Link>
-            ) : (
-              <p className="px-3">Tidak Ada</p>
-            )}
-          </Button>
+              </Link2>
+            </Button>
+          ) : (
+            <span className="text-black text-xs font-medium mt-2">
+              Tidak Ada Referensi
+            </span>
+          )}
+        </div>
+      );
+    },
+  },
+  {
+    accessorKey: "ikf_upload",
+    header: () => (
+      <div className="flex gap-2 w-44 p-2">
+        <CalendarArrowUp size={18} />
+        <p>Tanggal Upload</p>
+      </div>
+    ),
+    cell: ({ row }) => {
+      const id = row.original.ikf_id;
+      const uploadDate = row.getValue("ikf_upload");
+
+      const formattedDate =
+        uploadDate &&
+        (typeof uploadDate === "string" || typeof uploadDate === "number")
+          ? new Date(uploadDate).toLocaleDateString("id-ID")
+          : "Belum diupload";
+
+      return (
+        <div
+          className={`w-44 px-2 flex items-center gap-2 justify-around ${
+            uploadDate ? "py-2" : "py-1"
+          }`}
+        >
+          <span className="me-auto">{formattedDate}</span>
+          {/* {!uploadDate && <ConfirmUpload id={id} />} */}
         </div>
       );
     },
@@ -115,20 +243,40 @@ export const columns: ColumnDef<IdeKontenFoto>[] = [
       </div>
     ),
     cell: ({ row, table }) => {
-      const meta = table.options.meta as { handleDelete: (id: number) => void };
+      const meta = table.options.meta as {
+        handleDelete: (id: number) => void;
+        setSelectedItem: (id: number) => void;
+      };
+
       return (
-        <div className="w-32 p-1 flex justify-between gap-1">
+        <div className="w-40 p-1 flex justify-between gap-1">
+          <Button
+            onClick={() => meta.setSelectedItem(row.original as any)}
+            className="bg-blue-500 hover:bg-blue-600 text-white flex items-center gap-1 h-8 text-xs px-3 rounded-md"
+          >
+            <Eye size={16} />
+          </Button>
+          <span className="w-[1px] h-6 bg-yellow-500 my-auto" />
+          <Button
+            onClick={() => meta.setSelectedItem(row.original as any)}
+            className="bg-blue-500 hover:bg-blue-600 text-white flex items-center gap-1 h-8 text-xs px-3 rounded-md"
+          >
+            <Eye size={16} />
+          </Button>
           <UpdateKontenFoto
             id={row.getValue("ikf_id")}
             currentName={row.getValue("ikf_judul_konten")}
             currentSummary={row.getValue("ikf_ringkasan")}
-            currentReference={row.getValue("ikf_referensi")}
+            currentPic={row.getValue("ikf_pic")}
+            currentScript={row.getValue("ikf_skrip")}
+            currentStatus={row.getValue("ikf_status")}
           />
+          <span className="w-[1px] h-6 bg-yellow-500 my-auto" />
           <Button
-            className="bg-red-600 transition-all h-full duration-300 hover:bg-red-500/80 w-16 h-7"
+            className="bg-red-500 hover:bg-red-600 text-white flex items-center gap-1 h-8 text-xs px-3 rounded-md"
             onClick={() => meta.handleDelete(row.getValue("ikf_id"))}
           >
-            <Trash />
+            <Trash size={16} />
           </Button>
         </div>
       );

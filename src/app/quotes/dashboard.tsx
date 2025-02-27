@@ -109,7 +109,6 @@ export default function DashboardQuotePage() {
           err instanceof Error ? err.message : "An unknown error occurred";
         setError("Failed to fetch data: " + errorMessage);
         setLoading(false);
-        console.error("Error details:", err);
       }
     };
 
