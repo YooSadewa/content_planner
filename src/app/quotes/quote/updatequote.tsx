@@ -87,7 +87,7 @@ export default function UpdateQuote({ id, currentLink }: QuoteProps) {
       <Button
         size="sm"
         variant="outline"
-        className="h-full"
+        className="h-8"
         onClick={onEditQuote}
       >
         <Pencil className="h-4 w-4" />

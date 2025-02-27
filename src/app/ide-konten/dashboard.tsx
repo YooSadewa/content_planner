@@ -168,7 +168,6 @@ export default function DashboardIdeKontenPage() {
               {itemsVideo.map((item) => (
                 <Link href={"/ide-konten"} key={item.ikv_id} className="flex flex-col gap-2">
                   <div
-                    key={item.ikv_id}
                     className="bg-white rounded-lg h-[110px] p-4 shadow-lg hover:shadow-xl transition-all duration-300 border border-gray-100"
                   >
                     <div className="flex items-start gap-2 my-auto">

@@ -1,7 +1,7 @@
 import { Card, CardContent, CardHeader } from "@/components/ui/card";
 import { LinkPreview } from "@/components/ui/link-preview";
 import axios from "axios";
-import { Flame, Info, Instagram, MessageSquareQuote } from "lucide-react";
+import { AlertCircle, Flame, Info, MessageSquareQuote } from "lucide-react";
 import { useEffect, useState } from "react";
 
 interface Quote {
@@ -50,6 +50,10 @@ export default function DashboardQuotePage() {
   const [combinedData, setCombinedData] = useState<CombinedItem[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+
+  // Set the limit to 3 items
+  const displayLimit = 3;
+
   useEffect(() => {
     const fetchData = async () => {
       try {
@@ -95,7 +99,10 @@ export default function DashboardQuotePage() {
           (a, b) => b.timestamp.getTime() - a.timestamp.getTime()
         );
 
-        setCombinedData(sortedItems);
+        // Limit to first 3 items
+        const limitedItems = sortedItems.slice(0, displayLimit);
+
+        setCombinedData(limitedItems);
         setLoading(false);
       } catch (err) {
         const errorMessage =
@@ -128,6 +135,11 @@ export default function DashboardQuotePage() {
             <div className="flex items-center h-[42px] p-4 bg-gray-100 skeleton rounded-lg"></div>
             <div className="flex items-center h-[42px] p-4 bg-gray-100 skeleton rounded-lg"></div>
             <div className="flex items-center h-[42px] p-4 bg-gray-100 skeleton rounded-lg"></div>
+          </div>
+        ) : combinedData.length === 0 ? (
+          <div className="flex flex-col items-center justify-center h-[120px] p-4 text-gray-500 text-center">
+            <AlertCircle className="w-10 h-10 mb-2 text-gray-400" />
+            <p>Tidak ada data</p>
           </div>
         ) : (
           <div className="grid gap-1">

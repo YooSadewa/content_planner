@@ -272,26 +272,30 @@ export default function PodcastPage() {
                   <div className="bg-white animate-pulse w-full h-[212px] shadow-md rounded" />
                 </div>
                 <div className="w-full mt-3 py-[7px] pe-1">
-                <Pagination>
-                  <PaginationContent>
-                    <PaginationItem>
-                      <PaginationPrevious
-                        aria-disabled
-                        className={"pointer-events-none opacity-50"}
-                      />
-                    </PaginationItem>
-                    <PaginationItem>
-                      <PaginationLink aria-disabled><Button size="icon" variant="outline">1</Button></PaginationLink>
-                    </PaginationItem>
+                  <Pagination>
+                    <PaginationContent>
+                      <PaginationItem>
+                        <PaginationPrevious
+                          aria-disabled
+                          className={"pointer-events-none opacity-50"}
+                        />
+                      </PaginationItem>
+                      <PaginationItem>
+                        <PaginationLink aria-disabled>
+                          <Button size="icon" variant="outline">
+                            1
+                          </Button>
+                        </PaginationLink>
+                      </PaginationItem>
 
-                    <PaginationItem>
-                      <PaginationNext
-                        aria-disabled
-                        className={"pointer-events-none opacity-50"}
-                      />
-                    </PaginationItem>
-                  </PaginationContent>
-                </Pagination>
+                      <PaginationItem>
+                        <PaginationNext
+                          aria-disabled
+                          className={"pointer-events-none opacity-50"}
+                        />
+                      </PaginationItem>
+                    </PaginationContent>
+                  </Pagination>
                 </div>
               </div>
             </div>

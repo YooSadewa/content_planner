@@ -97,7 +97,7 @@ export default function UpdateInspiring({
       <Button
         size="sm"
         variant="outline"
-        className="h-full"
+        className="h-8"
         onClick={onEditInspiring}
       >
         <Pencil className="h-4 w-4" />

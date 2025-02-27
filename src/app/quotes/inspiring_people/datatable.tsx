@@ -1,5 +1,3 @@
-import { Button } from "@/components/ui/button";
-import { Table, TableBody, TableCell, TableRow } from "@/components/ui/table";
 import {
   ColumnDef,
   flexRender,
@@ -7,19 +5,27 @@ import {
   getPaginationRowModel,
   useReactTable,
 } from "@tanstack/react-table";
-import { ChevronLeft, ChevronRight } from "lucide-react";
-interface DataTableProps<TData, TValue> {
+import {
+  Pagination,
+  PaginationContent,
+  PaginationItem,
+  PaginationLink,
+  PaginationNext,
+  PaginationPrevious,
+} from "@/components/ui/pagination";
+
+interface DataTableProps<TData> {
   query: string;
-  columns: ColumnDef<TData, TValue>[];
+  columns: ColumnDef<TData, any>[];
   data: TData[];
-  onDelete: (idInspiring: number) => void;
+  onDelete: (id: number) => void;
 }
 
-export function DataTableInspiring<TData, TValue>({
+export function DataTableInspiring<TData>({
   columns,
   data,
   onDelete,
-}: DataTableProps<TData, TValue>) {
+}: DataTableProps<TData>) {
   const table = useReactTable({
     data,
     columns,
@@ -37,64 +43,69 @@ export function DataTableInspiring<TData, TValue>({
   });
 
   return (
-    <>
-      <div className="bg-white p-5 rounded-xl mt-5 flex flex-col w-[1010px]">
-        <h1 className="font-bold text-2xl mb-3 text-[#293854]">
-          Data Postingan Instagram "Inspiring People"
-        </h1>
-        <div className="bg-white flex flex-row flex-wrap gap-3 justify-between">
-          <Table>
-            <TableBody>
-              <TableRow>
-                <TableCell className="p-0">
-                  <div className="flex flex-row flex-wrap gap-3">
-                    {table.getRowModel().rows.length ? (
-                      table.getRowModel().rows.map((row) => (
-                        <div key={row.id}>
-                          {row.getVisibleCells().map((cell) => (
-                            <div key={cell.id}>
-                              {flexRender(
-                                cell.column.columnDef.cell,
-                                cell.getContext()
-                              )}
-                            </div>
-                          ))}
-                        </div>
-                      ))
-                    ) : (
-                      <div className="w-full text-center">
-                        Tidak ada data Postingan
-                      </div>
-                    )}
-                  </div>
-                </TableCell>
-              </TableRow>
-            </TableBody>
-          </Table>
-          <div className="flex justify-between items-center w-full mt-4">
-            <Button
-              onClick={() => table.previousPage()}
-              disabled={!table.getCanPreviousPage()}
-              variant="outline"
-              className="px-2 py-1"
+    <div className="flex flex-col">
+      <div className="flex flex-row gap-3 overflow-x-auto">
+        {table.getRowModel().rows.length ? (
+          table.getRowModel().rows.map((row) => (
+            <div
+              key={row.id}
+              className="w-[315px] h-auto rounded-xl flex flex-col shadow-sm"
             >
-              <ChevronLeft className="h-4 w-4" />
-            </Button>
-            <span className="text-sm">
-              Halaman {table.getState().pagination.pageIndex + 1} dari{" "}
-              {table.getPageCount()}
-            </span>
-            <Button
-              onClick={() => table.nextPage()}
-              disabled={!table.getCanNextPage()}
-              variant="outline"
-              className="px-2 py-1"
-            >
-              <ChevronRight className="h-4 w-4" />
-            </Button>
+              {row.getVisibleCells().map((cell) => (
+                <div key={cell.id}>
+                  {flexRender(cell.column.columnDef.cell, cell.getContext())}
+                </div>
+              ))}
+            </div>
+          ))
+        ) : (
+          <div className="text-center py-4 w-full">
+            Tidak ada data Postingan
           </div>
-        </div>
+        )}
       </div>
-    </>
+
+      <div className="w-full mt-8 py-[5px] pe-1">
+        <Pagination>
+          <PaginationContent>
+            <PaginationItem className="cursor-pointer">
+              <PaginationPrevious
+                aria-disabled={!table.getCanPreviousPage()}
+                onClick={() => table.previousPage()}
+                className={
+                  !table.getCanPreviousPage()
+                    ? "pointer-events-none opacity-50"
+                    : ""
+                }
+              />
+            </PaginationItem>
+
+            {/* Generate page numbers */}
+            {Array.from({ length: table.getPageCount() }, (_, i) => (
+              <PaginationItem key={i} className="cursor-pointer">
+                <PaginationLink
+                  onClick={() => table.setPageIndex(i)}
+                  isActive={table.getState().pagination.pageIndex === i}
+                >
+                  {i + 1}
+                </PaginationLink>
+              </PaginationItem>
+            ))}
+
+            <PaginationItem className="cursor-pointer">
+              <PaginationNext
+                onClick={() => table.nextPage()}
+                aria-disabled={!table.getCanPreviousPage()}
+                className={
+                  !table.getCanNextPage()
+                    ? "pointer-events-none opacity-50"
+                    : ""
+                }
+              />
+            </PaginationItem>
+          </PaginationContent>
+        </Pagination>
+      </div>
+    </div>
   );
 }
