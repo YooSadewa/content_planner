@@ -38,10 +38,18 @@ export default function IdeKontenPage() {
         const response = await axios.get(
           "http://127.0.0.1:8000/api/idekontenfoto"
         );
-
         if (response.data.status && response.data.data.ide_konten_foto) {
           console.log("Ide Konten Foto: ", response.data.data.ide_konten_foto);
-          setTableData(response.data.data.ide_konten_foto);
+          const sortOrder = ["scheduled", "on hold", "done"];
+          const sortedData = response.data.data.ide_konten_foto.sort(
+            (a: any, b: any) => {
+              return (
+                sortOrder.indexOf(a.ikf_status) -
+                sortOrder.indexOf(b.ikf_status)
+              );
+            }
+          );
+          setTableData(sortedData);
         } else {
           setError("Format data tidak sesuai");
         }
@@ -51,6 +59,7 @@ export default function IdeKontenPage() {
         setLoading(false);
       }
     };
+
     fetchIdeFoto();
   }, []);
 
@@ -60,13 +69,18 @@ export default function IdeKontenPage() {
         const response = await axios.get(
           "http://127.0.0.1:8000/api/idekontenvideo"
         );
-
         if (response.data.status && response.data.data.ide_konten_video) {
-          console.log(
-            "Ide Konten Video: ",
-            response.data.data.ide_konten_video
+          console.log("Ide Konten Video: ", response.data.data.ide_konten_video);
+          const sortOrder = ["scheduled", "on hold", "done"];
+          const sortedData = response.data.data.ide_konten_video.sort(
+            (a: any, b: any) => {
+              return (
+                sortOrder.indexOf(a.ikv_status) -
+                sortOrder.indexOf(b.ikv_status)
+              );
+            }
           );
-          setTableDataVideo(response.data.data.ide_konten_video);
+          setTableDataVideo(sortedData);
         } else {
           setError("Format data tidak sesuai");
         }
@@ -76,6 +90,7 @@ export default function IdeKontenPage() {
         setLoading(false);
       }
     };
+
     fetchIdeVideo();
   }, []);
 

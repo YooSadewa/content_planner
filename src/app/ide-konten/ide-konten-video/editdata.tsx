@@ -90,7 +90,7 @@ export default function UpdateKontenVideo({
       ikv_ringkasan: currentSummary,
     },
 
-    resolver: zodResolver(editVidContentInfoSchema),
+    resolver: zodResolver(editVidContentInfoSchema(true, currentDate)),
   });
 
   const handleStatusChange = (value: any) => {

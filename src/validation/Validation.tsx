@@ -124,41 +124,74 @@ export const picContentInfoSchema = z.object({
     .optional(),
 });
 
-export const editPicContentInfoSchema = z.object({
-  ikv_tgl: z
-    .string()
-    .nullable()
-    .optional()
-    .refine(
-      (val) => !val || new Date(val) >= today,
-      "Tanggal tidak boleh di masa lalu"
-    ),
-  ikf_judul_konten: z
-    .string()
-    .min(1, { message: "Judul konten harus diisi" })
-    .max(150, { message: "Judul konten melebihi batas 150 karakter" }),
-  ikf_ringkasan: z
-    .string()
-    .min(1, { message: "Ringkasan harus diisi" })
-    .max(150, { message: "Ringkasan melebihi batas 150 karakter" }),
-  ikf_pic: z.string().min(1, { message: "Person in Charge harus diisi" }),
-  ikf_status: z
-    .string()
-    .min(1, { message: "Status harus dipilih" })
-    .refine(
-      (val) => val === "scheduled" || val === "on hold" || val === "done",
+export const editPicContentInfoSchema = (
+  isEdit: boolean,
+  previousDate?: string
+) =>
+  z.object({
+    ikf_tgl: z.string().refine(
+      (val) => {
+        const inputDate = new Date(val);
+        const currentDate = new Date();
+        currentDate.setHours(0, 0, 0, 0);
+        inputDate.setHours(0, 0, 0, 0);
+
+        if (isEdit && previousDate) {
+          const prevDate = new Date(previousDate);
+          prevDate.setHours(0, 0, 0, 0);
+
+          // Jika previousDate di masa lalu dan tidak diubah, tetap lolos
+          if (
+            prevDate < currentDate &&
+            inputDate.getTime() === prevDate.getTime()
+          ) {
+            return true;
+          }
+
+          // Jika previousDate di masa lalu tapi diubah, minimal harus hari ini
+          if (prevDate < currentDate) {
+            return inputDate >= currentDate;
+          }
+
+          // Jika previousDate di masa depan dan diubah, minimal harus setelah hari ini tetapi boleh di bawah previousDate
+          if (prevDate >= currentDate) {
+            return inputDate >= currentDate;
+          }
+        }
+
+        // Jika bukan edit, tetap tidak boleh di masa lalu
+        return inputDate >= currentDate;
+      },
       {
-        message: "Status tidak valid",
+        message: "Tanggal shooting tidak boleh di masa lalu",
       }
     ),
-  ikf_skrip: z.any().optional().nullable(),
-  ikf_referensi: z
-    .string()
-    .url("Link Harus Valid")
-    .or(z.literal(""))
-    .nullable()
-    .optional(),
-});
+    ikf_judul_konten: z
+      .string()
+      .min(1, { message: "Judul konten harus diisi" })
+      .max(150, { message: "Judul konten melebihi batas 150 karakter" }),
+    ikf_ringkasan: z
+      .string()
+      .min(1, { message: "Ringkasan harus diisi" })
+      .max(150, { message: "Ringkasan melebihi batas 150 karakter" }),
+    ikf_pic: z.string().min(1, { message: "Person in Charge harus diisi" }),
+    ikf_status: z
+      .string()
+      .min(1, { message: "Status harus dipilih" })
+      .refine(
+        (val) => val === "scheduled" || val === "on hold" || val === "done",
+        {
+          message: "Status tidak valid",
+        }
+      ),
+    ikf_skrip: z.any().optional().nullable(),
+    ikf_referensi: z
+      .string()
+      .url("Link Harus Valid")
+      .or(z.literal(""))
+      .nullable()
+      .optional(),
+  });
 
 const allowedFileTypes = [
   "application/pdf",
@@ -201,25 +234,65 @@ export const vidContentInfoSchema = z.object({
     .optional(),
 });
 
-export const editVidContentInfoSchema = z.object({
-  ikv_tgl: z.string().min(1, { message: "Tanggal harus diisi" }),
-  ikv_judul_konten: z
-    .string()
-    .min(1, { message: "Judul konten harus diisi" })
-    .max(150, { message: "Judul konten melebihi batas 150 karakter" }),
-  ikv_ringkasan: z
-    .string()
-    .min(1, { message: "Ringkasan harus diisi" })
-    .max(150, { message: "Ringkasan melebihi batas 150 karakter" }),
-  ikv_pic: z.string().min(1, { message: "Person in Charge harus diisi" }),
-  ikv_status: z
-    .string()
-    .min(1, { message: "Status harus dipilih" })
-    .refine(
-      (val) => val === "scheduled" || val === "on hold" || val === "done",
+export const editVidContentInfoSchema = (
+  isEdit: boolean,
+  previousDate?: string
+) =>
+  z.object({
+    ikv_tgl: z.string().refine(
+      (val) => {
+        const inputDate = new Date(val);
+        const currentDate = new Date();
+        currentDate.setHours(0, 0, 0, 0);
+        inputDate.setHours(0, 0, 0, 0);
+
+        if (isEdit && previousDate) {
+          const prevDate = new Date(previousDate);
+          prevDate.setHours(0, 0, 0, 0);
+
+          // Jika previousDate di masa lalu dan tidak diubah, tetap lolos
+          if (
+            prevDate < currentDate &&
+            inputDate.getTime() === prevDate.getTime()
+          ) {
+            return true;
+          }
+
+          // Jika previousDate di masa lalu tapi diubah, minimal harus hari ini
+          if (prevDate < currentDate) {
+            return inputDate >= currentDate;
+          }
+
+          // Jika previousDate di masa depan dan diubah, minimal harus setelah hari ini tetapi boleh di bawah previousDate
+          if (prevDate >= currentDate) {
+            return inputDate >= currentDate;
+          }
+        }
+
+        // Jika bukan edit, tetap tidak boleh di masa lalu
+        return inputDate >= currentDate;
+      },
       {
-        message: "Status tidak valid",
+        message: "Tanggal shooting tidak boleh di masa lalu",
       }
     ),
-  ikv_skrip: z.any().optional().nullable(),
-});
+    ikv_judul_konten: z
+      .string()
+      .min(1, { message: "Judul konten harus diisi" })
+      .max(150, { message: "Judul konten melebihi batas 150 karakter" }),
+    ikv_ringkasan: z
+      .string()
+      .min(1, { message: "Ringkasan harus diisi" })
+      .max(150, { message: "Ringkasan melebihi batas 150 karakter" }),
+    ikv_pic: z.string().min(1, { message: "Person in Charge harus diisi" }),
+    ikv_status: z
+      .string()
+      .min(1, { message: "Status harus dipilih" })
+      .refine(
+        (val) => val === "scheduled" || val === "on hold" || val === "done",
+        {
+          message: "Status tidak valid",
+        }
+      ),
+    ikv_skrip: z.any().optional().nullable(),
+  });

@@ -88,7 +88,7 @@ export default function UpdateKontenFoto({
       ikf_referensi: currentReference,
       ikf_ringkasan: currentSummary,
     },
-    resolver: zodResolver(editPicContentInfoSchema),
+    resolver: zodResolver(editPicContentInfoSchema(true, currentDate)),
   });
   const handleStatusChange = (value: any) => {
     setCurrentStatus(value);
