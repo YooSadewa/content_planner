@@ -1,11 +1,13 @@
 "use client"
 import {
+  CalendarClock,
     ChartNoAxesCombined,
     ChartPie,
     House,
     Lightbulb,
     MessageSquareQuote,
     Podcast,
+    SquareUser,
   } from "lucide-react";
   import Image from "next/image";
   import Link from "next/link";
@@ -16,6 +18,8 @@ import {
   
     const menuItems = [
       { name: "Beranda", href: "/", icon: House },
+      { name: "Rencana Konten", href: "/planner", icon: CalendarClock },
+      { name: "Ringkasan Medsos", href: "/account", icon: SquareUser },
       { name: "Ide Konten", href: "/ide-konten", icon: Lightbulb },
       { name: "Analisis Konten", href: "/analisis-konten", icon: ChartPie },
       { name: "Statistik Medsos", href: "/statistik", icon: ChartNoAxesCombined },
@@ -44,8 +48,8 @@ import {
                 }`}
               >
                 <Link href={item.href} className="flex gap-3">
-                  <item.icon className="w-8 h-8 my-auto" />
-                  <p className="flex items-center font-semibold">{item.name}</p>
+                  <item.icon className="w-7 h-7 my-auto" />
+                  <p className="flex items-center text-sm font-semibold">{item.name}</p>
                 </Link>
               </li>
             );
