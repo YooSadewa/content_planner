@@ -37,8 +37,7 @@ export const podcastInfoSchema = (isEdit: boolean, previousDate?: string) =>
           return inputDate >= currentDate;
         },
         {
-          message:
-            "Tanggal shooting tidak boleh di masa lalu",
+          message: "Tanggal shooting tidak boleh di masa lalu",
         }
       ),
       pdc_jadwal_upload: z.string().nullable().optional(),
@@ -98,13 +97,47 @@ export const picContentInfoSchema = z.object({
     .min(1, { message: "Judul konten harus diisi" })
     .max(150, { message: "Judul konten melebihi batas 150 karakter" }),
   ikf_tgl: z.string().nullable().optional(),
-  ikf_pic: z.string().min(1, {message: "Person in Charge harus diisi"}),
+  ikf_pic: z.string().min(1, { message: "Person in Charge harus diisi" }),
   ikf_ringkasan: z
     .string()
     .min(1, { message: "Ringkasan harus diisi" })
     .max(150, { message: "Ringkasan melebihi batas 150 karakter" }),
-  ikf_status: z.string().min(1, { message: "Status harus diisi" }),
+  ikf_status: z
+    .string()
+    .min(1, { message: "Status harus dipilih" })
+    .refine((val) => val === "scheduled" || val === "on hold", {
+      message: "Status tidak valid",
+    }),
   ikf_skrip: z.any().nullable().optional(),
+  ikf_referensi: z
+    .string()
+    .url("Link Harus Valid")
+    .or(z.literal(""))
+    .nullable()
+    .optional(),
+});
+
+export const editPicContentInfoSchema = z.object({
+  ikf_tgl: z.string().nullable().optional(),
+  ikf_judul_konten: z
+    .string()
+    .min(1, { message: "Judul konten harus diisi" })
+    .max(150, { message: "Judul konten melebihi batas 150 karakter" }),
+  ikf_ringkasan: z
+    .string()
+    .min(1, { message: "Ringkasan harus diisi" })
+    .max(150, { message: "Ringkasan melebihi batas 150 karakter" }),
+  ikf_pic: z.string().min(1, { message: "Person in Charge harus diisi" }),
+  ikf_status: z
+    .string()
+    .min(1, { message: "Status harus dipilih" })
+    .refine(
+      (val) => val === "scheduled" || val === "on hold" || val === "done",
+      {
+        message: "Status tidak valid",
+      }
+    ),
+  ikf_skrip: z.any().optional().nullable(),
   ikf_referensi: z
     .string()
     .url("Link Harus Valid")

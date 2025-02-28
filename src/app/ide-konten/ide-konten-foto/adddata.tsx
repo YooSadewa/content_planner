@@ -10,7 +10,14 @@ import {
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Select, SelectContent, SelectGroup, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import {
+  Select,
+  SelectContent,
+  SelectGroup,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import { picContentInfoSchema } from "@/validation/Validation";
 import { zodResolver } from "@hookform/resolvers/zod";
 import axios from "axios";
@@ -27,7 +34,6 @@ type PicContent = {
   ikf_status: string;
   ikf_skrip: string;
   ikf_referensi: string;
-  ikf_upload: string;
 };
 
 export default function CreateKontenFoto() {
@@ -50,7 +56,6 @@ export default function CreateKontenFoto() {
       ikf_status: "",
       ikf_skrip: "",
       ikf_referensi: "",
-      ikf_upload: "",
     },
     resolver: zodResolver(picContentInfoSchema),
   });
@@ -68,10 +73,25 @@ export default function CreateKontenFoto() {
     setSuccessMessage("");
 
     try {
+      const formData = new FormData();
+
+      Object.keys(data).forEach((key) => {
+        const typedKey = key as keyof PicContent;
+        if (typedKey === "ikf_skrip" && data[typedKey]) {
+          const fileList = data[typedKey] as unknown as FileList;
+          if (fileList[0]) {
+            formData.append(typedKey, fileList[0]);
+          }
+        } else {
+          formData.append(typedKey, String(data[typedKey]));
+        }
+      });
+
       const response = await axios.post(
         "http://127.0.0.1:8000/api/idekontenfoto/create",
-        data
+        formData
       );
+
       if (response.status === 200 || response.status === 201) {
         window.location.reload();
         setSuccessMessage("Konten berhasil ditambahkan.");
@@ -80,7 +100,15 @@ export default function CreateKontenFoto() {
         setErrorMessage("Terjadi kesalahan saat menambahkan Konten.");
       }
     } catch (error) {
-      setErrorMessage("Judul Sudah tersedia");
+      console.error("Error details:", error);
+
+      if (axios.isAxiosError(error)) {
+        setErrorMessage(
+          error.response?.data?.message || "Terjadi kesalahan pada server"
+        );
+      } else {
+        setErrorMessage("Terjadi kesalahan yang tidak diketahui");
+      }
     } finally {
       setLoading(false);
     }

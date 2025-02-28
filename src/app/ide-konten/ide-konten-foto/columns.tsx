@@ -26,6 +26,9 @@ type IdeKontenFoto = {
   ikf_tgl: string;
   ikf_judul_konten: string;
   ikf_ringkasan: string;
+  ikf_pic: string;
+  ikf_status: string;
+  ikf_skrip: string;
   ikf_referensi: string;
 };
 
@@ -257,19 +260,15 @@ export const columns: ColumnDef<IdeKontenFoto>[] = [
             <Eye size={16} />
           </Button>
           <span className="w-[1px] h-6 bg-yellow-500 my-auto" />
-          <Button
-            onClick={() => meta.setSelectedItem(row.original as any)}
-            className="bg-blue-500 hover:bg-blue-600 text-white flex items-center gap-1 h-8 text-xs px-3 rounded-md"
-          >
-            <Eye size={16} />
-          </Button>
           <UpdateKontenFoto
             id={row.getValue("ikf_id")}
+            currentDate={row.getValue("ikf_tgl")}
             currentName={row.getValue("ikf_judul_konten")}
             currentSummary={row.getValue("ikf_ringkasan")}
             currentPic={row.getValue("ikf_pic")}
             currentScript={row.getValue("ikf_skrip")}
             currentStatus={row.getValue("ikf_status")}
+            currentReference={row.getValue("ikf_referensi")}
           />
           <span className="w-[1px] h-6 bg-yellow-500 my-auto" />
           <Button
