@@ -43,7 +43,7 @@ export const ConfirmUpload = ({ id }: any) => {
       <AlertDialogTrigger asChild>
         <Button
           variant="outline"
-          className="w-7 h-7 bg-blue-500 text-white"
+          className="w-7 h-8 bg-blue-500 text-white"
           disabled={loading}
         >
           {loading ? "..." : <Upload size={16} />}

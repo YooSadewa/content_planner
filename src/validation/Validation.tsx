@@ -96,7 +96,14 @@ export const picContentInfoSchema = z.object({
     .string()
     .min(1, { message: "Judul konten harus diisi" })
     .max(150, { message: "Judul konten melebihi batas 150 karakter" }),
-  ikf_tgl: z.string().nullable().optional(),
+  ikv_tgl: z
+    .string()
+    .nullable()
+    .optional()
+    .refine(
+      (val) => !val || new Date(val) >= today,
+      "Tanggal tidak boleh di masa lalu"
+    ),
   ikf_pic: z.string().min(1, { message: "Person in Charge harus diisi" }),
   ikf_ringkasan: z
     .string()
@@ -118,7 +125,14 @@ export const picContentInfoSchema = z.object({
 });
 
 export const editPicContentInfoSchema = z.object({
-  ikf_tgl: z.string().nullable().optional(),
+  ikv_tgl: z
+    .string()
+    .nullable()
+    .optional()
+    .refine(
+      (val) => !val || new Date(val) >= today,
+      "Tanggal tidak boleh di masa lalu"
+    ),
   ikf_judul_konten: z
     .string()
     .min(1, { message: "Judul konten harus diisi" })
@@ -151,34 +165,40 @@ const allowedFileTypes = [
   "application/msword",
   "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
 ];
+const today = new Date();
+today.setHours(0, 0, 0, 0);
 
 export const vidContentInfoSchema = z.object({
-  ikv_tgl: z.string().min(1, { message: "Tanggal harus diisi" }),
   ikv_judul_konten: z
     .string()
     .min(1, { message: "Judul konten harus diisi" })
     .max(150, { message: "Judul konten melebihi batas 150 karakter" }),
+  ikv_tgl: z
+    .string()
+    .nullable()
+    .optional()
+    .refine(
+      (val) => !val || new Date(val) >= today,
+      "Tanggal tidak boleh di masa lalu"
+    ),
+  ikv_pic: z.string().min(1, { message: "Person in Charge harus diisi" }),
   ikv_ringkasan: z
     .string()
     .min(1, { message: "Ringkasan harus diisi" })
     .max(150, { message: "Ringkasan melebihi batas 150 karakter" }),
-  ikv_pic: z.string().min(1, { message: "Person in Charge harus diisi" }),
   ikv_status: z
     .string()
     .min(1, { message: "Status harus dipilih" })
-    .refine(
-      (val) => val === "scheduled" || val === "on hold" || val === "done",
-      {
-        message: "Status tidak valid",
-      }
-    ),
-  ikv_skrip: z
-    .custom<FileList>((val) => val instanceof FileList && val.length > 0, {
-      message: "Skrip harus diupload",
-    })
-    .refine((files) => files && allowedFileTypes.includes(files[0]?.type), {
-      message: "File harus berupa PDF, DOC, atau DOCX",
+    .refine((val) => val === "scheduled" || val === "on hold", {
+      message: "Status tidak valid",
     }),
+  ikv_skrip: z.any().nullable().optional(),
+  ikv_referensi: z
+    .string()
+    .url("Link Harus Valid")
+    .or(z.literal(""))
+    .nullable()
+    .optional(),
 });
 
 export const editVidContentInfoSchema = z.object({

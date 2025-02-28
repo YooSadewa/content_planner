@@ -15,9 +15,11 @@ import {
   ArrowBigDownDash,
   Link,
   Video,
+  Eye,
 } from "lucide-react";
 import Link2 from "next/link";
 import { ConfirmUpload } from "./uploadcontent";
+import UpdateKontenVideo from "./editdata";
 
 type IdeKontenVideo = {
   ikv_id: number;
@@ -46,14 +48,6 @@ export const columns: ColumnDef<IdeKontenVideo>[] = [
           <p className="block pt-2 ps-2 sentence-case truncate w-[290px] min-w-0">
             {row.getValue("ikv_judul_konten")}
           </p>
-          {meta.hoveredRow === row.original.ikv_id && (
-            <Button
-              onClick={() => meta.setSelectedItem(row.original)}
-              className="h-7 text-[10px] px-3 mt-1 me-1 text-white absolute right-0"
-            >
-              Detail
-            </Button>
-          )}
         </div>
       );
     },
@@ -249,26 +243,39 @@ export const columns: ColumnDef<IdeKontenVideo>[] = [
       </div>
     ),
     cell: ({ row, table }) => {
-      const meta = table.options.meta as { handleDelete: (id: number) => void };
+      const meta = table.options.meta as {
+        handleDelete: (id: number) => void;
+        setSelectedItem: (id: number) => void;
+      };
       console.log({
         skrip: row.getValue("ikv_skrip"),
         status: row.getValue("ikv_status"),
       });
       return (
-        <div className="w-32 p-1 flex justify-between gap-1">
-          {/* <UpdateKontenFoto
+        <div className="w-40 p-1 flex justify-between gap-1">
+          <Button
+            onClick={() => meta.setSelectedItem(row.original as any)}
+            className="bg-blue-500 hover:bg-blue-600 text-white flex items-center gap-1 h-8 text-xs px-3 rounded-md"
+          >
+            <Eye size={16} />
+          </Button>
+          <span className="w-[1px] h-6 bg-yellow-500 my-auto" />
+          <UpdateKontenVideo
             id={row.getValue("ikv_id")}
+            currentDate={row.getValue("ikv_tgl")}
             currentName={row.getValue("ikv_judul_konten")}
             currentSummary={row.getValue("ikv_ringkasan")}
             currentPic={row.getValue("ikv_pic")}
             currentScript={row.getValue("ikv_skrip")}
             currentStatus={row.getValue("ikv_status")}
-          /> */}
+            currentReference={row.getValue("ikv_referensi")}
+          />
+          <span className="w-[1px] h-6 bg-yellow-500 my-auto" />
           <Button
-            className="bg-red-600 transition-all h-full duration-300 hover:bg-red-500/80 w-16 h-7"
+            className="bg-red-500 hover:bg-red-600 text-white flex items-center gap-1 h-8 text-xs px-3 rounded-md"
             onClick={() => meta.handleDelete(row.getValue("ikv_id"))}
           >
-            <Trash />
+            <Trash size={16} />
           </Button>
         </div>
       );

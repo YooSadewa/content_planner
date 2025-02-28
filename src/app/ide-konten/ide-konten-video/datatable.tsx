@@ -270,14 +270,20 @@ export function DataTableVideo({ data }: DataTableProps) {
                       <span className="font-semibold text-gray-700">
                         Skrip Konten:{" "}
                       </span>
-                      <Link
-                        href={`http://localhost:8000/uploads/${selectedItem.ikv_skrip}`}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="text-blue-500 hover:text-blue-600 underline"
-                      >
-                        Unduh Skrip
-                      </Link>
+                      {selectedItem.ikv_skrip ? (
+                        <Link
+                          href={`http://localhost:8000/uploads/${selectedItem.ikv_skrip}`}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="text-blue-500 hover:text-blue-600 underline"
+                        >
+                          Unduh Skrip
+                        </Link>
+                      ) : (
+                        <span className="text-gray-500 italic">
+                          Tidak ada skrip
+                        </span>
+                      )}
                     </SheetDescription>
                   </div>
                 </div>
@@ -288,14 +294,20 @@ export function DataTableVideo({ data }: DataTableProps) {
                       <span className="font-semibold text-gray-700">
                         Referensi:{" "}
                       </span>
-                      <Link
-                        href={selectedItem.ikv_referensi}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="text-blue-500 hover:text-blue-600 underline"
-                      >
-                        Lihat Referensi
-                      </Link>
+                      {selectedItem.ikv_referensi ? (
+                        <Link
+                          href={selectedItem.ikv_referensi}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="text-blue-500 hover:text-blue-600 underline"
+                        >
+                          Lihat Referensi
+                        </Link>
+                      ) : (
+                        <span className="text-gray-500 italic">
+                          Tidak ada referensi
+                        </span>
+                      )}
                     </SheetDescription>
                   </div>
                 </div>
@@ -307,9 +319,13 @@ export function DataTableVideo({ data }: DataTableProps) {
                         Tanggal Upload:{" "}
                       </span>
                       <span className="text-gray-600">
-                        {selectedItem.ikv_upload
-                          ? selectedItem.ikv_upload
-                          : "Belum diupload"}
+                        {selectedItem.ikv_upload ? (
+                          selectedItem.ikv_upload
+                        ) : (
+                          <span className="text-gray-500 italic">
+                            Belum Diupload
+                          </span>
+                        )}
                       </span>
                     </SheetDescription>
                   </div>
