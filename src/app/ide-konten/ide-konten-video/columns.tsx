@@ -17,7 +17,7 @@ import {
   Video,
 } from "lucide-react";
 import Link2 from "next/link";
-import UpdateKontenFoto from "./editdata";
+import { ConfirmUpload } from "./uploadcontent";
 
 type IdeKontenVideo = {
   ikv_id: number;
@@ -235,7 +235,7 @@ export const columns: ColumnDef<IdeKontenVideo>[] = [
           }`}
         >
           <span className="me-auto">{formattedDate}</span>
-          {/* {!uploadDate && <ConfirmUpload id={id} />} */}
+          {!uploadDate && <ConfirmUpload id={id} />}
         </div>
       );
     },

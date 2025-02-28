@@ -20,6 +20,7 @@ import {
 } from "lucide-react";
 import Link2 from "next/link";
 import UpdateKontenFoto from "./editdata";
+import { ConfirmUpload } from "./uploadcontent";
 
 type IdeKontenFoto = {
   ikf_id: number;
@@ -232,7 +233,7 @@ export const columns: ColumnDef<IdeKontenFoto>[] = [
           }`}
         >
           <span className="me-auto">{formattedDate}</span>
-          {/* {!uploadDate && <ConfirmUpload id={id} />} */}
+          {!uploadDate && <ConfirmUpload id={id} />}
         </div>
       );
     },
