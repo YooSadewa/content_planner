@@ -104,7 +104,7 @@ export default function DashboardIdeKontenPage() {
           ) : (
             <>
               {itemsFoto.map((item) => (
-                <Link href={"/ide-konten"} key={item.ikf_id} className="flex flex-col gap-2">
+                <Link href={"/ide-konten"} key={`foto-${item.ikf_id}`} className="flex flex-col gap-2">
                   <div className="bg-white rounded-lg h-[110px] p-4 shadow-lg hover:shadow-xl transition-all duration-300 border border-gray-100 flex flex-col gap-2">
                     <div className="flex items-start gap-2 my-auto">
                       <div className="rounded-full bg-blue-100 p-2">
@@ -165,8 +165,8 @@ export default function DashboardIdeKontenPage() {
             </div>
           ) : (
             <>
-              {itemsVideo.map((item) => (
-                <Link href={"/ide-konten"} key={item.ikv_id} className="flex flex-col gap-2">
+              {itemsVideo.map((item, index) => (
+                <Link href={"/ide-konten"} key={`video-${item.ikv_id}`} className="flex flex-col gap-2">
                   <div
                     className="bg-white rounded-lg h-[110px] p-4 shadow-lg hover:shadow-xl transition-all duration-300 border border-gray-100"
                   >

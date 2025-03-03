@@ -27,7 +27,7 @@ export default function SummaryAccPage() {
       textColor: "text-white",
       stats: [
         { label: "Jumlah Tweet", value: "2,134" },
-        { label: "Follower", value: "411" },
+        { label: "Pengikut", value: "411" },
       ],
     },
     {

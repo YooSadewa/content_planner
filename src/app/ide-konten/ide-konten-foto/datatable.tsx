@@ -125,7 +125,7 @@ export function DataTable({ data }: DataTableProps) {
   };
 
   return (
-    <div className="px-2">
+    <div className="px-2 mt-2">
       <div className="w-[975px] overflow-x-auto">
         <Table>
           <TableHeader>

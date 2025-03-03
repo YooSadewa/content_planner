@@ -129,43 +129,45 @@ export const editPicContentInfoSchema = (
   previousDate?: string
 ) =>
   z.object({
-    ikf_tgl: z.string().refine(
-      (val) => {
-        const inputDate = new Date(val);
-        const currentDate = new Date();
-        currentDate.setHours(0, 0, 0, 0);
-        inputDate.setHours(0, 0, 0, 0);
+    ikf_tgl: z
+      .string()
+      .nullable()
+      .refine(
+        (val) => {
+          if (!val) return true; // Izinkan null atau undefined
 
-        if (isEdit && previousDate) {
-          const prevDate = new Date(previousDate);
-          prevDate.setHours(0, 0, 0, 0);
+          const inputDate = new Date(val);
+          const currentDate = new Date();
+          currentDate.setHours(0, 0, 0, 0);
+          inputDate.setHours(0, 0, 0, 0);
 
-          // Jika previousDate di masa lalu dan tidak diubah, tetap lolos
-          if (
-            prevDate < currentDate &&
-            inputDate.getTime() === prevDate.getTime()
-          ) {
-            return true;
+          if (isEdit && previousDate) {
+            const prevDate = new Date(previousDate);
+            prevDate.setHours(0, 0, 0, 0);
+
+            if (
+              prevDate < currentDate &&
+              inputDate.getTime() === prevDate.getTime()
+            ) {
+              return true;
+            }
+
+            if (prevDate < currentDate) {
+              return inputDate >= currentDate;
+            }
+
+            if (prevDate >= currentDate) {
+              return inputDate >= currentDate;
+            }
           }
 
-          // Jika previousDate di masa lalu tapi diubah, minimal harus hari ini
-          if (prevDate < currentDate) {
-            return inputDate >= currentDate;
-          }
-
-          // Jika previousDate di masa depan dan diubah, minimal harus setelah hari ini tetapi boleh di bawah previousDate
-          if (prevDate >= currentDate) {
-            return inputDate >= currentDate;
-          }
+          return inputDate >= currentDate;
+        },
+        {
+          message: "Tanggal tidak boleh di masa lalu",
         }
+      ),
 
-        // Jika bukan edit, tetap tidak boleh di masa lalu
-        return inputDate >= currentDate;
-      },
-      {
-        message: "Tanggal shooting tidak boleh di masa lalu",
-      }
-    ),
     ikf_judul_konten: z
       .string()
       .min(1, { message: "Judul konten harus diisi" })
@@ -239,43 +241,46 @@ export const editVidContentInfoSchema = (
   previousDate?: string
 ) =>
   z.object({
-    ikv_tgl: z.string().refine(
-      (val) => {
-        const inputDate = new Date(val);
-        const currentDate = new Date();
-        currentDate.setHours(0, 0, 0, 0);
-        inputDate.setHours(0, 0, 0, 0);
+    ikv_tgl: z
+      .string()
+      .nullable()
+      .refine(
+        (val) => {
+          const inputDate = new Date(val as any);
+          const currentDate = new Date();
+          currentDate.setHours(0, 0, 0, 0);
+          inputDate.setHours(0, 0, 0, 0);
 
-        if (isEdit && previousDate) {
-          const prevDate = new Date(previousDate);
-          prevDate.setHours(0, 0, 0, 0);
+          if (isEdit && previousDate) {
+            const prevDate = new Date(previousDate);
+            prevDate.setHours(0, 0, 0, 0);
 
-          // Jika previousDate di masa lalu dan tidak diubah, tetap lolos
-          if (
-            prevDate < currentDate &&
-            inputDate.getTime() === prevDate.getTime()
-          ) {
-            return true;
+            // Jika previousDate di masa lalu dan tidak diubah, tetap lolos
+            if (
+              prevDate < currentDate &&
+              inputDate.getTime() === prevDate.getTime()
+            ) {
+              return true;
+            }
+
+            // Jika previousDate di masa lalu tapi diubah, minimal harus hari ini
+            if (prevDate < currentDate) {
+              return inputDate >= currentDate;
+            }
+
+            // Jika previousDate di masa depan dan diubah, minimal harus setelah hari ini tetapi boleh di bawah previousDate
+            if (prevDate >= currentDate) {
+              return inputDate >= currentDate;
+            }
           }
 
-          // Jika previousDate di masa lalu tapi diubah, minimal harus hari ini
-          if (prevDate < currentDate) {
-            return inputDate >= currentDate;
-          }
-
-          // Jika previousDate di masa depan dan diubah, minimal harus setelah hari ini tetapi boleh di bawah previousDate
-          if (prevDate >= currentDate) {
-            return inputDate >= currentDate;
-          }
+          // Jika bukan edit, tetap tidak boleh di masa lalu
+          return inputDate >= currentDate;
+        },
+        {
+          message: "Tanggal shooting tidak boleh di masa lalu",
         }
-
-        // Jika bukan edit, tetap tidak boleh di masa lalu
-        return inputDate >= currentDate;
-      },
-      {
-        message: "Tanggal shooting tidak boleh di masa lalu",
-      }
-    ),
+      ),
     ikv_judul_konten: z
       .string()
       .min(1, { message: "Judul konten harus diisi" })
@@ -296,3 +301,18 @@ export const editVidContentInfoSchema = (
       ),
     ikv_skrip: z.any().optional().nullable(),
   });
+
+const platformSchema = z.object({
+  dpl_platform: z.string().min(1, "Platform harus dipilih"),
+  dpl_total_konten: z.string().min(1, "Total konten harus diisi"),
+  dpl_pengikut: z.string(),
+});
+
+// Schema for the whole form
+export const monthlyDataSchema = z.object({
+  dacc_bulan: z.string().min(1, "Bulan harus dipilih"),
+  dacc_tahun: z.string().min(1, "Tahun harus dipilih"),
+  platforms: z
+    .array(platformSchema)
+    .min(1, "Minimal satu platform harus dipilih"),
+});

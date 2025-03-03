@@ -30,6 +30,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import CreateDetailMonthly from "./monthly/adddata";
 
 const months = [
   "Januari",
@@ -84,33 +85,36 @@ export default function AkunMedsosPage() {
         </div>
 
         <div className="mb-12">
-          <h2 className="text-xl font-semibold mb-4 text-gray-700 flex items-center gap-2">
-            Total Postingan Bulan
-            <Select value={selectedMonth} onValueChange={setSelectedMonth}>
-              <SelectTrigger className="w-[150px]">
-                <SelectValue placeholder="Select Month" />
-              </SelectTrigger>
-              <SelectContent aria-modal={false}>
-                {months.map((month) => (
-                  <SelectItem key={month} value={month}>
-                    {month}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-            <Select value={selectedYear} onValueChange={setSelectedYear}>
-              <SelectTrigger className="w-[100px]">
-                <SelectValue placeholder="Select Year" />
-              </SelectTrigger>
-              <SelectContent>
-                {years.map((year) => (
-                  <SelectItem key={year} value={year.toString()}>
-                    {year}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-          </h2>
+          <div className="flex items-center mb-4 justify-between">
+            <h2 className="text-xl font-semibold text-gray-700 flex items-center gap-2">
+              Total Postingan Bulan
+              <Select value={selectedMonth} onValueChange={setSelectedMonth}>
+                <SelectTrigger className="w-[150px]">
+                  <SelectValue placeholder="Select Month" />
+                </SelectTrigger>
+                <SelectContent>
+                  {months.map((month) => (
+                    <SelectItem key={month} value={month}>
+                      {month}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+              <Select value={selectedYear} onValueChange={setSelectedYear}>
+                <SelectTrigger className="w-[100px]">
+                  <SelectValue placeholder="Select Year" />
+                </SelectTrigger>
+                <SelectContent>
+                  {years.map((year) => (
+                    <SelectItem key={year} value={year.toString()}>
+                      {year}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </h2>
+            <CreateDetailMonthly />
+          </div>
           <MonthlyPostPage />
         </div>
 
