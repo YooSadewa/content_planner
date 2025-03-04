@@ -224,10 +224,6 @@ export default function AkunMedsosPage() {
             <BreadcrumbLink href="/account">Ringkasan Medsos</BreadcrumbLink>
           </Bread>
         </div>
-        {/* <div className="flex gap-1">
-          <CreateKontenFoto />
-          <CreateKontenVideo />
-        </div> */}
       </div>
       <h1 className="mt-5 font-bold text-2xl text-[#293854] me-auto mb-4 flex items-center">
         Daftar Akun Media Sosial

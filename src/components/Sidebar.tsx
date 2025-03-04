@@ -20,9 +20,9 @@ import {
       { name: "Beranda", href: "/", icon: House },
       { name: "Rencana Konten", href: "/planner", icon: CalendarClock },
       { name: "Ringkasan Medsos", href: "/account", icon: SquareUser },
-      { name: "Ide Konten", href: "/ide-konten", icon: Lightbulb },
       { name: "Analisis Konten", href: "/analisis-konten", icon: ChartPie },
       { name: "Statistik Medsos", href: "/statistik", icon: ChartNoAxesCombined },
+      { name: "Ide Konten", href: "/ide-konten", icon: Lightbulb },
       { name: "Podcast", href: "/podcast", icon: Podcast },
       { name: "Quotes", href: "/quotes", icon: MessageSquareQuote },
     ];

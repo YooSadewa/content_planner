@@ -16,14 +16,14 @@ export default function MonthlyPostPage({ data }: any) {
     <Card className="border-none shadow-lg">
       <CardContent className="p-0">
         <div className="overflow-x-auto">
-          <div className="p-6 grid grid-cols-6 gap-4">
+          <div className="flex justify-between w-full p-5 gap-4 w-fit">
             {data.map((item: any) =>
               platforms.map((platform) => (
                 <div
                   key={`${item.dacc_id}-${platform}`}
                   className="flex flex-col items-center"
                 >
-                  <div className="text-gray-600 font-medium mb-5 capitalize">
+                  <div className="text-black font-semibold mb-5 capitalize">
                     {platform}
                   </div>
                   <div className="flex gap-2">
@@ -38,21 +38,27 @@ export default function MonthlyPostPage({ data }: any) {
                       >
                         {item[platform]?.dpl_total_konten || 0}
                       </div>
-                      <p className="text-[10px] mt-2">Total Konten</p>
+                      <p className="text-[10px] mt-2">
+                        Total {platform === "twitter" ? "Tweet" : "Konten"}
+                      </p>
                     </div>
-                    <div className="text-center">
-                      <div
-                        className={cn(
-                          "w-16 h-16 rounded-full flex items-center justify-center font-bold text-xl",
-                          item[platform]?.dpl_pengikut > 0
-                            ? "bg-blue-100 text-blue-700"
-                            : "bg-gray-100 text-gray-500"
-                        )}
-                      >
-                        {item[platform]?.dpl_pengikut || 0}
+                    {platform !== "website" && (
+                      <div className="text-center">
+                        <div
+                          className={cn(
+                            "w-16 h-16 rounded-full flex items-center justify-center font-bold text-xl",
+                            item[platform]?.dpl_pengikut > 0
+                              ? "bg-blue-100 text-blue-700"
+                              : "bg-gray-100 text-gray-500"
+                          )}
+                        >
+                          {item[platform]?.dpl_pengikut || 0}
+                        </div>
+                        <p className="text-[10px] mt-2">
+                          {platform === "youtube" ? "Subscriber" : "Pengikut"}
+                        </p>
                       </div>
-                      <p className="text-[10px] mt-2">Pengikut</p>
-                    </div>
+                    )}
                   </div>
                 </div>
               ))
