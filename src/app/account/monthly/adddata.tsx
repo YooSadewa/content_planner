@@ -26,7 +26,7 @@ import { Label } from "@/components/ui/label";
 
 // Define types
 type PlatformData = {
-  id: number;
+  dacc_id: string;
   dpl_platform: string;
   dpl_total_konten: string;
   dpl_pengikut: string;
@@ -118,29 +118,54 @@ export default function MonthlyDataForm() {
             `http://127.0.0.1:8000/api/detailaccount/get-by-month-year?month=${selectedMonth}&year=${selectedYear}`
           );
 
-          if (response.data && response.data.data) {
+          console.log("bulan dan tahun", selectedMonth, selectedYear);
+
+          if (
+            response.data.data &&
+            response.data.data.detail_akun &&
+            response.data.data.detail_akun.length > 0
+          ) {
             // Data exists, set update mode
             setIsUpdateMode(true);
-            setExistingDataId(response.data.data.id);
+            const accountDetail = response.data.data.detail_akun[0]; // Get the first item in the array
+            setExistingDataId(accountDetail.dacc_id);
+
+            console.log("tes data id", accountDetail.dacc_id);
 
             // Fetch platform details for this account
             const platformResponse = await axios.get(
-              `http://127.0.0.1:8000/api/detailplatform/get-by-dacc?dacc_id=${response.data.data.id}`
+              `http://127.0.0.1:8000/api/detailplatform/get-by-dacc?dacc_id=${accountDetail.dacc_id}`
             );
 
-            if (platformResponse.data && platformResponse.data.data) {
-              const platformData = platformResponse.data.data;
+            if (
+              platformResponse.data &&
+              platformResponse.data.data &&
+              platformResponse.data.data.detail_akun
+            ) {
+              const detailAkun = platformResponse.data.data.detail_akun;
               const newSelectedPlatforms: string[] = [];
               const newPlatformValues: Record<string, any> = {};
               const newPlatformIds: Record<string, number> = {};
 
-              platformData.forEach((platform: PlatformData) => {
-                newSelectedPlatforms.push(platform.dpl_platform);
-                newPlatformValues[platform.dpl_platform] = {
-                  dpl_total_konten: platform.dpl_total_konten,
-                  dpl_pengikut: platform.dpl_pengikut,
+              // Get platform names (excluding non-platform fields)
+              const platformNames = Object.keys(detailAkun).filter(
+                (key) =>
+                  key !== "dacc_id" &&
+                  key !== "dacc_bulan" &&
+                  key !== "dacc_tahun" &&
+                  key !== "created_at" &&
+                  key !== "updated_at"
+              );
+
+              platformNames.forEach((platform) => {
+                newSelectedPlatforms.push(platform);
+                newPlatformValues[platform] = {
+                  dpl_total_konten: String(
+                    detailAkun[platform].dpl_total_konten || ""
+                  ),
+                  dpl_pengikut: String(detailAkun[platform].dpl_pengikut || ""),
                 };
-                newPlatformIds[platform.dpl_platform] = platform.id;
+                newPlatformIds[platform] = detailAkun[platform].dpl_id;
               });
 
               setValue("selectedPlatforms", newSelectedPlatforms);
@@ -156,7 +181,6 @@ export default function MonthlyDataForm() {
             setPlatformIds({});
           }
         } catch (error) {
-          console.error("Error fetching existing data:", error);
           setIsUpdateMode(false);
           setExistingDataId(null);
           setValue("selectedPlatforms", []);
@@ -216,20 +240,6 @@ export default function MonthlyDataForm() {
 
     try {
       if (isUpdateMode && existingDataId) {
-        // Update existing data
-        // First, update the account data
-        const accountData = {
-          dacc_id: existingDataId,
-          dacc_bulan: data.dacc_bulan,
-          dacc_tahun: data.dacc_tahun,
-        };
-
-        await axios.post(
-          "http://127.0.0.1:8000/api/detailaccount/update",
-          accountData
-        );
-
-        // Now update platform data or create new platform entries
         const platformPromises = data.selectedPlatforms.map(
           async (platform) => {
             const platformData = {
@@ -241,8 +251,8 @@ export default function MonthlyDataForm() {
 
             // If we have an ID for this platform, update it
             if (platformIds[platform]) {
-              return axios.post(
-                "http://127.0.0.1:8000/api/detailplatform/update",
+              return axios.put(
+                `http://127.0.0.1:8000/api/detailplatform/update/${existingDataId}`,
                 {
                   ...platformData,
                   id: platformIds[platform],
@@ -352,7 +362,7 @@ export default function MonthlyDataForm() {
                 </AlertDialogTitle>
                 <div className="pt-1 pb-4 w-full flex flex-col gap-3">
                   <div className="flex gap-5">
-                    <div className="grid w-full items-center gap-1.5 w-[70%]">
+                    <div className="grid w-full items-center gap-1.5 w-[70%] h-fit">
                       <Label htmlFor="dacc_bulan">
                         Bulan <span className="text-red-600">*</span>
                       </Label>
@@ -389,7 +399,7 @@ export default function MonthlyDataForm() {
                       )}
                     </div>
 
-                    <div className="grid w-full items-center gap-1.5 w-[30%]">
+                    <div className="grid w-full items-center gap-1.5 w-[30%] h-fit">
                       <Label htmlFor="dacc_tahun">
                         Tahun <span className="text-red-600">*</span>
                       </Label>
@@ -478,6 +488,7 @@ export default function MonthlyDataForm() {
                                     render={({ field }) => (
                                       <input
                                         type="number"
+                                        min={1}
                                         className={`w-full p-2 border rounded ${
                                           errors.platforms?.[platform]
                                             ?.dpl_total_konten
@@ -506,7 +517,6 @@ export default function MonthlyDataForm() {
                                       {platform === "youtube"
                                         ? "Subscriber"
                                         : "Pengikut"}{" "}
-                                      <span className="text-red-600">*</span>
                                     </label>
                                     <Controller
                                       name={`platforms.${platform}.dpl_pengikut`}
@@ -514,6 +524,7 @@ export default function MonthlyDataForm() {
                                       render={({ field }) => (
                                         <input
                                           type="number"
+                                          min={1}
                                           className={`w-full p-2 border rounded ${
                                             errors.platforms?.[platform]
                                               ?.dpl_pengikut
