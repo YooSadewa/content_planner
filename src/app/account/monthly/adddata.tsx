@@ -560,19 +560,6 @@ export default function MonthlyDataForm() {
                   )}
                 </div>
               </AlertDialogHeader>
-
-              {errorMessage && (
-                <div className="bg-red-50 border border-red-200 text-red-700 p-3 rounded mb-4">
-                  {errorMessage}
-                </div>
-              )}
-
-              {successMessage && (
-                <div className="bg-green-50 border border-green-200 text-green-700 p-3 rounded mb-4">
-                  {successMessage}
-                </div>
-              )}
-
               <AlertDialogFooter>
                 <AlertDialogCancel type="button" onClick={handleCancel}>
                   Cancel
