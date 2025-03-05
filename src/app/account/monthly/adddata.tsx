@@ -36,18 +36,28 @@ type PlatformData = {
 const monthlyDataSchema = z.object({
   dacc_bulan: z.string().min(1, "Bulan harus dipilih"),
   dacc_tahun: z.string().min(1, "Tahun harus dipilih"),
-  selectedPlatforms: z
-    .array(z.string())
-    .min(1, "Minimal satu platform harus dipilih"),
-  platforms: z.record(
-    z.object({
-      dpl_total_konten: z.string().min(1, "Total konten harus diisi"),
-      dpl_pengikut: z.string().optional(),
-    })
-  ),
+  selectedPlatforms: z.array(z.string()).default([]), // Tambahkan default array
+  platforms: z
+    .record(
+      z.object({
+        dpl_total_konten: z.string().min(1, "Total Konten Harus diisi").default(""),
+        dpl_pengikut: z.string().optional().default("0"),
+      })
+    )
+    .optional()
+    .default({}),
 });
 
-type MonthlyDataForm = z.infer<typeof monthlyDataSchema>;
+type MonthlyDataForm = z.infer<typeof monthlyDataSchema> & {
+  selectedPlatforms?: string[];
+  platforms?: Record<
+    string,
+    {
+      dpl_total_konten?: string;
+      dpl_pengikut?: string;
+    }
+  >;
+};
 
 export default function MonthlyDataForm() {
   const [isModalOpen, setModalOpen] = useState(false);
@@ -197,7 +207,8 @@ export default function MonthlyDataForm() {
 
   // Handle checkbox change for platforms
   const handleCheckboxChange = (platform: string) => {
-    const currentSelectedPlatforms = [...(selectedPlatforms || [])];
+    // Gunakan spread operator dengan default array
+    const currentSelectedPlatforms = [...(selectedPlatforms ?? [])];
 
     if (currentSelectedPlatforms.includes(platform)) {
       // Remove platform
@@ -205,6 +216,11 @@ export default function MonthlyDataForm() {
         "selectedPlatforms",
         currentSelectedPlatforms.filter((p) => p !== platform)
       );
+
+      // Clear platform values
+      const currentPlatforms = { ...(watch("platforms") ?? {}) };
+      delete currentPlatforms[platform];
+      setValue("platforms", currentPlatforms);
     } else {
       // Add platform
       setValue("selectedPlatforms", [...currentSelectedPlatforms, platform]);
@@ -239,27 +255,45 @@ export default function MonthlyDataForm() {
     setSuccessMessage("");
 
     try {
+      if (data.selectedPlatforms.length === 0) {
+        setErrorMessage("Minimal satu platform harus dipilih");
+        setLoading(false);
+        return;
+      }
+
+      // Validasi setiap platform memiliki data
+      const invalidPlatforms = data.selectedPlatforms.filter(
+        (platform) =>
+          !data.platforms[platform]?.dpl_total_konten ||
+          data.platforms[platform]?.dpl_total_konten.trim() === ""
+      );
+
+      if (invalidPlatforms.length > 0) {
+        setErrorMessage(
+          `Platform ${invalidPlatforms.join(", ")} harus memiliki total konten`
+        );
+        setLoading(false);
+        return;
+      }
       if (isUpdateMode && existingDataId) {
-        const platformPromises = data.selectedPlatforms.map(
+        // Hapus platform yang tidak dipilih
+        const platformPromises = (data.selectedPlatforms ?? []).map(
           async (platform) => {
             const platformData = {
               dacc_id: existingDataId,
               dpl_platform: platform,
-              dpl_total_konten: data.platforms[platform].dpl_total_konten,
-              dpl_pengikut: data.platforms[platform].dpl_pengikut || "0", // Default to 0 for website
+              dpl_total_konten:
+                data.platforms?.[platform]?.dpl_total_konten || "",
+              dpl_pengikut: data.platforms?.[platform]?.dpl_pengikut || "0",
             };
 
-            // If we have an ID for this platform, update it
-            if (platformIds[platform]) {
+            // Gunakan optional chaining untuk platformIds
+            if (platformIds?.[platform]) {
               return axios.put(
-                `http://127.0.0.1:8000/api/detailplatform/update/${existingDataId}`,
-                {
-                  ...platformData,
-                  id: platformIds[platform],
-                }
+                `http://127.0.0.1:8000/api/detailplatform/update/${platformIds[platform]}`,
+                platformData
               );
             } else {
-              // Otherwise create a new platform entry
               return axios.post(
                 "http://127.0.0.1:8000/api/detailplatform/create",
                 platformData
@@ -268,12 +302,21 @@ export default function MonthlyDataForm() {
           }
         );
 
-        await Promise.all(platformPromises);
+        // Hapus platform yang tidak dipilih
+        const deletePlatformPromises = Object.keys(platformIds ?? {})
+          .filter(
+            (platform) => !(data.selectedPlatforms ?? []).includes(platform)
+          )
+          .map(async (platform) => {
+            return axios.delete(
+              `http://127.0.0.1:8000/api/detailplatform/delete/${platformIds[platform]}`
+            );
+          });
 
+        await Promise.all([...platformPromises, ...deletePlatformPromises]);
         setSuccessMessage("Data berhasil diperbarui");
       } else {
-        // Create new data
-        // First, create detail account
+        // Logika untuk membuat data baru (tetap sama)
         const accountData = {
           dacc_bulan: data.dacc_bulan,
           dacc_tahun: data.dacc_tahun,
@@ -290,7 +333,6 @@ export default function MonthlyDataForm() {
           throw new Error("Gagal menambahkan data bulan dan tahun");
         }
 
-        // Get the new detail account ID
         const daccId =
           accountResponse.data.data.id ||
           accountResponse.data.id ||
@@ -302,20 +344,23 @@ export default function MonthlyDataForm() {
           );
         }
 
-        // Now create detail platform entries for each selected platform
-        const platformPromises = data.selectedPlatforms.map((platform) => {
-          const platformData = {
-            dacc_id: daccId,
-            dpl_platform: platform,
-            dpl_total_konten: data.platforms[platform].dpl_total_konten,
-            dpl_pengikut: data.platforms[platform].dpl_pengikut || "0", // Default to 0 for website
-          };
+        // Buat entri platform baru
+        const platformPromises = (data.selectedPlatforms ?? []).map(
+          (platform) => {
+            const platformData = {
+              dacc_id: daccId,
+              dpl_platform: platform,
+              dpl_total_konten:
+                data.platforms?.[platform]?.dpl_total_konten || "",
+              dpl_pengikut: data.platforms?.[platform]?.dpl_pengikut || "0",
+            };
 
-          return axios.post(
-            "http://127.0.0.1:8000/api/detailplatform/create",
-            platformData
-          );
-        });
+            return axios.post(
+              "http://127.0.0.1:8000/api/detailplatform/create",
+              platformData
+            );
+          }
+        );
 
         await Promise.all(platformPromises);
 
@@ -455,6 +500,11 @@ export default function MonthlyDataForm() {
                           {errors.selectedPlatforms.message}
                         </p>
                       )}
+                      {selectedPlatforms && selectedPlatforms.length === 0 && (
+                        <p className="text-red-500 text-sm mt-1">
+                          Minimal satu platform harus dipilih
+                        </p>
+                      )}
                       <div className="grid grid-cols-2 gap-4 mt-1">
                         {platforms.map((platform) => (
                           <div
@@ -476,8 +526,8 @@ export default function MonthlyDataForm() {
                             </label>
 
                             {selectedPlatforms?.includes(platform) && (
-                              <div className="pt-2 space-y-2">
-                                <div>
+                              <div className="pt-2 flex gap-3">
+                                <div className="w-[50%]">
                                   <label className="block text-sm font-medium">
                                     Total Konten{" "}
                                     <span className="text-red-600">*</span>
@@ -512,7 +562,7 @@ export default function MonthlyDataForm() {
                                 </div>
 
                                 {platform !== "website" && (
-                                  <div>
+                                  <div className="w-[50%]">
                                     <label className="block text-sm font-medium">
                                       {platform === "youtube"
                                         ? "Subscriber"

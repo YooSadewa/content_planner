@@ -3,6 +3,15 @@ import { Card, CardContent } from "@/components/ui/card";
 import { cn } from "@/lib/utils";
 import axios from "axios";
 
+interface PlatformData {
+  dpl_total_konten?: number;
+  dpl_pengikut?: number;
+}
+
+const formatNumber = (num: number): string | number => {
+  return num >= 1000 ? (num / 1000).toFixed(1) + "K" : num;
+};
+
 export default function MonthlyPostPage({ data }: any) {
   const platforms = [
     "website",
@@ -36,7 +45,10 @@ export default function MonthlyPostPage({ data }: any) {
                             : "bg-gray-100 text-gray-500"
                         )}
                       >
-                        {item[platform]?.dpl_total_konten || 0}
+                        {formatNumber(
+                          (item[platform] as PlatformData)?.dpl_total_konten ||
+                            0
+                        )}
                       </div>
                       <p className="text-[10px] mt-2">
                         Total {platform === "twitter" ? "Tweet" : "Konten"}
@@ -52,7 +64,9 @@ export default function MonthlyPostPage({ data }: any) {
                               : "bg-gray-100 text-gray-500"
                           )}
                         >
-                          {item[platform]?.dpl_pengikut || 0}
+                          {formatNumber(
+                            (item[platform] as PlatformData)?.dpl_pengikut || 0
+                          )}
                         </div>
                         <p className="text-[10px] mt-2">
                           {platform === "youtube" ? "Subscriber" : "Pengikut"}
