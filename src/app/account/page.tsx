@@ -9,7 +9,7 @@ import Bread from "@/components/BreadCrumb";
 import SummaryAccPage from "./summary/page";
 import MonthlyPostPage from "./monthly/page";
 import DetailAccPage from "./detail/page";
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useCallback } from "react";
 import {
   Select,
   SelectContent,
@@ -20,11 +20,13 @@ import {
 import CreateDetailMonthly from "./monthly/adddata";
 import axios from "axios";
 
+// Generate years array
 const years = Array.from(
   { length: 10 },
   (_, i) => new Date().getFullYear() - i
 );
 
+// Define types with more strict typing
 export type PlatformStats = {
   total_konten: number;
   pengikut: number;
@@ -39,7 +41,21 @@ export type AllPlatformStats = {
   tiktok: PlatformStats;
 };
 
+// Define interface for account data
+interface AccountData {
+  [key: string]:
+    | {
+        dacc_id: number;
+        dpl_total_konten?: number | string;
+        dpl_pengikut?: number | string;
+        created_at?: string;
+        updated_at?: string;
+      }
+    | undefined;
+}
+
 export default function AkunMedsosPage() {
+  // Months array with type definition
   const months = [
     { value: "1", label: "Januari" },
     { value: "2", label: "Februari" },
@@ -54,35 +70,46 @@ export default function AkunMedsosPage() {
     { value: "11", label: "November" },
     { value: "12", label: "Desember" },
   ];
+
+  // State initialization with default values
   const currentMonth = new Date().getMonth() + 1;
-  const [selectedMonth, setSelectedMonth] = React.useState(
-    currentMonth.toString()
-  );
-  const [selectedYear, setSelectedYear] = React.useState(years[0].toString());
+  const [selectedMonth, setSelectedMonth] = useState(currentMonth.toString());
+  const [selectedYear, setSelectedYear] = useState(years[0].toString());
   const [dataMonthly, setDataMonthly] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
 
+  // Initial platform stats with type safety
+  const initialPlatformStats: AllPlatformStats = {
+    website: { total_konten: 0, pengikut: 0 },
+    instagram: { total_konten: 0, pengikut: 0 },
+    twitter: { total_konten: 0, pengikut: 0 },
+    facebook: { total_konten: 0, pengikut: 0 },
+    youtube: { total_konten: 0, pengikut: 0 },
+    tiktok: { total_konten: 0, pengikut: 0 },
+  };
+
+  const [platformStats, setPlatformStats] =
+    useState<AllPlatformStats>(initialPlatformStats);
+
+  // Fetch detail monthly data
   useEffect(() => {
     const fetchDetailMonthly = async () => {
       try {
+        setLoading(true);
         const response = await axios.get(
           "http://127.0.0.1:8000/api/detailaccount"
         );
 
-        console.log("Data API sebelum filter:", response.data.data.detail_akun);
-
         if (response.data.status && response.data.data.detail_akun) {
+          // Filter data based on selected month and year
           let filteredData = response.data.data.detail_akun.filter(
             (item: any) =>
               item.dacc_bulan === parseInt(selectedMonth) &&
               item.dacc_tahun === parseInt(selectedYear)
           );
 
-          console.log("bulan", selectedMonth);
-          console.log("tahun", selectedYear);
-          console.log("Data setelah filter:", filteredData); // Debugging hasil filter
-
+          // If no data found, provide default empty data
           if (filteredData.length === 0) {
             filteredData = [
               {
@@ -103,6 +130,7 @@ export default function AkunMedsosPage() {
         }
       } catch (err) {
         setError("Gagal mengambil data dari API.");
+        console.error(err);
       } finally {
         setLoading(false);
       }
@@ -111,107 +139,104 @@ export default function AkunMedsosPage() {
     fetchDetailMonthly();
   }, [selectedMonth, selectedYear]);
 
-  const [platformStats, setPlatformStats] = useState<AllPlatformStats>({
-    website: { total_konten: 0, pengikut: 0 },
-    instagram: { total_konten: 0, pengikut: 0 },
-    twitter: { total_konten: 0, pengikut: 0 },
-    facebook: { total_konten: 0, pengikut: 0 },
-    youtube: { total_konten: 0, pengikut: 0 },
-    tiktok: { total_konten: 0, pengikut: 0 },
-  });
+  // Fetch platform stats
   useEffect(() => {
-    // Fungsi untuk fetch data
-    const fetchData = async () => {
+    const fetchPlatformStats = async () => {
       try {
         setLoading(true);
+        const response = await axios.get(
+          "http://127.0.0.1:8000/api/sortdetailaccount"
+        );
 
-        // Fetch data dari API
-        const response = await fetch("http://127.0.0.1:8000/api/detailaccount");
-        const data = await response.json();
+        if (response.data.status) {
+          const newStats: AllPlatformStats = { ...initialPlatformStats };
 
-        // Cek jika response berhasil
-        if (data.status) {
-          // Inisialisasi objek untuk menyimpan data platform yang sudah dijumlahkan
-          const newStats = {
-            website: { total_konten: 0, pengikut: 0 },
-            instagram: { total_konten: 0, pengikut: 0 },
-            twitter: { total_konten: 0, pengikut: 0 },
-            facebook: { total_konten: 0, pengikut: 0 },
-            youtube: { total_konten: 0, pengikut: 0 },
-            tiktok: { total_konten: 0, pengikut: 0 },
+          // Sorting data berdasarkan timestamp terbaru (created_at atau updated_at)
+          const sortedData = response.data.data.detail_akun.sort(
+            (a: any, b: any) =>
+              Math.max(
+                new Date(b.created_at).getTime(),
+                new Date(b.updated_at).getTime()
+              ) -
+              Math.max(
+                new Date(a.created_at).getTime(),
+                new Date(a.updated_at).getTime()
+              )
+          );
+
+          // Map untuk menyimpan data terbaru berdasarkan timestamp terbesar
+          const latestPlatformRecords: Record<keyof AllPlatformStats, any> = {
+            website: null,
+            instagram: null,
+            twitter: null,
+            facebook: null,
+            youtube: null,
+            tiktok: null,
           };
 
-          // Loop melalui data dari API
-          data.data.detail_akun.forEach((account: any) => {
-            // Cek setiap platform
-            if (account.instagram) {
-              newStats.instagram.total_konten += Number(
-                account.instagram.dpl_total_konten || 0
-              );
-              newStats.instagram.pengikut += Number(
-                account.instagram.dpl_pengikut || 0
-              );
-            }
+          sortedData.forEach((account: AccountData) => {
+            const platforms: (keyof AllPlatformStats)[] = [
+              "website",
+              "instagram",
+              "twitter",
+              "facebook",
+              "youtube",
+              "tiktok",
+            ];
 
-            if (account.twitter) {
-              newStats.twitter.total_konten += Number(
-                account.twitter.dpl_total_konten || 0
-              );
-              newStats.twitter.pengikut += Number(
-                account.twitter.dpl_pengikut || 0
-              );
-            }
+            // Hitung timestamp terbaru dari akun
+            const latestTimestamp = Math.max(
+              new Date(account.created_at as any).getTime(),
+              new Date(account.updated_at as any).getTime()
+            );
 
-            if (account.facebook) {
-              newStats.facebook.total_konten += Number(
-                account.facebook.dpl_total_konten || 0
-              );
-              newStats.facebook.pengikut += Number(
-                account.facebook.dpl_pengikut || 0
-              );
-            }
+            platforms.forEach((platform) => {
+              const platformData = account[platform];
+              if (platformData) {
+                // Akumulasi total konten
+                newStats[platform].total_konten += Number(
+                  platformData.dpl_total_konten || 0
+                );
 
-            if (account.youtube) {
-              newStats.youtube.total_konten += Number(
-                account.youtube.dpl_total_konten || 0
-              );
-              newStats.youtube.pengikut += Number(
-                account.youtube.dpl_pengikut || 0
-              );
-            }
+                // Karena data sudah diurutkan, cukup ambil yang pertama
+                if (!latestPlatformRecords[platform]) {
+                  latestPlatformRecords[platform] = {
+                    ...platformData,
+                    latestTimestamp,
+                  };
+                }
+              }
+            });
+          });
 
-            if (account.tiktok) {
-              newStats.tiktok.total_konten += Number(
-                account.tiktok.dpl_total_konten || 0
-              );
-              newStats.tiktok.pengikut += Number(
-                account.tiktok.dpl_pengikut || 0
-              );
-            }
-
-            if (account.website) {
-              newStats.website.total_konten += Number(
-                account.website.dpl_total_konten || 0
+          // Setelah iterasi selesai, atur jumlah pengikut berdasarkan data terbaru
+          (
+            Object.keys(latestPlatformRecords) as (keyof AllPlatformStats)[]
+          ).forEach((platform) => {
+            const latestRecord = latestPlatformRecords[platform];
+            if (latestRecord) {
+              newStats[platform].pengikut = Number(
+                latestRecord.dpl_pengikut || 0
               );
             }
           });
 
-          // Update state dengan data yang telah dijumlahkan
           setPlatformStats(newStats);
         } else {
-          setError("Gagal mengambil data: " + data.message);
+          setError("Gagal mengambil data: " + response.data.message);
         }
       } catch (err) {
         setError("Error mengambil data: " + (err as Error).message);
+        console.error(err);
       } finally {
         setLoading(false);
       }
     };
 
-    // Panggil fungsi fetch
-    fetchData();
+    fetchPlatformStats();
   }, []);
 
+  // Rest of the component remains the same...
   return (
     <div className="p-6 w-[1050px] mx-auto min-h-screen">
       <div className="flex justify-between">

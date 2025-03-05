@@ -392,7 +392,7 @@ export default function MonthlyDataForm() {
     <div>
       <Button size="sm" variant="default" onClick={onAdd}>
         <Plus className="mr-1" />
-        Tambahkan Detail Bulanan
+        Update Detail Bulanan
       </Button>
 
       {isModalOpen && (

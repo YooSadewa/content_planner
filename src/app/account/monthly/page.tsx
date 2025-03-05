@@ -1,7 +1,5 @@
-import { useEffect, useState } from "react";
 import { Card, CardContent } from "@/components/ui/card";
 import { cn } from "@/lib/utils";
-import axios from "axios";
 
 interface PlatformData {
   dpl_total_konten?: number;
