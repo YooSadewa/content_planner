@@ -316,3 +316,7 @@ export const monthlyDataSchema = z.object({
     .array(platformSchema)
     .min(1, "Minimal satu platform harus dipilih"),
 });
+
+export const onlinePlannerSchema = z.object({
+  onp_tanggal: z.date()
+})

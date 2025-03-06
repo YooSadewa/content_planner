@@ -1,31 +1,44 @@
+"use client";
 import type { Metadata } from "next";
 import { Montserrat } from "next/font/google";
-
-const montserrat = Montserrat({
-  subsets: ["latin"], 
-  weight: ["400", "500", "700"], // Sesuaikan dengan kebutuhan
-  variable: "--font-montserrat", // Nama CSS Variable
-});
+import { SessionProvider } from "next-auth/react";
+import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
+import { usePathname } from "next/navigation";
 import "./globals.css";
 import Sidebar from "@/components/Sidebar";
 
-export const metadata: Metadata = {
-  title: "Content Planner UIB",
-  description: "Content Planner UIB",
-};
+const montserrat = Montserrat({
+  subsets: ["latin"],
+  weight: ["400", "500", "700"],
+  variable: "--font-montserrat",
+});
+
+// Create the client outside of the component
+const queryClient = new QueryClient();
 
 export default function RootLayout({
   children,
 }: Readonly<{
   children: React.ReactNode;
 }>) {
+  const pathname = usePathname();
+  const isLoginPage = pathname === "/login";
+
   return (
     <html lang="en" className={montserrat.variable}>
-      <body>
-        <div className="flex bg-gray-100">
-          <Sidebar />
-          {children}
-        </div>
+      <body className={`${montserrat.variable} min-h-screen`}>
+        <QueryClientProvider client={queryClient}>
+          <SessionProvider>
+            <div className="flex min-h-screen">
+              {!isLoginPage && <Sidebar />}
+              <main
+                className={`flex-grow ${!isLoginPage ? "bg-gray-100" : ""}`}
+              >
+                {children}
+              </main>
+            </div>
+          </SessionProvider>
+        </QueryClientProvider>
       </body>
     </html>
   );

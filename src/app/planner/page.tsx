@@ -1,3 +1,4 @@
+"use client"
 import Bread from "@/components/BreadCrumb";
 import {
   BreadcrumbLink,

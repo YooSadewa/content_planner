@@ -104,7 +104,11 @@ export default function DashboardIdeKontenPage() {
           ) : (
             <>
               {itemsFoto.map((item) => (
-                <Link href={"/ide-konten"} key={`foto-${item.ikf_id}`} className="flex flex-col gap-2">
+                <Link
+                  href={"/ide-konten"}
+                  key={`foto-${item.ikf_id}`}
+                  className="flex flex-col gap-2"
+                >
                   <div className="bg-white rounded-lg h-[110px] p-4 shadow-lg hover:shadow-xl transition-all duration-300 border border-gray-100 flex flex-col gap-2">
                     <div className="flex items-start gap-2 my-auto">
                       <div className="rounded-full bg-blue-100 p-2">
@@ -120,14 +124,16 @@ export default function DashboardIdeKontenPage() {
                               Tanggal
                             </span>
                             <p className="text-sm text-slate-600 w-40 truncate">
-                              {new Date(item.ikf_tgl).toLocaleDateString(
-                                "id-ID",
-                                {
-                                  day: "numeric",
-                                  month: "long",
-                                  year: "numeric",
-                                }
-                              )}
+                              {item.ikf_tgl
+                                ? new Date(item.ikf_tgl).toLocaleDateString(
+                                    "id-ID",
+                                    {
+                                      day: "numeric",
+                                      month: "long",
+                                      year: "numeric",
+                                    }
+                                  )
+                                : "N/A"}
                             </p>
                           </div>
                           <div className="flex flex-col">
@@ -166,10 +172,12 @@ export default function DashboardIdeKontenPage() {
           ) : (
             <>
               {itemsVideo.map((item, index) => (
-                <Link href={"/ide-konten"} key={`video-${item.ikv_id}`} className="flex flex-col gap-2">
-                  <div
-                    className="bg-white rounded-lg h-[110px] p-4 shadow-lg hover:shadow-xl transition-all duration-300 border border-gray-100"
-                  >
+                <Link
+                  href={"/ide-konten"}
+                  key={`video-${item.ikv_id}`}
+                  className="flex flex-col gap-2"
+                >
+                  <div className="bg-white rounded-lg h-[110px] p-4 shadow-lg hover:shadow-xl transition-all duration-300 border border-gray-100">
                     <div className="flex items-start gap-2 my-auto">
                       <div className="rounded-full bg-blue-100 p-2">
                         <Video className="w-4 h-4 text-blue-500" />
@@ -195,14 +203,16 @@ export default function DashboardIdeKontenPage() {
                               Tanggal
                             </span>
                             <p className="text-sm text-slate-600 w-40 truncate">
-                              {new Date(item.ikv_tgl).toLocaleDateString(
-                                "id-ID",
-                                {
-                                  day: "numeric",
-                                  month: "long",
-                                  year: "numeric",
-                                }
-                              )}
+                              {item.ikv_tgl
+                                ? new Date(item.ikv_tgl).toLocaleDateString(
+                                    "id-ID",
+                                    {
+                                      day: "numeric",
+                                      month: "long",
+                                      year: "numeric",
+                                    }
+                                  )
+                                : "N/A"}
                             </p>
                           </div>
                           <div className="flex flex-col">

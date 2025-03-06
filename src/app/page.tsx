@@ -15,6 +15,7 @@ import TotalUploadPodcast from "./podcast/detailupload";
 import { Card, CardContent, CardHeader } from "@/components/ui/card";
 import DashboardQuotePage from "./quotes/dashboard";
 import DashboardIdeKontenPage from "./ide-konten/dashboard";
+import { useSession } from "next-auth/react";
 
 export default function HomePage() {
   const [totalFoto, setTotalFoto] = useState(0);
@@ -25,6 +26,8 @@ export default function HomePage() {
   const [loading, setLoading] = useState(true);
   const [podcasts, setPodcasts] = useState([]);
   const [error, setError] = useState(null);
+  const { data: session } = useSession();
+  const userName = session?.user?.name || "User";
 
   const fetchData = async (url: any, dataKey: any) => {
     try {
@@ -124,7 +127,7 @@ export default function HomePage() {
   return (
     <div className="px-5 py-10">
       <p className="flex font-medium text-xs">
-        Welcome Back, Admin
+        Welcome Back, {userName}
         <Image
           src={"/assets/icons/WavingHand.svg"}
           alt="waving hand icon"

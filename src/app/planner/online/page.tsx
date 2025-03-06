@@ -34,6 +34,7 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { FaTiktok } from "react-icons/fa";
+import CreateOnlinePlanner from "./adddata";
 
 // Define the type for a content calendar entry
 interface ContentCalendarEntry {
@@ -288,10 +289,7 @@ export default function OnlineContentPlanner() {
               Mengelola dan melacak jadwal penerbitan konten
             </CardDescription>
           </div>
-          <Button size="sm" className="bg-indigo-600 hover:bg-indigo-700">
-            <Calendar className="h-4 w-4 mr-2" />
-            Add Content
-          </Button>
+          <CreateOnlinePlanner />
         </div>
       </CardHeader>
       <CardContent className="p-0">
