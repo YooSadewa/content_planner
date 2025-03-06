@@ -223,7 +223,24 @@ export default function AkunMedsosPage() {
           <h2 className="text-xl font-semibold mb-4 text-gray-700">
             Ringkasan Platform
           </h2>
-          <SummaryAccPage data={platformStats} />
+          {loading ? (
+            <div className="flex flex-col gap-6">
+              <div className="flex justify-between">
+                <span className="w-[305px] h-[173px] bg-gray-100 rounded-xl skeleton" />
+                <span className="w-[305px] h-[173px] bg-gray-100 rounded-xl skeleton" />
+                <span className="w-[305px] h-[173px] bg-gray-100 rounded-xl skeleton" />
+              </div>
+              <div className="flex justify-between">
+                <span className="w-[305px] h-[173px] bg-gray-100 rounded-xl skeleton" />
+                <span className="w-[305px] h-[173px] bg-gray-100 rounded-xl skeleton" />
+                <span className="w-[305px] h-[173px] bg-gray-100 rounded-xl skeleton" />
+              </div>
+            </div>
+          ) : (
+            <>
+              <SummaryAccPage data={platformStats} />
+            </>
+          )}
         </div>
 
         <div className="mb-12">
@@ -260,7 +277,11 @@ export default function AkunMedsosPage() {
             </h2>
             <CreateDetailMonthly />
           </div>
-          <MonthlyPostPage data={dataMonthly} />
+          {loading ? (
+            <div className="w-full bg-gray-100 h-[173px] rounded-xl" />
+          ) : (
+            <MonthlyPostPage data={dataMonthly} />
+          )}
         </div>
 
         <div className="mb-12">

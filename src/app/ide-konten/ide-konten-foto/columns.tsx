@@ -65,8 +65,14 @@ export const columns: ColumnDef<IdeKontenFoto>[] = [
       </div>
     ),
     cell: ({ row }) => {
-      const date = new Date(row.getValue("ikf_tgl"));
-      return <div className="w-32 p-2">{date.toLocaleDateString("id-ID")}</div>;
+      const rawDate = row.getValue("ikf_tgl");
+      const date = rawDate ? new Date(rawDate as any) : null;
+
+      return (
+        <div className="w-32 p-2">
+          {date ? date.toLocaleDateString("id-ID") : "N/A"}
+        </div>
+      );
     },
   },
   {

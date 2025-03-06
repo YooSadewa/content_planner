@@ -61,8 +61,14 @@ export const columns: ColumnDef<IdeKontenVideo>[] = [
       </div>
     ),
     cell: ({ row }) => {
-      const date = new Date(row.getValue("ikv_tgl"));
-      return <div className="w-32 p-2">{date.toLocaleDateString("id-ID")}</div>;
+      const rawDate = row.getValue("ikv_tgl");
+      const date = rawDate ? new Date(rawDate as any) : null;
+
+      return (
+        <div className="w-32 p-2">
+          {date ? date.toLocaleDateString("id-ID") : "N/A"}
+        </div>
+      );
     },
   },
   {

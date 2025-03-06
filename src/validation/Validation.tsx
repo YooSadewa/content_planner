@@ -96,7 +96,7 @@ export const picContentInfoSchema = z.object({
     .string()
     .min(1, { message: "Judul konten harus diisi" })
     .max(150, { message: "Judul konten melebihi batas 150 karakter" }),
-  ikv_tgl: z
+  ikf_tgl: z
     .string()
     .nullable()
     .optional()

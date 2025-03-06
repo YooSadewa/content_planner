@@ -69,6 +69,7 @@ export function DataTableVideo({ data }: DataTableProps) {
   const [error, setError] = useState("");
 
   const formatNameDate = (dateString: string) => {
+    if (!dateString) return "N/A";
     const date = new Date(dateString);
     return date.toLocaleDateString("id-ID", {
       day: "numeric",
