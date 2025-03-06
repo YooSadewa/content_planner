@@ -139,95 +139,59 @@ export default function AkunMedsosPage() {
     fetchDetailMonthly();
   }, [selectedMonth, selectedYear]);
 
-  // Fetch platform stats
   useEffect(() => {
     const fetchPlatformStats = async () => {
+      setLoading(true);
+      setError("");
       try {
-        setLoading(true);
-        const response = await axios.get(
+        const sortSummary = await axios.get(
           "http://127.0.0.1:8000/api/sortdetailaccount"
         );
+        console.log("API response:", sortSummary.data);
 
-        if (response.data.status) {
-          const newStats: AllPlatformStats = { ...initialPlatformStats };
+        if (sortSummary.data.status) {
+          // Extract data from the response
+          const { total_konten_per_platform, latest_followers } =
+            sortSummary.data.data;
 
-          // Sorting data berdasarkan timestamp terbaru (created_at atau updated_at)
-          const sortedData = response.data.data.detail_akun.sort(
-            (a: any, b: any) =>
-              Math.max(
-                new Date(b.created_at).getTime(),
-                new Date(b.updated_at).getTime()
-              ) -
-              Math.max(
-                new Date(a.created_at).getTime(),
-                new Date(a.updated_at).getTime()
-              )
-          );
-
-          // Map untuk menyimpan data terbaru berdasarkan timestamp terbesar
-          const latestPlatformRecords: Record<keyof AllPlatformStats, any> = {
-            website: null,
-            instagram: null,
-            twitter: null,
-            facebook: null,
-            youtube: null,
-            tiktok: null,
+          // Create a new object with the correct structure for AllPlatformStats
+          const formattedStats: AllPlatformStats = {
+            website: {
+              total_konten: total_konten_per_platform.website || 0,
+              pengikut: latest_followers.website || 0,
+            },
+            instagram: {
+              total_konten: total_konten_per_platform.instagram || 0,
+              pengikut: latest_followers.instagram || 0,
+            },
+            twitter: {
+              total_konten: total_konten_per_platform.twitter || 0,
+              pengikut: latest_followers.twitter || 0,
+            },
+            facebook: {
+              total_konten: total_konten_per_platform.facebook || 0,
+              pengikut: latest_followers.facebook || 0,
+            },
+            youtube: {
+              total_konten: total_konten_per_platform.youtube || 0,
+              pengikut: latest_followers.youtube || 0,
+            },
+            tiktok: {
+              total_konten: total_konten_per_platform.tiktok || 0,
+              pengikut: latest_followers.tiktok || 0,
+            },
           };
 
-          sortedData.forEach((account: AccountData) => {
-            const platforms: (keyof AllPlatformStats)[] = [
-              "website",
-              "instagram",
-              "twitter",
-              "facebook",
-              "youtube",
-              "tiktok",
-            ];
-
-            // Hitung timestamp terbaru dari akun
-            const latestTimestamp = Math.max(
-              new Date(account.created_at as any).getTime(),
-              new Date(account.updated_at as any).getTime()
-            );
-
-            platforms.forEach((platform) => {
-              const platformData = account[platform];
-              if (platformData) {
-                // Akumulasi total konten
-                newStats[platform].total_konten += Number(
-                  platformData.dpl_total_konten || 0
-                );
-
-                // Karena data sudah diurutkan, cukup ambil yang pertama
-                if (!latestPlatformRecords[platform]) {
-                  latestPlatformRecords[platform] = {
-                    ...platformData,
-                    latestTimestamp,
-                  };
-                }
-              }
-            });
-          });
-
-          // Setelah iterasi selesai, atur jumlah pengikut berdasarkan data terbaru
-          (
-            Object.keys(latestPlatformRecords) as (keyof AllPlatformStats)[]
-          ).forEach((platform) => {
-            const latestRecord = latestPlatformRecords[platform];
-            if (latestRecord) {
-              newStats[platform].pengikut = Number(
-                latestRecord.dpl_pengikut || 0
-              );
-            }
-          });
-
-          setPlatformStats(newStats);
+          console.log("Formatted platform stats:", formattedStats);
+          setPlatformStats(formattedStats);
         } else {
-          setError("Gagal mengambil data: " + response.data.message);
+          console.warn("API returned status false");
+          setPlatformStats(initialPlatformStats);
         }
       } catch (err) {
-        setError("Error mengambil data: " + (err as Error).message);
-        console.error(err);
+        console.error("Error fetching platform stats:", err);
+        setError("Gagal mengambil data statistik platform.");
+        setPlatformStats(initialPlatformStats);
       } finally {
         setLoading(false);
       }
