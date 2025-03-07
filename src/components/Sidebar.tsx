@@ -19,7 +19,7 @@ import { useSession, signOut } from "next-auth/react";
 
 export default function Sidebar() {
   const pathname = usePathname();
-  const { data: session } = useSession();
+  const { data: session, status } = useSession();
 
   const menuItems = [
     { name: "Beranda", href: "/", icon: House },
@@ -72,35 +72,44 @@ export default function Sidebar() {
         </ul>
       </div>
 
-      {/* Profile Section */}
-      {session?.user && (
-        <div className="mb-4 mr-4 p-2 bg-[#1e2c45] rounded-lg flex items-center justify-between">
-          <div className="flex items-center">
-            <Avatar className="h-6 w-6">
-              <AvatarImage src="/assets/avatar.png" alt="Profile" />
-              <AvatarFallback className="text-xs">
-                {session.user.name
-                  ? session.user.name.substring(0, 2).toUpperCase()
-                  : "UI"}
-              </AvatarFallback>
-            </Avatar>
-            <div className="ml-3">
-              <p className="text-white text-sm font-medium">
-                {session.user.name || "User"}
-              </p>
-              <p className="text-gray-400 text-xs truncate w-24">
-                @{session.user.email || "user@example.com"}
-              </p>
+      {status === "loading" ? (
+        <div className="mb-4 mr-4 w-46 h-[52px] bg-[#1e2c45] rounded-lg animate-pulse">
+
+        </div>
+      ) : (
+        <div>
+          {session?.user && (
+            <div className="mb-4 mr-4 py-2 px-3 bg-[#1e2c45] rounded-lg flex items-center justify-between">
+              <div className="flex items-center">
+                <Avatar className="h-6 w-6">
+                  <AvatarImage src="/assets/avatar.png" alt="Profile" />
+                  <AvatarFallback className="text-xs">
+                    {session.user.name
+                      ? session.user.name.substring(0, 2).toUpperCase()
+                      : "UI"}
+                  </AvatarFallback>
+                </Avatar>
+                <div className="ml-3">
+                  <p className="text-white text-sm font-medium truncate w-24">
+                    {session.user.name || "User"}
+                  </p>
+                  <p className="text-gray-400 text-xs truncate w-24">
+                    {(session.user as any).username ||
+                      session.user.email ||
+                      "user@example.com"}
+                  </p>
+                </div>
+              </div>
+              <Button
+                variant="ghost"
+                size="icon"
+                className="text-white hover:bg-[#364869] hover:text-white"
+                onClick={handleLogout}
+              >
+                <LogOut className="h-5 w-5" />
+              </Button>
             </div>
-          </div>
-          <Button
-            variant="ghost"
-            size="icon"
-            className="text-white hover:bg-[#364869] hover:text-white"
-            onClick={handleLogout}
-          >
-            <LogOut className="h-5 w-5" />
-          </Button>
+          )}
         </div>
       )}
     </div>

@@ -318,5 +318,10 @@ export const monthlyDataSchema = z.object({
 });
 
 export const onlinePlannerSchema = z.object({
-  onp_tanggal: z.date()
+  onp_tanggal: z.string().min(1, "Tanggal harus diisi"),
+  onp_topik_konten: z.string().min(1, "Topik Konten harus diisi"),
+  onp_hari: z.string(),
+  onp_admin: z.string(),
+  onp_platform: z.string(),
+  onp_checkpoint: z.string()
 })

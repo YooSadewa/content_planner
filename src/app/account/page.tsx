@@ -130,7 +130,7 @@ export default function AkunMedsosPage() {
         }
       } catch (err) {
         setError("Gagal mengambil data dari API.");
-        console.error(err);
+        return 0
       } finally {
         setLoading(false);
       }
@@ -189,9 +189,9 @@ export default function AkunMedsosPage() {
           setPlatformStats(initialPlatformStats);
         }
       } catch (err) {
-        console.error("Error fetching platform stats:", err);
         setError("Gagal mengambil data statistik platform.");
         setPlatformStats(initialPlatformStats);
+        return 0;
       } finally {
         setLoading(false);
       }
