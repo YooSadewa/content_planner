@@ -323,5 +323,35 @@ export const onlinePlannerSchema = z.object({
   onp_hari: z.string(),
   onp_admin: z.string(),
   onp_platform: z.string(),
-  onp_checkpoint: z.string()
-})
+  onp_checkpoint: z.string(),
+});
+
+export const createUploadOnlinePlannerSchema = (platform: {
+  instagram?: boolean;
+  facebook?: boolean;
+  twitter?: boolean;
+  youtube?: boolean;
+  website?: boolean;
+  tikTok?: boolean;
+}) => {
+  return z.object({
+    lup_instagram: platform.instagram
+      ? z.string().min(1, "Link Instagram harus diisi")
+      : z.string().optional().nullable(),
+    lup_facebook: platform.facebook
+      ? z.string().min(1, "Link Facebook harus diisi")
+      : z.string().optional().nullable(),
+    lup_twitter: platform.twitter
+      ? z.string().min(1, "Link Twitter harus diisi")
+      : z.string().optional().nullable(),
+    lup_youtube: platform.youtube
+      ? z.string().min(1, "Link YouTube harus diisi")
+      : z.string().optional().nullable(),
+    lup_website: platform.website
+      ? z.string().min(1, "Link Website harus diisi")
+      : z.string().optional().nullable(),
+    lup_tiktok: platform.tikTok
+      ? z.string().min(1, "Link TikTok harus diisi")
+      : z.string().optional().nullable(),
+  });
+};

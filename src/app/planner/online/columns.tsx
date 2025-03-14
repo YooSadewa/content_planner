@@ -12,7 +12,9 @@ import {
   LinkIcon,
 } from "lucide-react";
 import { FaTiktok } from "react-icons/fa";
+import { MdFileUpload } from "react-icons/md";
 import { Button } from "@/components/ui/button";
+import FormUploadLink from "./upload";
 
 export type OnlineContent = {
   onp_id: number;
@@ -34,14 +36,12 @@ export type OnlineContent = {
     chris?: boolean;
     winny?: boolean;
   };
-  onp_link_upload?: {
-    instagram?: string;
-    facebook?: string;
-    twitter?: string;
-    youtube?: string;
-    website?: string;
-    tiktok?: string;
-  };
+  lup_instagram?: string;
+  lup_twitter?: string;
+  lup_youtube?: string;
+  lup_facebook?: string;
+  lup_website?: string;
+  lup_tiktok?: string;
   onp_status?: "draft" | "review" | "scheduled" | "published";
   platforms: any;
 };
@@ -329,6 +329,29 @@ export const columns: ColumnDef<OnlineContent>[] = [
           <div className="w-fit mx-auto">
             <StatusBadge status={status} />
           </div>
+        </div>
+      );
+    },
+  },
+  {
+    accessorKey: "ikv_id",
+    header: () => (
+      <div className="font-semibold text-center">
+        <p>Confirm Upload</p>
+      </div>
+    ),
+    cell: ({ row, table }) => {
+      const meta = table.options.meta as {
+        setSelectedItem: (item: OnlineContent) => void;
+      };
+
+      return (
+        <div className="w-[120px]">
+          <FormUploadLink
+            idONP={row.getValue("onp_id")}
+            TopikKonten={row.getValue("onp_topik_konten")}
+            Platform={row.getValue("onp_platform")}
+          />
         </div>
       );
     },

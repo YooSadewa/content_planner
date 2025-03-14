@@ -41,16 +41,18 @@ export default function LoginForm() {
         setStatus("success");
         Swal.fire({
           title: "Good job!",
-          text: "You successfully logged in!",
+          text: "Berhasil login, Selamat datang",
           icon: "success",
           confirmButtonText: "OK",
         }).then(() => {
           replace("/");
         });
       } else if (res?.status === 401) {
-        setStatus("error");
-      } else if (res?.status === 403) {
-        setStatus("username_not_verified");
+        Swal.fire({
+          icon: "error",
+          title: "Oops...",
+          text: "Username atau Password salah",
+        });
       }
     } catch (error) {
       setStatus("error");
@@ -94,22 +96,6 @@ export default function LoginForm() {
                 />
               </div>
             </div>
-
-            {status === "error" && (
-              <Alert variant="destructive" className="">
-                <AlertCircle className="h-4 w-4" />
-                <AlertDescription className="mt-1">
-                  Login tidak sesuai. Silahkan Coba lagi.
-                </AlertDescription>
-              </Alert>
-            )}
-
-            {status === "username_not_verified" && (
-              <div className="flex items-center gap-2 text-sm p-3 rounded-md border border-yellow-300 bg-yellow-50 text-yellow-800">
-                <AlertCircle className="h-4 w-4 text-yellow-500 flex-shrink-0" />
-                <span>Please verify your username before logging in.</span>
-              </div>
-            )}
 
             <Button
               type="submit"

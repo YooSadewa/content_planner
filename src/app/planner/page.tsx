@@ -109,17 +109,17 @@ export default function ContentPlannerPage() {
             };
 
             // Create link upload object
-            const linkUploadObj: OnlineContent["onp_link_upload"] = {};
+            // const linkUploadObj: OnlineContent["lup_instagram" | "lup_tiktok"];
 
             // Check if platforms is an object (not an empty array)
-            if (item.platforms && !Array.isArray(item.platforms)) {
-              Object.entries(item.platforms).forEach(([platform, data]) => {
-                if (platform && data && data.link) {
-                  linkUploadObj[platform as keyof typeof linkUploadObj] =
-                    data.link;
-                }
-              });
-            }
+            // if (item.platforms && !Array.isArray(item.platforms)) {
+            //   Object.entries(item.platforms).forEach(([platform, data]) => {
+            //     if (platform && data && data.link) {
+            //       linkUploadObj[platform as keyof typeof linkUploadObj] =
+            //         data.link;
+            //     }
+            //   });
+            // }
 
             // Return transformed item
             const transformedItem: OnlineContent = {
@@ -130,7 +130,7 @@ export default function ContentPlannerPage() {
               onp_admin: item.onp_admin,
               onp_platform: platformObj,
               onp_checkpoint: checkpointObj,
-              onp_link_upload: linkUploadObj,
+              // onp_link_upload: linkUploadObj,
               platforms: item.platforms,
               onp_status: "published", // Default status
             };
@@ -171,7 +171,7 @@ export default function ContentPlannerPage() {
         </div>
       </div>
       <div className="mx-5">
-        <h1 className="font-bold text-2xl mt-5 text-[#293854] me-auto mb-4 flex items-center">
+        <h1 className="font-bold text-2xl mt-5 text-[#293854] me-auto mb-3 flex items-center">
           Perencanaan Konten
         </h1>
         {loading ? (
@@ -179,8 +179,8 @@ export default function ContentPlannerPage() {
         ) : error ? (
           <div className="text-center py-8 text-red-500">{error}</div>
         ) : (
-          <Card className="shadow-md border-none">
-            <CardHeader className="bg-gradient-to-r from-blue-50 to-indigo-50 border-b">
+          <Card className="shadow-md border-none mb-5">
+            <CardHeader className="bg-gradient-to-r from-blue-50 to-indigo-50 border-b p-5 ">
               <div className="flex justify-between items-center">
                 <div>
                   <CardTitle className="text-xl font-bold text-gray-800">
