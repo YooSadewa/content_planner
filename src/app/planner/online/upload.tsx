@@ -16,6 +16,7 @@ import { createUploadOnlinePlannerSchema } from "@/validation/Validation";
 import axios from "axios";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import Swal from "sweetalert2";
 
 type UploadLinkProps = {
   idONP: string;
@@ -101,9 +102,36 @@ export default function FormUploadLink({
         formData
       );
       if (response.status === 200 || response.status === 201) {
-        window.location.reload();
         setSuccessMessage("Link berhasil ditambahkan.");
         setModalOpen(false);
+
+        // Show success SweetAlert with timer
+        let timerInterval : any;
+        Swal.fire({
+          title: "Berhasil!",
+          text: "Link berhasil ditambahkan.",
+          icon: "success",
+          timer: 1000,
+          timerProgressBar: true,
+          showConfirmButton: false, // Remove the OK button
+          didOpen: () => {
+            Swal.showLoading();
+            const timer = Swal.getPopup()?.querySelector("b");
+            if (timer) {
+              timerInterval = setInterval(() => {
+                if (timer) timer.textContent = `${Swal.getTimerLeft()}`;
+              }, 100);
+            }
+          },
+          willClose: () => {
+            clearInterval(timerInterval);
+          },
+        }).then((result) => {
+          if (result.dismiss === Swal.DismissReason.timer) {
+            console.log("Alert closed by the timer");
+            window.location.reload(); 
+          }
+        });
       } else {
         setErrorMessage("Terjadi kesalahan saat menambahkan link.");
       }
@@ -122,7 +150,6 @@ export default function FormUploadLink({
     }
   };
 
-  // Sisanya sama dengan kode sebelumnya
   return (
     <>
       <Button
@@ -255,10 +282,6 @@ export default function FormUploadLink({
               {errorMessage && (
                 <div className="text-red-500 mt-2">{errorMessage}</div>
               )}
-              {successMessage && (
-                <div className="text-green-500 mt-2">{successMessage}</div>
-              )}
-
               <AlertDialogFooter className="mt-4">
                 <AlertDialogCancel type="button" onClick={handleCancel}>
                   Cancel

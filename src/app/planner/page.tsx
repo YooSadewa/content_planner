@@ -49,6 +49,8 @@ interface ApiOnlinePlanner {
 
 export default function ContentPlannerPage() {
   const [tableDataOnline, setTableDataOnline] = useState<OnlineContent[]>([]);
+  const [tableDataOnlineScheduled, setTableDataOnlineScheduled] = useState<OnlineContent[]>([]);
+  const [tableDataOnlineDone, setTableDataOnlineDone] = useState<OnlineContent[]>([]);
   const [loading, setLoading] = useState<boolean>(true);
   const [error, setError] = useState<string>("");
 
@@ -155,6 +157,212 @@ export default function ContentPlannerPage() {
     fetchOnlinePlanner();
   }, []);
 
+  useEffect(() => {
+    const fetchOnlinePlannerScheduled = async () => {
+      try {
+        const response = await axios.get<ApiResponse>(
+          "http://127.0.0.1:8000/api/onlinecontentplanner/scheduled"
+        );
+
+        console.log("Raw API Response:", response.data);
+
+        if (response.data.status) {
+          const dataOnline = response.data.data.online_planners || [];
+          console.log("Original data:", dataOnline);
+
+          // Transform the data to match your component expectations
+          const transformedData: OnlineContent[] = dataOnline.map((item) => {
+            // Parse the platform string into an object
+            const platformObj: OnlineContent["onp_platform"] = {
+              instagram: false,
+              facebook: false,
+              twitter: false,
+              youtube: false,
+              website: false,
+              tikTok: false,
+            };
+
+            // Handle comma-separated platform string
+            if (item.onp_platform) {
+              const platforms = item.onp_platform.split(",");
+              platforms.forEach((platform) => {
+                const trimmedPlatform = platform.trim();
+                if (trimmedPlatform === "instagram")
+                  platformObj.instagram = true;
+                else if (trimmedPlatform === "facebook")
+                  platformObj.facebook = true;
+                else if (trimmedPlatform === "twitter")
+                  platformObj.twitter = true;
+                else if (trimmedPlatform === "youtube")
+                  platformObj.youtube = true;
+                else if (trimmedPlatform === "website")
+                  platformObj.website = true;
+                else if (
+                  trimmedPlatform === "tiktok" ||
+                  trimmedPlatform === "tikTok"
+                )
+                  platformObj.tikTok = true;
+              });
+            }
+
+            // Create checkpoint object
+            const checkpointObj: OnlineContent["onp_checkpoint"] = {
+              jayaridho: item.onp_checkpoint === "jayaridho",
+              gilang: item.onp_checkpoint === "gilang",
+              chris: item.onp_checkpoint === "chris",
+              winny: item.onp_checkpoint === "winny",
+            };
+
+            // Create link upload object
+            // const linkUploadObj: OnlineContent["lup_instagram" | "lup_tiktok"];
+
+            // Check if platforms is an object (not an empty array)
+            // if (item.platforms && !Array.isArray(item.platforms)) {
+            //   Object.entries(item.platforms).forEach(([platform, data]) => {
+            //     if (platform && data && data.link) {
+            //       linkUploadObj[platform as keyof typeof linkUploadObj] =
+            //         data.link;
+            //     }
+            //   });
+            // }
+
+            // Return transformed item
+            const transformedItem: OnlineContent = {
+              onp_id: item.onp_id,
+              onp_tanggal: item.onp_tanggal,
+              onp_hari: item.onp_hari,
+              onp_topik_konten: item.onp_topik_konten,
+              onp_admin: item.onp_admin,
+              onp_platform: platformObj,
+              onp_checkpoint: checkpointObj,
+              // onp_link_upload: linkUploadObj,
+              platforms: item.platforms,
+              onp_status: "published", // Default status
+            };
+
+            return transformedItem;
+          });
+
+          console.log("Transformed data:", transformedData);
+          setTableDataOnlineScheduled(transformedData);
+        } else {
+          console.log("API returned status false");
+          setTableDataOnlineScheduled([]);
+        }
+      } catch (error) {
+        console.error("Error fetching data:", error);
+        setError("Terjadi kesalahan");
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchOnlinePlannerScheduled();
+  }, []);
+
+  useEffect(() => {
+    const fetchOnlinePlannerDone = async () => {
+      try {
+        const response = await axios.get<ApiResponse>(
+          "http://127.0.0.1:8000/api/onlinecontentplanner/done"
+        );
+
+        console.log("Raw API Response:", response.data);
+
+        if (response.data.status) {
+          const dataOnline = response.data.data.online_planners || [];
+          console.log("Original data:", dataOnline);
+
+          // Transform the data to match your component expectations
+          const transformedData: OnlineContent[] = dataOnline.map((item) => {
+            // Parse the platform string into an object
+            const platformObj: OnlineContent["onp_platform"] = {
+              instagram: false,
+              facebook: false,
+              twitter: false,
+              youtube: false,
+              website: false,
+              tikTok: false,
+            };
+
+            // Handle comma-separated platform string
+            if (item.onp_platform) {
+              const platforms = item.onp_platform.split(",");
+              platforms.forEach((platform) => {
+                const trimmedPlatform = platform.trim();
+                if (trimmedPlatform === "instagram")
+                  platformObj.instagram = true;
+                else if (trimmedPlatform === "facebook")
+                  platformObj.facebook = true;
+                else if (trimmedPlatform === "twitter")
+                  platformObj.twitter = true;
+                else if (trimmedPlatform === "youtube")
+                  platformObj.youtube = true;
+                else if (trimmedPlatform === "website")
+                  platformObj.website = true;
+                else if (
+                  trimmedPlatform === "tiktok" ||
+                  trimmedPlatform === "tikTok"
+                )
+                  platformObj.tikTok = true;
+              });
+            }
+
+            // Create checkpoint object
+            const checkpointObj: OnlineContent["onp_checkpoint"] = {
+              jayaridho: item.onp_checkpoint === "jayaridho",
+              gilang: item.onp_checkpoint === "gilang",
+              chris: item.onp_checkpoint === "chris",
+              winny: item.onp_checkpoint === "winny",
+            };
+
+            // Create link upload object
+            // const linkUploadObj: OnlineContent["lup_instagram" | "lup_tiktok"];
+
+            // Check if platforms is an object (not an empty array)
+            // if (item.platforms && !Array.isArray(item.platforms)) {
+            //   Object.entries(item.platforms).forEach(([platform, data]) => {
+            //     if (platform && data && data.link) {
+            //       linkUploadObj[platform as keyof typeof linkUploadObj] =
+            //         data.link;
+            //     }
+            //   });
+            // }
+
+            // Return transformed item
+            const transformedItem: OnlineContent = {
+              onp_id: item.onp_id,
+              onp_tanggal: item.onp_tanggal,
+              onp_hari: item.onp_hari,
+              onp_topik_konten: item.onp_topik_konten,
+              onp_admin: item.onp_admin,
+              onp_platform: platformObj,
+              onp_checkpoint: checkpointObj,
+              // onp_link_upload: linkUploadObj,
+              platforms: item.platforms,
+              onp_status: "published", // Default status
+            };
+
+            return transformedItem;
+          });
+
+          console.log("Transformed data:", transformedData);
+          setTableDataOnlineDone(transformedData);
+        } else {
+          console.log("API returned status false");
+          setTableDataOnlineDone([]);
+        }
+      } catch (error) {
+        console.error("Error fetching data:", error);
+        setError("Terjadi kesalahan");
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchOnlinePlannerDone();
+  }, []);
+
   return (
     <div className="w-[1050px]">
       <div className="px-5 pt-5 overflow-auto">
@@ -204,6 +412,12 @@ export default function ContentPlannerPage() {
                 </div>
                 <TabsContent value="all" className="m-0">
                   <DataTableOnline data={tableDataOnline} columns={columns} />
+                </TabsContent>
+                <TabsContent value="scheduled" className="m-0">
+                  <DataTableOnline data={tableDataOnlineScheduled} columns={columns} />
+                </TabsContent>
+                <TabsContent value="published" className="m-0">
+                  <DataTableOnline data={tableDataOnlineDone} columns={columns} />
                 </TabsContent>
               </Tabs>
             </CardContent>

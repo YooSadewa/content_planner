@@ -15,6 +15,7 @@ import { FaTiktok } from "react-icons/fa";
 import { MdFileUpload } from "react-icons/md";
 import { Button } from "@/components/ui/button";
 import FormUploadLink from "./upload";
+import FormEditLink from "./updatelink";
 
 export type OnlineContent = {
   onp_id: number;
@@ -319,7 +320,7 @@ export const columns: ColumnDef<OnlineContent>[] = [
             variant="outline"
           >
             {config.icon}
-            <span className="capitalize text-xs">{status}</span>
+            <span className="capitalize text-sm">{status}</span>
           </Badge>
         );
       };
@@ -345,13 +346,37 @@ export const columns: ColumnDef<OnlineContent>[] = [
         setSelectedItem: (item: OnlineContent) => void;
       };
 
+      // Get the complete row data to check the status
+      const rowData = row.original;
+      let status = "scheduled"; // Default status
+
+      // Check if platforms has data
+      if (rowData.platforms) {
+        // If it's an object with keys, mark as done
+        if (
+          typeof rowData.platforms === "object" &&
+          !Array.isArray(rowData.platforms) &&
+          Object.keys(rowData.platforms).length > 0
+        ) {
+          status = "done";
+        }
+      }
+
+      // Render FormEditLink if status is done, otherwise FormUploadLink
       return (
         <div className="w-[120px]">
-          <FormUploadLink
-            idONP={row.getValue("onp_id")}
-            TopikKonten={row.getValue("onp_topik_konten")}
-            Platform={row.getValue("onp_platform")}
-          />
+          {status === "done" ? (
+            <Badge variant="outline" className="bg-green-100 text-green-700 border-green-200 flex items-center gap-1 font-normal">
+              <Check size={20} className="mr-2"/>
+              <span className="text-xs">Sudah Terupload</span>
+            </Badge>
+          ) : (
+            <FormUploadLink
+              idONP={row.getValue("onp_id")}
+              TopikKonten={row.getValue("onp_topik_konten")}
+              Platform={row.getValue("onp_platform")}
+            />
+          )}
         </div>
       );
     },
