@@ -17,6 +17,14 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
+import {
+  Pagination,
+  PaginationContent,
+  PaginationItem,
+  PaginationLink,
+  PaginationNext,
+  PaginationPrevious,
+} from "@/components/ui/pagination";
 import CreateOnlinePlanner from "./online/adddata";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { platform } from "os";
@@ -253,7 +261,7 @@ export default function ContentPlannerPage() {
           setTableDataOnlineScheduled([]);
         }
       } catch (error) {
-        return 0
+        return 0;
       } finally {
         setLoading(false);
       }
@@ -354,7 +362,7 @@ export default function ContentPlannerPage() {
           setTableDataOnlineDone([]);
         }
       } catch (error) {
-        return 0
+        return 0;
       } finally {
         setLoading(false);
       }
@@ -382,53 +390,75 @@ export default function ContentPlannerPage() {
         <h1 className="font-bold text-2xl mt-5 text-[#293854] me-auto mb-3 flex items-center">
           Perencanaan Konten
         </h1>
-        {loading ? (
-          <div className="text-center py-8">Loading...</div>
-        ) : error ? (
-          <div className="text-center py-8 text-red-500">{error}</div>
-        ) : (
-          <Card className="shadow-md border-none mb-5">
-            <CardHeader className="bg-gradient-to-r from-blue-50 to-indigo-50 border-b p-5 ">
-              <div className="flex justify-between items-center">
-                <div>
-                  <CardTitle className="text-xl font-bold text-gray-800">
-                    Online Content Planner
-                  </CardTitle>
-                  <CardDescription>
-                    Mengelola dan melacak jadwal penerbitan konten
-                  </CardDescription>
-                </div>
-                <CreateOnlinePlanner />
+
+        <Card className="shadow-md border-none mb-5">
+          <CardHeader className="bg-gradient-to-r from-blue-50 to-indigo-50 border-b p-5 ">
+            <div className="flex justify-between items-center">
+              <div>
+                <CardTitle className="text-xl font-bold text-gray-800">
+                  Online Content Planner
+                </CardTitle>
+                <CardDescription>
+                  Mengelola dan melacak jadwal penerbitan konten
+                </CardDescription>
               </div>
-            </CardHeader>
-            <CardContent className="p-0">
-              <Tabs defaultValue="all" className="w-full">
-                <div className="px-6 pt-4">
-                  <TabsList className="grid w-full grid-cols-3">
-                    <TabsTrigger value="all">All Content</TabsTrigger>
-                    <TabsTrigger value="scheduled">Scheduled</TabsTrigger>
-                    <TabsTrigger value="published">Published</TabsTrigger>
-                  </TabsList>
+              <CreateOnlinePlanner />
+            </div>
+          </CardHeader>
+          <CardContent className="p-0">
+            <Tabs defaultValue="all" className="w-full">
+              <div className="px-6 pt-4">
+                <TabsList className="grid w-full grid-cols-3 bg-white">
+                  <TabsTrigger value="all" className="border">All Content</TabsTrigger>
+                  <TabsTrigger value="scheduled" className="border">Scheduled</TabsTrigger>
+                  <TabsTrigger value="published" className="border">Published</TabsTrigger>
+                </TabsList>
+              </div>
+              {loading ? (
+                <div className="w-full px-6 pt-6 pb-6">
+                  <div className="w-full bg-gray-100 skeleton h-80" />
+                  <div className="w-full mt-6">
+                    <Pagination>
+                      <PaginationContent>
+                        <PaginationItem className="cursor-pointer">
+                          <PaginationPrevious
+                            className={"pointer-events-none opacity-50"}
+                          />
+                        </PaginationItem>
+                        <PaginationItem className="cursor-pointer">
+                          <PaginationLink>0</PaginationLink>
+                        </PaginationItem>
+                        <PaginationItem className="cursor-pointer">
+                          <PaginationNext
+                            className={"pointer-events-none opacity-50"}
+                          />
+                        </PaginationItem>
+                      </PaginationContent>
+                    </Pagination>
+                  </div>
                 </div>
-                <TabsContent value="all" className="m-0">
-                  <DataTableOnline data={tableDataOnline} columns={columns} />
-                </TabsContent>
-                <TabsContent value="scheduled" className="m-0">
-                  <DataTableOnline
-                    data={tableDataOnlineScheduled}
-                    columns={columns}
-                  />
-                </TabsContent>
-                <TabsContent value="published" className="m-0">
-                  <DataTableOnline
-                    data={tableDataOnlineDone}
-                    columns={columns}
-                  />
-                </TabsContent>
-              </Tabs>
-            </CardContent>
-          </Card>
-        )}
+              ) : (
+                <>
+                  <TabsContent value="all" className="m-0">
+                    <DataTableOnline data={tableDataOnline} columns={columns} />
+                  </TabsContent>
+                  <TabsContent value="scheduled" className="m-0">
+                    <DataTableOnline
+                      data={tableDataOnlineScheduled}
+                      columns={columns}
+                    />
+                  </TabsContent>
+                  <TabsContent value="published" className="m-0">
+                    <DataTableOnline
+                      data={tableDataOnlineDone}
+                      columns={columns}
+                    />
+                  </TabsContent>
+                </>
+              )}
+            </Tabs>
+          </CardContent>
+        </Card>
       </div>
     </div>
   );
