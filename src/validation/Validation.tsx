@@ -317,14 +317,54 @@ export const monthlyDataSchema = z.object({
     .min(1, "Minimal satu platform harus dipilih"),
 });
 
-export const onlinePlannerSchema = z.object({
-  onp_tanggal: z.string().min(1, "Tanggal harus diisi"),
-  onp_topik_konten: z.string().min(1, "Topik Konten harus diisi"),
-  onp_hari: z.string(),
-  onp_admin: z.string(),
-  onp_platform: z.string(),
-  onp_checkpoint: z.string(),
-});
+export const onlinePlannerSchema = (isEdit: boolean, previousDate?: string) =>
+  z.object({
+    onp_tgl: z
+      .string()
+      .nullable()
+      .refine(
+        (val) => {
+          const inputDate = new Date(val as any);
+          const currentDate = new Date();
+          currentDate.setHours(0, 0, 0, 0);
+          inputDate.setHours(0, 0, 0, 0);
+
+          if (isEdit && previousDate) {
+            const prevDate = new Date(previousDate);
+            prevDate.setHours(0, 0, 0, 0);
+
+            // Jika previousDate di masa lalu dan tidak diubah, tetap lolos
+            if (
+              prevDate < currentDate &&
+              inputDate.getTime() === prevDate.getTime()
+            ) {
+              return true;
+            }
+
+            // Jika previousDate di masa lalu tapi diubah, minimal harus hari ini
+            if (prevDate < currentDate) {
+              return inputDate >= currentDate;
+            }
+
+            // Jika previousDate di masa depan dan diubah, minimal harus setelah hari ini tetapi boleh di bawah previousDate
+            if (prevDate >= currentDate) {
+              return inputDate >= currentDate;
+            }
+          }
+
+          // Jika bukan edit, tetap tidak boleh di masa lalu
+          return inputDate >= currentDate;
+        },
+        {
+          message: "Tanggal shooting tidak boleh di masa lalu",
+        }
+      ),
+    onp_topik_konten: z.string().min(1, "Topik Konten harus diisi"),
+    onp_hari: z.string(),
+    onp_admin: z.string(),
+    onp_platform: z.string(),
+    onp_checkpoint: z.string(),
+  });
 
 export const createUploadOnlinePlannerSchema = (platform: {
   instagram?: boolean;
@@ -334,24 +374,84 @@ export const createUploadOnlinePlannerSchema = (platform: {
   website?: boolean;
   tikTok?: boolean;
 }) => {
-  return z.object({
+  const schema = z.object({
     lup_instagram: platform.instagram
-      ? z.string().min(1, "Link Instagram harus diisi").url("Link harus valid")
+      ? z.union([
+          z.string().url("Link harus valid"),
+          z.string().length(0),
+          z.null(),
+          z.undefined(),
+        ])
       : z.string().optional().nullable(),
     lup_facebook: platform.facebook
-      ? z.string().min(1, "Link Facebook harus diisi").url("Link harus valid")
+      ? z.union([
+          z.string().url("Link harus valid"),
+          z.string().length(0),
+          z.null(),
+          z.undefined(),
+        ])
       : z.string().optional().nullable(),
     lup_twitter: platform.twitter
-      ? z.string().min(1, "Link Twitter harus diisi").url("Link harus valid")
+      ? z.union([
+          z.string().url("Link harus valid"),
+          z.string().length(0),
+          z.null(),
+          z.undefined(),
+        ])
       : z.string().optional().nullable(),
     lup_youtube: platform.youtube
-      ? z.string().min(1, "Link YouTube harus diisi").url("Link harus valid")
+      ? z.union([
+          z.string().url("Link harus valid"),
+          z.string().length(0),
+          z.null(),
+          z.undefined(),
+        ])
       : z.string().optional().nullable(),
     lup_website: platform.website
-      ? z.string().min(1, "Link Website harus diisi").url("Link harus valid")
+      ? z.union([
+          z.string().url("Link harus valid"),
+          z.string().length(0),
+          z.null(),
+          z.undefined(),
+        ])
       : z.string().optional().nullable(),
     lup_tiktok: platform.tikTok
-      ? z.string().min(1, "Link TikTok harus diisi").url("Link harus valid")
+      ? z.union([
+          z.string().url("Link harus valid"),
+          z.string().length(0),
+          z.null(),
+          z.undefined(),
+        ])
       : z.string().optional().nullable(),
   });
+
+  return schema.refine(
+    (data) => {
+      // Jika tidak ada platform yang dipilih, tidak perlu validasi tambahan
+      if (
+        !platform.instagram &&
+        !platform.facebook &&
+        !platform.twitter &&
+        !platform.youtube &&
+        !platform.website &&
+        !platform.tikTok
+      ) {
+        return true;
+      }
+
+      // Jika ada platform yang dipilih, setidaknya satu field harus diisi
+      const hasValue = Object.entries(data).some(([key, value]) => {
+        const platformKey = key.replace("lup_", "");
+        const platformValue =
+          (platform as any)[platformKey === "tiktok" ? "tikTok" : platformKey];
+        return platformValue && value && value.trim() !== "";
+      });
+
+      return hasValue;
+    },
+    {
+      message: "Setidaknya satu link platform harus diisi",
+      path: [""], // Untuk menunjukkan error pada level form
+    }
+  );
 };

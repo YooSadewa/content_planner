@@ -49,8 +49,12 @@ interface ApiOnlinePlanner {
 
 export default function ContentPlannerPage() {
   const [tableDataOnline, setTableDataOnline] = useState<OnlineContent[]>([]);
-  const [tableDataOnlineScheduled, setTableDataOnlineScheduled] = useState<OnlineContent[]>([]);
-  const [tableDataOnlineDone, setTableDataOnlineDone] = useState<OnlineContent[]>([]);
+  const [tableDataOnlineScheduled, setTableDataOnlineScheduled] = useState<
+    OnlineContent[]
+  >([]);
+  const [tableDataOnlineDone, setTableDataOnlineDone] = useState<
+    OnlineContent[]
+  >([]);
   const [loading, setLoading] = useState<boolean>(true);
   const [error, setError] = useState<string>("");
 
@@ -246,12 +250,10 @@ export default function ContentPlannerPage() {
           console.log("Transformed data:", transformedData);
           setTableDataOnlineScheduled(transformedData);
         } else {
-          console.log("API returned status false");
           setTableDataOnlineScheduled([]);
         }
       } catch (error) {
-        console.error("Error fetching data:", error);
-        setError("Terjadi kesalahan");
+        return 0
       } finally {
         setLoading(false);
       }
@@ -349,12 +351,10 @@ export default function ContentPlannerPage() {
           console.log("Transformed data:", transformedData);
           setTableDataOnlineDone(transformedData);
         } else {
-          console.log("API returned status false");
           setTableDataOnlineDone([]);
         }
       } catch (error) {
-        console.error("Error fetching data:", error);
-        setError("Terjadi kesalahan");
+        return 0
       } finally {
         setLoading(false);
       }
@@ -414,10 +414,16 @@ export default function ContentPlannerPage() {
                   <DataTableOnline data={tableDataOnline} columns={columns} />
                 </TabsContent>
                 <TabsContent value="scheduled" className="m-0">
-                  <DataTableOnline data={tableDataOnlineScheduled} columns={columns} />
+                  <DataTableOnline
+                    data={tableDataOnlineScheduled}
+                    columns={columns}
+                  />
                 </TabsContent>
                 <TabsContent value="published" className="m-0">
-                  <DataTableOnline data={tableDataOnlineDone} columns={columns} />
+                  <DataTableOnline
+                    data={tableDataOnlineDone}
+                    columns={columns}
+                  />
                 </TabsContent>
               </Tabs>
             </CardContent>

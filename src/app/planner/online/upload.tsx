@@ -50,6 +50,8 @@ export default function FormUploadLink({
   const [loading, setLoading] = useState(false);
   const [errorMessage, setErrorMessage] = useState("");
   const [successMessage, setSuccessMessage] = useState("");
+  const [existingLinks, setExistingLinks] = useState<UploadLink | null>(null);
+  const [hasFilledInput, setHasFilledInput] = useState(false);
 
   // Buat schema dinamis berdasarkan Platform
   const uploadSchema = createUploadOnlinePlannerSchema(Platform);
@@ -59,6 +61,7 @@ export default function FormUploadLink({
     handleSubmit,
     setValue,
     reset,
+    watch,
     formState: { errors, isSubmitting },
   } = useForm<UploadLink>({
     defaultValues: {
@@ -72,8 +75,54 @@ export default function FormUploadLink({
     resolver: zodResolver(uploadSchema),
   });
 
+  // Watch all form fields to check if any is filled
+  const formValues = watch();
+
+  // Check if at least one field has a value
+  useEffect(() => {
+    const checkIfAnyFieldFilled = () => {
+      const values = Object.values(formValues);
+      const anyFieldFilled = values.some(
+        (value) => value && value.trim() !== ""
+      );
+      setHasFilledInput(anyFieldFilled);
+    };
+
+    checkIfAnyFieldFilled();
+  }, [formValues]);
+
+  // Fungsi untuk mengambil data link yang sudah ada
+  const fetchExistingLinks = async () => {
+    try {
+      setLoading(true);
+      const response = await axios.get(
+        `http://127.0.0.1:8000/api/linkplanner/${idONP}`
+      );
+
+      if (response.status === 200 && response.data.status) {
+        const linkData = response.data.data.linkUploadPlanner;
+        setExistingLinks(linkData);
+
+        // Isi form dengan data yang sudah ada
+        setValue("lup_instagram", linkData.lup_instagram || "");
+        setValue("lup_facebook", linkData.lup_facebook || "");
+        setValue("lup_twitter", linkData.lup_twitter || "");
+        setValue("lup_youtube", linkData.lup_youtube || "");
+        setValue("lup_website", linkData.lup_website || "");
+        setValue("lup_tiktok", linkData.lup_tiktok || "");
+      }
+    } catch (error) {
+      console.error("Error fetching existing links:", error);
+      // Tidak perlu menampilkan error jika data belum ada
+    } finally {
+      setLoading(false);
+    }
+  };
+
   const onOpen = () => {
     setModalOpen(true);
+    // Fetch existing links when modal opens
+    fetchExistingLinks();
   };
 
   const handleCancel = () => {
@@ -86,34 +135,25 @@ export default function FormUploadLink({
     setErrorMessage("");
     setSuccessMessage("");
 
-    const formData = new FormData();
-    formData.append("onp_id", idONP);
-    formData.append("lup_instagram", data.lup_instagram);
-    formData.append("lup_twitter", data.lup_twitter);
-    formData.append("lup_facebook", data.lup_facebook);
-    formData.append("lup_youtube", data.lup_youtube);
-    formData.append("lup_website", data.lup_website);
-    formData.append("lup_tiktok", data.lup_tiktok);
-
     try {
       console.log("data input", data);
-      const response = await axios.post(
-        `http://127.0.0.1:8000/api/uploadcontent/create`,
-        formData
+      const response = await axios.put(
+        `http://127.0.0.1:8000/api/uploadcontent/${idONP}`,
+        data
       );
       if (response.status === 200 || response.status === 201) {
         setSuccessMessage("Link berhasil ditambahkan.");
         setModalOpen(false);
 
         // Show success SweetAlert with timer
-        let timerInterval : any;
+        let timerInterval: any;
         Swal.fire({
           title: "Berhasil!",
           text: "Link berhasil ditambahkan.",
           icon: "success",
           timer: 1000,
           timerProgressBar: true,
-          showConfirmButton: false, // Remove the OK button
+          showConfirmButton: false,
           didOpen: () => {
             Swal.showLoading();
             const timer = Swal.getPopup()?.querySelector("b");
@@ -129,7 +169,7 @@ export default function FormUploadLink({
         }).then((result) => {
           if (result.dismiss === Swal.DismissReason.timer) {
             console.log("Alert closed by the timer");
-            window.location.reload(); 
+            window.location.reload();
           }
         });
       } else {
@@ -165,135 +205,142 @@ export default function FormUploadLink({
             <AlertDialogTitle>
               Upload link untuk: {TopikKonten}
             </AlertDialogTitle>
-            <form onSubmit={handleSubmit(onSubmit)}>
-              {/* Dynamically generate input fields based on platform selection */}
-              {Platform && (
-                <div className="space-y-4">
-                  {Platform.instagram && (
-                    <div className="grid w-full items-center gap-1.5">
-                      <Label htmlFor="lup_instagram">Link Instagram</Label>
-                      <Input
-                        type="text"
-                        id="lup_instagram"
-                        disabled={isSubmitting || loading}
-                        placeholder="https://www.instagram.com/"
-                        {...register("lup_instagram")}
-                      />
-                      {errors.lup_instagram?.message && (
-                        <div className="text-red-500 text-xs">
-                          {errors.lup_instagram?.message}
-                        </div>
-                      )}
-                    </div>
-                  )}
+            {loading ? (
+              <div className="text-center py-4">Memuat data...</div>
+            ) : (
+              <form onSubmit={handleSubmit(onSubmit)}>
+                {/* Dynamically generate input fields based on platform selection */}
+                {Platform && (
+                  <div className="space-y-4">
+                    {Platform.instagram && (
+                      <div className="grid w-full items-center gap-1.5">
+                        <Label htmlFor="lup_instagram">Link Instagram</Label>
+                        <Input
+                          type="text"
+                          id="lup_instagram"
+                          disabled={isSubmitting || loading}
+                          placeholder="https://www.instagram.com/"
+                          {...register("lup_instagram")}
+                        />
+                        {errors.lup_instagram?.message && (
+                          <div className="text-red-500 text-xs">
+                            {errors.lup_instagram?.message}
+                          </div>
+                        )}
+                      </div>
+                    )}
 
-                  {Platform.facebook && (
-                    <div className="grid w-full items-center gap-1.5">
-                      <Label htmlFor="lup_facebook">Link Facebook</Label>
-                      <Input
-                        type="text"
-                        id="lup_facebook"
-                        disabled={isSubmitting || loading}
-                        placeholder="https://www.facebook.com/"
-                        {...register("lup_facebook")}
-                      />
-                      {errors.lup_facebook?.message && (
-                        <div className="text-red-500 text-xs">
-                          {errors.lup_facebook?.message}
-                        </div>
-                      )}
-                    </div>
-                  )}
+                    {Platform.facebook && (
+                      <div className="grid w-full items-center gap-1.5">
+                        <Label htmlFor="lup_facebook">Link Facebook</Label>
+                        <Input
+                          type="text"
+                          id="lup_facebook"
+                          disabled={isSubmitting || loading}
+                          placeholder="https://www.facebook.com/"
+                          {...register("lup_facebook")}
+                        />
+                        {errors.lup_facebook?.message && (
+                          <div className="text-red-500 text-xs">
+                            {errors.lup_facebook?.message}
+                          </div>
+                        )}
+                      </div>
+                    )}
 
-                  {Platform.twitter && (
-                    <div className="grid w-full items-center gap-1.5">
-                      <Label htmlFor="lup_twitter">Link Twitter</Label>
-                      <Input
-                        type="text"
-                        id="lup_twitter"
-                        disabled={isSubmitting || loading}
-                        placeholder="https://twitter.com/"
-                        {...register("lup_twitter")}
-                      />
-                      {errors.lup_twitter?.message && (
-                        <div className="text-red-500 text-xs">
-                          {errors.lup_twitter?.message}
-                        </div>
-                      )}
-                    </div>
-                  )}
+                    {Platform.twitter && (
+                      <div className="grid w-full items-center gap-1.5">
+                        <Label htmlFor="lup_twitter">Link Twitter</Label>
+                        <Input
+                          type="text"
+                          id="lup_twitter"
+                          disabled={isSubmitting || loading}
+                          placeholder="https://twitter.com/"
+                          {...register("lup_twitter")}
+                        />
+                        {errors.lup_twitter?.message && (
+                          <div className="text-red-500 text-xs">
+                            {errors.lup_twitter?.message}
+                          </div>
+                        )}
+                      </div>
+                    )}
 
-                  {Platform.youtube && (
-                    <div className="grid w-full items-center gap-1.5">
-                      <Label htmlFor="lup_youtube">Link YouTube</Label>
-                      <Input
-                        type="text"
-                        id="lup_youtube"
-                        disabled={isSubmitting || loading}
-                        placeholder="https://www.youtube.com/"
-                        {...register("lup_youtube")}
-                      />
-                      {errors.lup_youtube?.message && (
-                        <div className="text-red-500 text-xs">
-                          {errors.lup_youtube?.message}
-                        </div>
-                      )}
-                    </div>
-                  )}
+                    {Platform.youtube && (
+                      <div className="grid w-full items-center gap-1.5">
+                        <Label htmlFor="lup_youtube">Link YouTube</Label>
+                        <Input
+                          type="text"
+                          id="lup_youtube"
+                          disabled={isSubmitting || loading}
+                          placeholder="https://www.youtube.com/"
+                          {...register("lup_youtube")}
+                        />
+                        {errors.lup_youtube?.message && (
+                          <div className="text-red-500 text-xs">
+                            {errors.lup_youtube?.message}
+                          </div>
+                        )}
+                      </div>
+                    )}
 
-                  {Platform.website && (
-                    <div className="grid w-full items-center gap-1.5">
-                      <Label htmlFor="lup_website">Link Website</Label>
-                      <Input
-                        type="text"
-                        id="lup_website"
-                        disabled={isSubmitting || loading}
-                        placeholder="https://"
-                        {...register("lup_website")}
-                      />
-                      {errors.lup_website?.message && (
-                        <div className="text-red-500 text-xs">
-                          {errors.lup_website?.message}
-                        </div>
-                      )}
-                    </div>
-                  )}
+                    {Platform.website && (
+                      <div className="grid w-full items-center gap-1.5">
+                        <Label htmlFor="lup_website">Link Website</Label>
+                        <Input
+                          type="text"
+                          id="lup_website"
+                          disabled={isSubmitting || loading}
+                          placeholder="https://"
+                          {...register("lup_website")}
+                        />
+                        {errors.lup_website?.message && (
+                          <div className="text-red-500 text-xs">
+                            {errors.lup_website?.message}
+                          </div>
+                        )}
+                      </div>
+                    )}
 
-                  {Platform.tikTok && (
-                    <div className="grid w-full items-center gap-1.5">
-                      <Label htmlFor="lup_tiktok">Link TikTok</Label>
-                      <Input
-                        type="text"
-                        id="lup_tiktok"
-                        disabled={isSubmitting || loading}
-                        placeholder="https://www.tiktok.com/"
-                        {...register("lup_tiktok")}
-                      />
-                      {errors.lup_tiktok?.message && (
-                        <div className="text-red-500 text-xs">
-                          {errors.lup_tiktok?.message}
-                        </div>
-                      )}
-                    </div>
-                  )}
-                </div>
-              )}
+                    {Platform.tikTok && (
+                      <div className="grid w-full items-center gap-1.5">
+                        <Label htmlFor="lup_tiktok">Link TikTok</Label>
+                        <Input
+                          type="text"
+                          id="lup_tiktok"
+                          disabled={isSubmitting || loading}
+                          placeholder="https://www.tiktok.com/"
+                          {...register("lup_tiktok")}
+                        />
+                        {errors.lup_tiktok?.message && (
+                          <div className="text-red-500 text-xs">
+                            {errors.lup_tiktok?.message}
+                          </div>
+                        )}
+                      </div>
+                    )}
+                  </div>
+                )}
 
-              {errorMessage && (
-                <div className="text-red-500 mt-2">{errorMessage}</div>
-              )}
-              <AlertDialogFooter className="mt-4">
-                <AlertDialogCancel type="button" onClick={handleCancel}>
-                  Cancel
-                </AlertDialogCancel>
-                <AlertDialogAction
-                  type="submit"
-                  disabled={isSubmitting || loading}
-                >
-                  Upload
-                </AlertDialogAction>
-              </AlertDialogFooter>
-            </form>
+                {errorMessage && (
+                  <div className="text-red-500 mt-2">{errorMessage}</div>
+                )}
+                <AlertDialogFooter className="mt-4">
+                  <AlertDialogCancel type="button" onClick={handleCancel}>
+                    Cancel
+                  </AlertDialogCancel>
+                  <AlertDialogAction
+                    type="submit"
+                    disabled={isSubmitting || loading || !hasFilledInput}
+                    className={
+                      !hasFilledInput ? "opacity-50 cursor-not-allowed" : ""
+                    }
+                  >
+                    {existingLinks ? "Update" : "Upload"}
+                  </AlertDialogAction>
+                </AlertDialogFooter>
+              </form>
+            )}
           </AlertDialogHeader>
         </AlertDialogContent>
       </AlertDialog>

@@ -1,4 +1,3 @@
-
 import {
   flexRender,
   getCoreRowModel,
@@ -8,7 +7,15 @@ import {
 } from "@tanstack/react-table";
 import { useState } from "react";
 import { OnlineContent } from "./columns"; // Import the type from columns
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/tableplanner";
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "@/components/ui/tableplanner";
+import axios from "axios";
 
 interface DataTableOnlineProps {
   data: OnlineContent[];
@@ -19,6 +26,7 @@ export default function DataTableOnline({
   data,
   columns,
 }: DataTableOnlineProps) {
+  const [error, setError] = useState("");
   const [hoveredRow, setHoveredRow] = useState<number | null>(null);
 
   // Debug - add this to see if data is reaching component
@@ -36,6 +44,23 @@ export default function DataTableOnline({
     },
     meta: {
       hoveredRow,
+      handleDelete: async (idONP: number) => {
+        try {
+          const response = await axios.delete(
+            `http://127.0.0.1:8000/api/onlinecontentplanner/delete/${idONP}`
+          );
+
+          if (response.data.status) {
+            window.location.reload();
+            console.log(`Online Planner dengan ID ${idONP} berhasil dihapus.`);
+          } else {
+            console.error("Deletion failed:", response.data.message);
+          }
+        } catch (err) {
+          console.error("Terjadi kesalahan:", error);
+          setError("Gagal menghapus Online Planner");
+        }
+      },
     },
   });
 

@@ -1,6 +1,5 @@
 import { Button } from "@/components/ui/button";
-import { Calendar } from "lucide-react";
-import { useState, useEffect } from "react";
+import { Calendar, Pencil } from "lucide-react";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -18,6 +17,17 @@ import axios from "axios";
 import * as z from "zod";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
+import { useEffect, useState } from "react";
+
+type UpdateOnlineProps = {
+  id: string;
+  currentName: string;
+  currentDate: string;
+  currentDay: string;
+  currentAdmin: string;
+  currentPlatform: string | Record<string, boolean>;
+  currentCheckpoint: string | Record<string, boolean>;
+};
 
 interface OnlinePlanner {
   onp_topik_konten: string;
@@ -78,7 +88,15 @@ const onlinePlannerSchema = (isEdit: boolean, previousDate?: string) =>
     onp_checkpoint: z.string(),
   });
 
-export default function CreateOnlinePlanner() {
+export default function FormUpdateOnline({
+  id,
+  currentName,
+  currentDate,
+  currentDay,
+  currentAdmin,
+  currentPlatform,
+  currentCheckpoint,
+}: UpdateOnlineProps) {
   const [isModalOpen, setModalOpen] = useState(false);
   const [loading, setLoading] = useState(false);
   const [errorMessage, setErrorMessage] = useState("");
@@ -87,11 +105,9 @@ export default function CreateOnlinePlanner() {
   const [selectedCheckpoint, setSelectedCheckpoint] = useState<string>("");
   const [formInitialized, setFormInitialized] = useState(false);
 
-  // Get session with status to handle loading state
   const { data: session, status } = useSession();
-
-  const isEdit = false;
-  const previousDate = null;
+  const isEdit = true;
+  const previousDate = currentDate;
   const {
     register,
     handleSubmit,
@@ -102,26 +118,59 @@ export default function CreateOnlinePlanner() {
   } = useForm<OnlinePlanner>({
     resolver: zodResolver(onlinePlannerSchema(isEdit, previousDate as any)),
     defaultValues: {
-      onp_tanggal: "",
-      onp_hari: "",
-      onp_topik_konten: "",
+      onp_tanggal: currentDate,
+      onp_hari: currentDay,
+      onp_topik_konten: currentName,
       onp_admin: "",
-      onp_platform: "",
-      onp_checkpoint: "",
+      onp_platform: typeof currentPlatform === "string" ? currentPlatform : "",
+      onp_checkpoint:
+        typeof currentCheckpoint === "string" ? currentCheckpoint : "",
     },
   });
 
-  // Initialize form when session is ready and modal is opened
   useEffect(() => {
     if (status === "authenticated" && isModalOpen && !formInitialized) {
       const userName = session?.user?.name || "";
+
+      // Handle the platform field value
+      let platformValue = "";
+      if (typeof currentPlatform === "string") {
+        platformValue = currentPlatform;
+      } else if (
+        typeof currentPlatform === "object" &&
+        currentPlatform !== null
+      ) {
+        // Convert object of booleans to comma-separated string
+        platformValue = Object.entries(currentPlatform)
+          .filter(([_, isActive]) => isActive)
+          .map(([platform]) => platform.toLowerCase())
+          .join(",");
+      }
+
+      // Handle the checkpoint field value
+      let checkpointValue = "";
+      if (typeof currentCheckpoint === "string") {
+        checkpointValue = currentCheckpoint;
+      } else if (
+        typeof currentCheckpoint === "object" &&
+        currentCheckpoint !== null
+      ) {
+        // Get the first active checkpoint (assuming single selection)
+        const activeCheckpoint = Object.entries(currentCheckpoint).find(
+          ([_, isActive]) => isActive
+        );
+        checkpointValue = activeCheckpoint
+          ? activeCheckpoint[0].toLowerCase()
+          : "";
+      }
+
       reset({
-        onp_tanggal: "",
-        onp_hari: "",
-        onp_topik_konten: "",
+        onp_tanggal: currentDate,
+        onp_hari: currentDay,
+        onp_topik_konten: currentName,
         onp_admin: userName,
-        onp_platform: "",
-        onp_checkpoint: "",
+        onp_platform: platformValue,
+        onp_checkpoint: checkpointValue,
       });
       setFormInitialized(true);
     }
@@ -150,9 +199,58 @@ export default function CreateOnlinePlanner() {
 
   const onAdd = () => {
     setModalOpen(true);
-    setFormInitialized(false); // Reset form initialization flag
-    setSelectedPlatforms([]);
-    setSelectedCheckpoint("");
+    setFormInitialized(false);
+
+    // Initialize platforms
+    const initialPlatforms: string[] = [];
+
+    if (typeof currentPlatform === "string" && currentPlatform) {
+      // Handle string format "instagram, facebook, twitter"
+      const platforms = currentPlatform
+        .split(",")
+        .map((p) => p.trim().charAt(0).toUpperCase() + p.trim().slice(1));
+      initialPlatforms.push(...platforms);
+    } else if (
+      typeof currentPlatform === "object" &&
+      currentPlatform !== null
+    ) {
+      // Handle object format {instagram: true, facebook: true, twitter: false}
+      Object.entries(currentPlatform).forEach(([platform, isActive]) => {
+        if (isActive) {
+          const formattedPlatform =
+            platform.charAt(0).toUpperCase() + platform.slice(1);
+          initialPlatforms.push(formattedPlatform);
+        }
+      });
+    }
+
+    setSelectedPlatforms(initialPlatforms);
+
+    // Initialize checkpoint
+    let initialCheckpoint = "";
+
+    if (typeof currentCheckpoint === "string" && currentCheckpoint) {
+      // Handle string format "jayaridho"
+      initialCheckpoint =
+        currentCheckpoint.charAt(0).toUpperCase() + currentCheckpoint.slice(1);
+    } else if (
+      typeof currentCheckpoint === "object" &&
+      currentCheckpoint !== null
+    ) {
+      // Handle object format {jayaridho: true, gilang: false}
+      const activeCheckpoint = Object.entries(currentCheckpoint).find(
+        ([_, isActive]) => isActive
+      );
+
+      if (activeCheckpoint) {
+        initialCheckpoint =
+          activeCheckpoint[0].charAt(0).toUpperCase() +
+          activeCheckpoint[0].slice(1);
+      }
+    }
+
+    setSelectedCheckpoint(initialCheckpoint);
+
     setErrorMessage("");
     setSuccessMessage("");
   };
@@ -161,7 +259,6 @@ export default function CreateOnlinePlanner() {
     setModalOpen(false);
   };
 
-  // Handle platform selection
   const handlePlatformChange = (platform: string) => {
     setSelectedPlatforms((prev) => {
       const newPlatforms = prev.includes(platform)
@@ -179,11 +276,12 @@ export default function CreateOnlinePlanner() {
     });
   };
 
-  // Handle checkpoint selection (radio-like behavior)
   const handleCheckpointChange = (checkpoint: string) => {
     setSelectedCheckpoint(checkpoint);
     setValue("onp_checkpoint", checkpoint.toLowerCase());
   };
+
+  const userName = session?.user?.name || "";
 
   const onSubmit = async (data: OnlinePlanner) => {
     // Validate platform and checkpoint selection
@@ -211,11 +309,9 @@ export default function CreateOnlinePlanner() {
       onp_checkpoint: selectedCheckpoint.toLowerCase(),
     };
 
-    console.log("Sending data:", formData); // Debug what's being sent
-
     try {
-      const response = await axios.post(
-        "http://127.0.0.1:8000/api/onlineplanner/create",
+      const response = await axios.put(
+        `http://127.0.0.1:8000/api/onlineplanner/update/${id}`,
         formData
       );
 
@@ -247,28 +343,13 @@ export default function CreateOnlinePlanner() {
     }
   };
 
-  // Show loading state while session is loading
-  if (status === "loading") {
-    return (
-      <Button size="sm" className="bg-gray-400" disabled>
-        <Calendar className="h-4 w-4 mr-2" />
-        Loading...
-      </Button>
-    );
-  }
-
-  // Get username for the form
-  const userName = session?.user?.name || "";
-
   return (
     <>
       <Button
-        size="sm"
-        className="bg-indigo-600 hover:bg-indigo-700"
         onClick={onAdd}
+        className="bg-blue-500 hover:bg-blue-600 text-white flex items-center gap-2 h-8 w-full text-xs px-3 rounded-md"
       >
-        <Calendar className="h-4 w-4 mr-2" />
-        Add Content
+        <Pencil size={16} />
       </Button>
       {isModalOpen && (
         <AlertDialog defaultOpen open>
@@ -426,12 +507,6 @@ export default function CreateOnlinePlanner() {
                       )}
                     </div>
                   </div>
-                  {errorMessage && (
-                    <div className="text-red-500">{errorMessage}</div>
-                  )}
-                  {successMessage && (
-                    <div className="text-green-500">{successMessage}</div>
-                  )}
                 </div>
               </AlertDialogHeader>
               <AlertDialogFooter>

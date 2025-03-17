@@ -99,13 +99,13 @@ export function DataTableVideo({ data }: DataTableProps) {
 
           if (response.data.status) {
             window.location.reload();
-            console.log(`Quote dengan ID ${idikv} berhasil dihapus.`);
+            console.log(`Ide Konten dengan ID ${idikv} berhasil dihapus.`);
           } else {
             console.error("Deletion failed:", response.data.message);
           }
         } catch (err) {
           console.error("Terjadi kesalahan:", error);
-          setError("Gagal menghapus quote");
+          setError("Gagal menghapus Ide Konten");
         }
       },
     },
