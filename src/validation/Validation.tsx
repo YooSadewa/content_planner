@@ -455,3 +455,10 @@ export const createUploadOnlinePlannerSchema = (platform: {
     }
   );
 };
+
+export const AnalyticSchema = z.object({
+  anc_tanggal: z.string().min(1, "Tanggal harus diisi"),
+  anc_hari: z.string().min(1, "Hari harus diisi"),
+  lup_id: z.string().min(1, "Topik konten harus dipilih"),
+  platforms: z.string().min(1, "Platform harus dipilih"),
+});

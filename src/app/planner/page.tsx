@@ -408,7 +408,7 @@ export default function ContentPlannerPage() {
           <CardContent className="p-0">
             <Tabs defaultValue="all" className="w-full">
               <div className="px-6 pt-4">
-                <TabsList className="grid w-full grid-cols-3 bg-white">
+                <TabsList className="grid w-full grid-cols-3 bg-white gap-1">
                   <TabsTrigger value="all" className="border">All Content</TabsTrigger>
                   <TabsTrigger value="scheduled" className="border">Scheduled</TabsTrigger>
                   <TabsTrigger value="published" className="border">Published</TabsTrigger>

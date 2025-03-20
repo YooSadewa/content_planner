@@ -25,7 +25,7 @@ export default function Sidebar() {
     { name: "Beranda", href: "/", icon: House },
     { name: "Rencana Konten", href: "/planner", icon: CalendarClock },
     { name: "Ringkasan Medsos", href: "/account", icon: SquareUser },
-    { name: "Analisis Konten", href: "/analisis-konten", icon: ChartPie },
+    { name: "Analisis Konten", href: "/analisis", icon: ChartPie },
     { name: "Statistik Medsos", href: "/statistik", icon: ChartNoAxesCombined },
     { name: "Ide Konten", href: "/ide-konten", icon: Lightbulb },
     { name: "Podcast", href: "/podcast", icon: Podcast },
