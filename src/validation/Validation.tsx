@@ -442,8 +442,9 @@ export const createUploadOnlinePlannerSchema = (platform: {
       // Jika ada platform yang dipilih, setidaknya satu field harus diisi
       const hasValue = Object.entries(data).some(([key, value]) => {
         const platformKey = key.replace("lup_", "");
-        const platformValue =
-          (platform as any)[platformKey === "tiktok" ? "tikTok" : platformKey];
+        const platformValue = (platform as any)[
+          platformKey === "tiktok" ? "tikTok" : platformKey
+        ];
         return platformValue && value && value.trim() !== "";
       });
 
@@ -462,3 +463,89 @@ export const AnalyticSchema = z.object({
   lup_id: z.string().min(1, "Topik konten harus dipilih"),
   platforms: z.string().min(1, "Platform harus dipilih"),
 });
+
+export const PlatformMetricSchema = z.object({
+  website: z
+    .object({
+      reach: z.string().min(1, "Wajib Diisi"),
+    })
+    .optional(),
+  instagram: z
+    .object({
+      reach: z.string().min(1, "Wajib Diisi"),
+      like: z.string().optional(),
+      comment: z.string().optional(),
+      share: z.string().optional(),
+      save: z.string().optional(),
+    })
+    .optional(),
+  twitter: z
+    .object({
+      reach: z.string().min(1, "Wajib Diisi"),
+      like: z.string().optional(),
+      comment: z.string().optional(),
+      share: z.string().optional(),
+      save: z.string().optional(),
+    })
+    .optional(),
+  facebook: z
+    .object({
+      reach: z.string().min(1, "Wajib Diisi"),
+      like: z.string().optional(),
+      comment: z.string().optional(),
+      share: z.string().optional(),
+      save: z.string().optional(),
+    })
+    .optional(),
+  youtube: z
+    .object({
+      reach: z.string().min(1, "Wajib Diisi"),
+      like: z.string().optional(),
+      comment: z.string().optional(),
+      share: z.string().optional(),
+      save: z.string().optional(),
+    })
+    .optional(),
+  tiktok: z
+    .object({
+      reach: z.string().min(1, "Wajib Diisi"),
+      like: z.string().optional(),
+      comment: z.string().optional(),
+      share: z.string().optional(),
+      save: z.string().optional(),
+    })
+    .optional(),
+});
+
+// This should be a function that uses the schema
+export const validatePlatformMetrics = (
+  selectedPlatforms: string[],
+  metrics: any
+) => {
+  // Create a dynamic schema that only includes the selected platforms
+  const selectedSchema = z.object(
+    Object.fromEntries(
+      selectedPlatforms.map((platform) => [
+        platform,
+        z.object({
+          reach: z.string().min(1, `${platform} reach harus diisi`),
+          like: z.string().optional(),
+          comment: z.string().optional(),
+          share: z.string().optional(),
+          save: z.string().optional(),
+        }),
+      ])
+    )
+  );
+
+  try {
+    // Validate only the selected platforms
+    selectedSchema.parse(metrics);
+    return { success: true, error: null };
+  } catch (error) {
+    if (error instanceof z.ZodError) {
+      return { success: false, error: error.format() };
+    }
+    return { success: false, error: "Validation failed" };
+  }
+};

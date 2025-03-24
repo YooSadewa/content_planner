@@ -25,7 +25,11 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { AnalyticSchema } from "@/validation/Validation";
+import {
+  AnalyticSchema,
+  validatePlatformMetrics,
+} from "@/validation/Validation";
+import Swal from "sweetalert2";
 
 interface Topic {
   label: string;
@@ -45,6 +49,7 @@ export default function CreateAnalytic() {
   const [platformsDisabled, setPlatformsDisabled] = useState(false);
   const [topicsData, setTopicsData] = useState<any[]>([]);
   const [existingAnalytics, setExistingAnalytics] = useState<any[]>([]);
+  const [platformErrors, setPlatformErrors] = useState<any>({});
 
   // Form metric states for each platform
   const [platformMetrics, setPlatformMetrics] = useState({
@@ -98,15 +103,19 @@ export default function CreateAnalytic() {
   }, [selectedDate, setValue, existingAnalytics, topicsData]);
 
   // Filter available topics based on the selected date
+  // Filter available topics based on the selected date
   const filterAvailableTopics = (date: string) => {
-    if (!date || !topicsData.length || !existingAnalytics.length) {
+    if (!date || !topicsData.length) {
       return;
     }
 
     // Get list of lup_ids that already have analytics for the selected date
-    const existingLupIds = existingAnalytics
-      .filter((item) => item.anc_tanggal === date)
-      .map((item) => item.lup_id);
+    const existingLupIds =
+      existingAnalytics.length > 0
+        ? existingAnalytics
+            .filter((item) => item.anc_tanggal === date)
+            .map((item) => item.lup_id)
+        : []; // Empty array if no existing analytics
 
     // Filter topics that don't have analytics for the selected date
     const availableTopics = topicsData
@@ -177,6 +186,45 @@ export default function CreateAnalytic() {
     try {
       setLoading(true);
 
+      const validationResult = validatePlatformMetrics(
+        selectedPlatforms,
+        platformMetrics
+      );
+
+      if (!validationResult.success) {
+        setPlatformErrors(validationResult.error);
+
+        let timerInterval: any;
+        Swal.fire({
+          title: "Oops...!",
+          text: "Silahkan isi semua field yang diperlukan",
+          icon: "error",
+          timer: 700,
+          timerProgressBar: true,
+          showConfirmButton: false,
+          didOpen: () => {
+            Swal.showLoading();
+            const timer = Swal.getPopup()?.querySelector("b");
+            if (timer) {
+              timerInterval = setInterval(() => {
+                if (timer) timer.textContent = `${Swal.getTimerLeft()}`;
+              }, 100);
+            }
+          },
+          willClose: () => {
+            clearInterval(timerInterval);
+          },
+        }).then((result) => {
+          if (result.dismiss === Swal.DismissReason.timer) {
+            console.log("Alert closed by the timer");
+          }
+        });
+
+        setLoading(false);
+        return;
+      }
+
+      setPlatformErrors({});
       // Prepare data for backend
       const formData = {
         anc_tanggal: data.anc_tanggal,
@@ -195,11 +243,11 @@ export default function CreateAnalytic() {
         // Make sure platform name is normalized
         const normalizedPlatform = platform.trim().toLowerCase();
 
-        // Add metrics - ensure reach is always provided
-        (formData.reach as any)[normalizedPlatform] =
-          (platformMetrics as any)[normalizedPlatform].reach || "0";
-
         // Only add other metrics if they have values
+        if ((platformMetrics as any)[normalizedPlatform].reach)
+          (formData.reach as any)[normalizedPlatform] = (
+            platformMetrics as any
+          )[normalizedPlatform].reach;
         if ((platformMetrics as any)[normalizedPlatform].like)
           (formData.like as any)[normalizedPlatform] = (platformMetrics as any)[
             normalizedPlatform
@@ -220,7 +268,6 @@ export default function CreateAnalytic() {
 
       console.log("Submitting data:", formData);
 
-      // Make API call
       const response = await axios.post(
         "http://127.0.0.1:8000/api/analyticcontent/create",
         formData
@@ -244,6 +291,7 @@ export default function CreateAnalytic() {
           youtube: { reach: "", like: "", comment: "", share: "", save: "" },
           tiktok: { reach: "", like: "", comment: "", share: "", save: "" },
         });
+        setPlatformErrors({});
       }, 1500);
     } catch (error: any) {
       console.error("Error submitting form:", error);
@@ -310,20 +358,17 @@ export default function CreateAnalytic() {
         "http://127.0.0.1:8000/api/analyticcontent"
       );
 
-      if (
-        response.data &&
-        response.data.status &&
-        response.data.data &&
-        response.data.data.analytic_content
-      ) {
+      // Check if response has the expected structure and contains data
+      if (response.data?.status && response.data?.data?.analytic_content) {
         setExistingAnalytics(response.data.data.analytic_content);
       } else {
-        console.error("Invalid analytics data format", response.data);
+        console.log("No analytics data available");
         setExistingAnalytics([]);
       }
     } catch (err) {
-      console.error("Error fetching analytics data:", err);
+      console.log("Failed to fetch analytics data");
       setExistingAnalytics([]);
+      return 0;
     }
   };
 
@@ -533,41 +578,61 @@ export default function CreateAnalytic() {
                             </div>
 
                             {isSelected && (
-                              <div className="ml-6 flex flex-wrap gap-2">
-                                {platform.metrics.map((metric: any) => (
-                                  <div
-                                    key={`${platformKey}-${metric}`}
-                                    className="flex items-center space-x-2"
-                                  >
-                                    <Label
-                                      htmlFor={`${platformKey}-${metric}`}
-                                      className="w-16 text-xs"
+                              <>
+                                <div className="ml-6 flex flex-wrap gap-2">
+                                  {platform.metrics.map((metric: any) => (
+                                    <div
+                                      key={`${platformKey}-${metric}`}
+                                      className="flex items-center space-x-2"
                                     >
-                                      {metric.charAt(0).toUpperCase() +
-                                        metric.slice(1)}
-                                    </Label>
-                                    <Input
-                                      type="number"
-                                      min="0"
-                                      id={`${platformKey}-${metric}`}
-                                      className="h-8 w-24"
-                                      placeholder="0"
-                                      value={
-                                        (platformMetrics as any)[platformKey][
-                                          metric
-                                        ]
-                                      }
-                                      onChange={(e) =>
-                                        handleMetricChange(
-                                          platformKey,
-                                          metric,
-                                          e.target.value
-                                        )
-                                      }
-                                    />
-                                  </div>
-                                ))}
-                              </div>
+                                      <Label
+                                        htmlFor={`${platformKey}-${metric}`}
+                                        className="w-16 text-xs"
+                                      >
+                                        {metric.charAt(0).toUpperCase() +
+                                          metric.slice(1)}
+                                        {metric === "reach" && (
+                                          <span className="text-red-500">
+                                            {" "}
+                                            *
+                                          </span>
+                                        )}
+                                      </Label>
+                                      <Input
+                                        type="number"
+                                        min="0"
+                                        id={`${platformKey}-${metric}`}
+                                        className="h-8 w-24"
+                                        placeholder="0"
+                                        value={
+                                          (platformMetrics as any)[platformKey][
+                                            metric
+                                          ]
+                                        }
+                                        onChange={(e) =>
+                                          handleMetricChange(
+                                            platformKey,
+                                            metric,
+                                            e.target.value
+                                          )
+                                        }
+                                      />
+                                    </div>
+                                  ))}
+
+                                  {/* Add error message for reach field */}
+                                </div>
+                                <div className="ps-5 pt-1">
+                                  {platformErrors &&
+                                    platformErrors[platformKey] &&
+                                    platformErrors[platformKey].reach && (
+                                      <div className="text-red-500 text-xs ml-1">
+                                        Reach wajib diisi untuk{" "}
+                                        {platform.displayName}
+                                      </div>
+                                    )}
+                                </div>
+                              </>
                             )}
                           </div>
                         );

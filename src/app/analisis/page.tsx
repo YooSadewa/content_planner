@@ -38,42 +38,51 @@ export default function ContentAnalyticPage() {
       try {
         setLoading(true);
 
-        // Fetch analytic content data
-        const analyticResponse = await axios.get(
-          "http://127.0.0.1:8000/api/analyticcontent"
-        );
+        // Fetch both data sources
+        const [analyticResponse, plannerResponse] = await Promise.allSettled([
+          axios.get("http://127.0.0.1:8000/api/analyticcontent"),
+          axios.get("http://127.0.0.1:8000/api/onlinecontentplanner"),
+        ]);
 
-        // Fetch online planner data
-        const plannerResponse = await axios.get(
-          "http://127.0.0.1:8000/api/onlinecontentplanner"
-        );
-
+        // Handle analytic content data
         if (
-          analyticResponse.data.status === true &&
-          plannerResponse.data.status === true
+          analyticResponse.status === "fulfilled" &&
+          analyticResponse.value?.data?.status === true
         ) {
+          const analyticData =
+            analyticResponse.value.data.data.analytic_content || [];
           // Transform the analytic data
-          const transformedData: Analytic[] =
-            analyticResponse.data.data.analytic_content.map((item: any) => ({
-              anc_id: item.anc_id,
-              anc_tanggal: item.anc_tanggal,
-              anc_hari: item.anc_hari,
-              lup_id: item.lup_id,
-              created_at: item.created_at,
-              updated_at: item.updated_at,
-              platforms: item.platforms || [],
-              date: item.anc_tanggal,
-              day: item.anc_hari,
-            }));
-
+          const transformedData: Analytic[] = analyticData.map((item: any) => ({
+            anc_id: item.anc_id,
+            anc_tanggal: item.anc_tanggal,
+            anc_hari: item.anc_hari,
+            lup_id: item.lup_id,
+            created_at: item.created_at,
+            updated_at: item.updated_at,
+            platforms: item.platforms || [],
+            date: item.anc_tanggal,
+            day: item.anc_hari,
+          }));
           setTableDataAnalytic(transformedData);
-          setOnlinePlanners(plannerResponse.data.data.online_planners);
         } else {
-          setError("Failed to fetch data");
+          console.log("No analytics data available or request failed");
+          setTableDataAnalytic([]);
+        }
+
+        // Handle planner data
+        if (
+          plannerResponse.status === "fulfilled" &&
+          plannerResponse.value?.data?.status === true
+        ) {
+          setOnlinePlanners(
+            plannerResponse.value.data.data.online_planners || []
+          );
+        } else {
+          console.log("No planner data available or request failed");
+          setOnlinePlanners([]);
         }
       } catch (err) {
-        console.error("Error fetching data:", err);
-        setError("An error occurred while fetching data");
+        console.log("An error occurred during data fetching", err);
       } finally {
         setLoading(false);
       }
