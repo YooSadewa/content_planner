@@ -153,7 +153,7 @@ export default function ContentAnalyticPage() {
               </div>
             ) : (
               <>
-                <DataTableAnalytic data={tableDataAnalytic} columns={columns} />
+                <DataTableAnalytic data={tableDataAnalytic} columns={columns} isLoading={loading}/>
               </>
             )}
           </CardContent>

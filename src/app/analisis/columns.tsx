@@ -16,6 +16,7 @@ import {
   BarChart4,
   ArrowUpRight,
   Globe,
+  Trash,
 } from "lucide-react";
 import {
   Tooltip,
@@ -25,6 +26,8 @@ import {
 } from "@/components/ui/tooltip";
 import { Badge } from "@/components/ui/badge";
 import { FaTiktok } from "react-icons/fa";
+import { Button } from "@/components/ui/button";
+import UpdateAnalytic from "./update";
 
 type Platform = {
   acr_id: number;
@@ -174,16 +177,21 @@ const PlatformMetrics = ({
 };
 
 export const createColumns = (onlinePlanners: any[]): ColumnDef<Analytic>[] => {
-  // Fungsi untuk mendapatkan topik konten berdasarkan lup_id
-  const getTopikKontenByLupId = (lupId: number): string => {
-    if (!lupId || !onlinePlanners || onlinePlanners.length === 0) return "-";
+  const getContentInfoByLupId = (
+    lupId: number
+  ): { topik: string; lup_id: number } => {
+    if (!lupId || !onlinePlanners || onlinePlanners.length === 0)
+      return { topik: "-", lup_id: lupId };
 
-    // Mencari planner yang memiliki lup_id yang sesuai
+    // Find the planner with matching lup_id
     const matchingPlanner = onlinePlanners.find(
       (planner) => planner.platforms && planner.platforms.lup_id === lupId
     );
 
-    return matchingPlanner ? matchingPlanner.onp_topik_konten : "-";
+    return {
+      topik: matchingPlanner ? matchingPlanner.onp_topik_konten : "-",
+      lup_id: lupId,
+    };
   };
 
   // Definisi metrics untuk setiap platform
@@ -300,7 +308,7 @@ export const createColumns = (onlinePlanners: any[]): ColumnDef<Analytic>[] => {
       ),
       cell: ({ row }) => {
         const lupId = row.getValue("lup_id") as number;
-        const topikKonten = getTopikKontenByLupId(lupId);
+        const contentInfo = getContentInfoByLupId(lupId);
 
         return (
           <div className="w-[300px] p-1">
@@ -309,7 +317,7 @@ export const createColumns = (onlinePlanners: any[]): ColumnDef<Analytic>[] => {
                 size={16}
                 className="mr-2 flex-shrink-0 text-gray-500"
               />
-              <p className="text-left truncate">{topikKonten}</p>
+              <p className="text-left truncate">{contentInfo.topik}</p>
             </div>
           </div>
         );
@@ -465,6 +473,42 @@ export const createColumns = (onlinePlanners: any[]): ColumnDef<Analytic>[] => {
                 />
               </div>
             </div>
+          </div>
+        );
+      },
+    },
+    {
+      accessorKey: "Actions",
+      header: () => (
+        <div className="font-semibold text-center">
+          <p>Aksi</p>
+        </div>
+      ),
+      cell: ({ row, table }) => {
+        const meta = table.options.meta as {
+          handleDelete: (id: number) => void;
+          setSelectedItem: (id: number) => void;
+        };
+        const rowData = row.original;
+        const lupId = row.getValue("lup_id") as number;
+        const contentInfo = getContentInfoByLupId(lupId);
+
+        return (
+          <div className="w-[100px] flex gap-1">
+            <UpdateAnalytic
+              id={rowData.anc_id}
+              currentDate={rowData.anc_tanggal}
+              currentDay={rowData.anc_hari}
+              currentLup={contentInfo.topik}
+              lupId={contentInfo.lup_id} // Pass the lup_id explicitly
+              currentPlatform={rowData.platforms}
+            />
+            <Button
+              className="bg-red-500 hover:bg-red-600 text-white flex items-center gap-2 h-8 w-full text-xs px-3 rounded-md"
+              onClick={() => meta.handleDelete(row.getValue("anc_id"))}
+            >
+              <Trash size={16} />
+            </Button>
           </div>
         );
       },

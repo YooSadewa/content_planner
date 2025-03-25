@@ -225,20 +225,6 @@ export default function ContentPlannerPage() {
               winny: item.onp_checkpoint === "winny",
             };
 
-            // Create link upload object
-            // const linkUploadObj: OnlineContent["lup_instagram" | "lup_tiktok"];
-
-            // Check if platforms is an object (not an empty array)
-            // if (item.platforms && !Array.isArray(item.platforms)) {
-            //   Object.entries(item.platforms).forEach(([platform, data]) => {
-            //     if (platform && data && data.link) {
-            //       linkUploadObj[platform as keyof typeof linkUploadObj] =
-            //         data.link;
-            //     }
-            //   });
-            // }
-
-            // Return transformed item
             const transformedItem: OnlineContent = {
               onp_id: item.onp_id,
               onp_tanggal: item.onp_tanggal,
@@ -247,7 +233,6 @@ export default function ContentPlannerPage() {
               onp_admin: item.onp_admin,
               onp_platform: platformObj,
               onp_checkpoint: checkpointObj,
-              // onp_link_upload: linkUploadObj,
               platforms: item.platforms,
               onp_status: "published", // Default status
             };
@@ -326,20 +311,6 @@ export default function ContentPlannerPage() {
               winny: item.onp_checkpoint === "winny",
             };
 
-            // Create link upload object
-            // const linkUploadObj: OnlineContent["lup_instagram" | "lup_tiktok"];
-
-            // Check if platforms is an object (not an empty array)
-            // if (item.platforms && !Array.isArray(item.platforms)) {
-            //   Object.entries(item.platforms).forEach(([platform, data]) => {
-            //     if (platform && data && data.link) {
-            //       linkUploadObj[platform as keyof typeof linkUploadObj] =
-            //         data.link;
-            //     }
-            //   });
-            // }
-
-            // Return transformed item
             const transformedItem: OnlineContent = {
               onp_id: item.onp_id,
               onp_tanggal: item.onp_tanggal,
@@ -348,7 +319,6 @@ export default function ContentPlannerPage() {
               onp_admin: item.onp_admin,
               onp_platform: platformObj,
               onp_checkpoint: checkpointObj,
-              // onp_link_upload: linkUploadObj,
               platforms: item.platforms,
               onp_status: "published", // Default status
             };

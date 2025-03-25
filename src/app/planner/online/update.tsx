@@ -93,7 +93,6 @@ export default function FormUpdateOnline({
   currentName,
   currentDate,
   currentDay,
-  currentAdmin,
   currentPlatform,
   currentCheckpoint,
 }: UpdateOnlineProps) {
