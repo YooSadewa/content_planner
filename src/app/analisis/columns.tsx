@@ -460,7 +460,7 @@ export const createColumns = (onlinePlanners: any[]): ColumnDef<Analytic>[] => {
 
             {/* Website cell */}
             <div className="w-[100px]">
-              <div className="flex items-center justify-center h-full border-e">
+              <div className="flex items-center justify-center h-full">
                 <StatItem
                   value={(() => {
                     const data = platformsData.find(
@@ -494,15 +494,15 @@ export const createColumns = (onlinePlanners: any[]): ColumnDef<Analytic>[] => {
         const contentInfo = getContentInfoByLupId(lupId);
 
         return (
-          <div className="w-[100px] flex gap-1">
-            <UpdateAnalytic
+          <div className="w-[50px] flex gap-1">
+            {/* <UpdateAnalytic
               id={rowData.anc_id}
               currentDate={rowData.anc_tanggal}
               currentDay={rowData.anc_hari}
               currentLup={contentInfo.topik}
               lupId={contentInfo.lup_id} // Pass the lup_id explicitly
               currentPlatform={rowData.platforms}
-            />
+            /> */}
             <Button
               className="bg-red-500 hover:bg-red-600 text-white flex items-center gap-2 h-8 w-full text-xs px-3 rounded-md"
               onClick={() => meta.handleDelete(row.getValue("anc_id"))}

@@ -31,6 +31,7 @@ import {
 } from "@/validation/Validation";
 import Swal from "sweetalert2";
 
+// Define TypeScript interfaces
 interface Topic {
   label: string;
   onpId: string | null;
@@ -39,27 +40,91 @@ interface Topic {
   platforms?: string;
 }
 
-export default function CreateAnalytic() {
-  const [isModalOpen, setModalOpen] = useState(false);
-  const [topics, setTopics] = useState<Topic[]>([]);
-  const [loading, setLoading] = useState(false);
-  const [errorMessage, setErrorMessage] = useState("");
-  const [successMessage, setSuccessMessage] = useState("");
-  const [selectedPlatforms, setSelectedPlatforms] = useState<string[]>([]);
-  const [platformsDisabled, setPlatformsDisabled] = useState(false);
-  const [topicsData, setTopicsData] = useState<any[]>([]);
-  const [existingAnalytics, setExistingAnalytics] = useState<any[]>([]);
-  const [platformErrors, setPlatformErrors] = useState<any>({});
+interface PlatformData {
+  anp_id: number;
+  anp_name: string;
+  created_at: string;
+  updated_at: string;
+}
 
-  // Form metric states for each platform
-  const [platformMetrics, setPlatformMetrics] = useState({
-    website: { reach: "", like: "", comment: "", share: "", save: "" },
-    instagram: { reach: "", like: "", comment: "", share: "", save: "" },
-    twitter: { reach: "", like: "", comment: "", share: "", save: "" },
-    facebook: { reach: "", like: "", comment: "", share: "", save: "" },
-    youtube: { reach: "", like: "", comment: "", share: "", save: "" },
-    tiktok: { reach: "", like: "", comment: "", share: "", save: "" },
-  });
+interface PlatformField {
+  anf_id: number | string;
+  anp_id: number;
+  anf_name: string;
+  anf_required: number;
+  created_at: string | null;
+  updated_at: string | null;
+  platforms: PlatformData[];
+  custom?: boolean;
+}
+
+interface Platform {
+  anp_id: number;
+  anp_name: string;
+  created_at: string;
+  updated_at: string;
+}
+
+interface MetricsState {
+  [platform: string]: {
+    [field: string]: string;
+  };
+}
+
+interface PlatformErrorsState {
+  [platform: string]: {
+    [field: string]: string;
+  };
+}
+
+interface AnalyticData {
+  anc_id: number;
+  anc_tanggal: string;
+  anc_hari: string;
+  lup_id: number;
+  // Additional properties as needed
+}
+
+interface FormData {
+  anc_tanggal: string;
+  anc_hari: string;
+  lup_id: string;
+  platforms: string;
+  [key: string]: any; // For dynamic field values
+}
+
+interface AddFieldFormState {
+  platform: string;
+  name: string;
+  required: boolean;
+}
+
+export default function CreateAnalytic() {
+  const [isModalOpen, setModalOpen] = useState<boolean>(false);
+  const [topics, setTopics] = useState<Topic[]>([]);
+  const [loading, setLoading] = useState<boolean>(false);
+  const [errorMessage, setErrorMessage] = useState<string>("");
+  const [successMessage, setSuccessMessage] = useState<string>("");
+  const [selectedPlatforms, setSelectedPlatforms] = useState<string[]>([]);
+  const [platformsDisabled, setPlatformsDisabled] = useState<boolean>(false);
+  const [topicsData, setTopicsData] = useState<any[]>([]);
+  const [existingAnalytics, setExistingAnalytics] = useState<AnalyticData[]>(
+    []
+  );
+  const [platformErrors, setPlatformErrors] = useState<PlatformErrorsState>({});
+  const [isAddingField, setIsAddingField] = useState<boolean>(false);
+
+  // New state for dynamic platforms and fields
+  const [availablePlatforms, setAvailablePlatforms] = useState<Platform[]>([]);
+  const [platformFields, setPlatformFields] = useState<PlatformField[]>([]);
+
+  // Dynamic platform metrics state with TypeScript type
+  const [platformMetrics, setPlatformMetrics] = useState<MetricsState>({});
+
+  // State for add field form
+  const [addFieldForm, setAddFieldForm] = useState<AddFieldFormState | null>(
+    null
+  );
 
   const {
     register,
@@ -68,7 +133,7 @@ export default function CreateAnalytic() {
     watch,
     reset,
     formState: { errors, isSubmitting },
-  } = useForm({
+  } = useForm<FormData>({
     resolver: zodResolver(AnalyticSchema),
     defaultValues: {
       anc_tanggal: "",
@@ -80,6 +145,72 @@ export default function CreateAnalytic() {
 
   const selectedDate = watch("anc_tanggal");
   const selectedTopicId = watch("lup_id");
+
+  // Fetch platforms and fields data
+  useEffect(() => {
+    const fetchPlatformsAndFields = async (): Promise<void> => {
+      try {
+        setLoading(true);
+
+        // Fetch platforms
+        const platformsResponse = await axios.get<{
+          status: boolean;
+          message: string;
+          data: {
+            analytic_platforms: Platform[];
+          };
+        }>("http://127.0.0.1:8000/api/analyticcontent/get/platform");
+
+        if (
+          platformsResponse.data?.status &&
+          platformsResponse.data?.data?.analytic_platforms
+        ) {
+          setAvailablePlatforms(platformsResponse.data.data.analytic_platforms);
+        }
+
+        // Fetch fields
+        const fieldsResponse = await axios.get<{
+          status: boolean;
+          message: string;
+          data: {
+            fields: PlatformField[];
+          };
+        }>("http://127.0.0.1:8000/api/analyticcontent/get/field");
+
+        if (fieldsResponse.data?.status && fieldsResponse.data?.data?.fields) {
+          setPlatformFields(fieldsResponse.data.data.fields);
+
+          // Initialize empty metrics state for each platform and field
+          const newPlatformMetrics: MetricsState = {};
+
+          // Group fields by platform
+          const platforms = platformsResponse.data.data.analytic_platforms;
+          platforms.forEach((platform: Platform) => {
+            // Initialize fields for this platform
+            newPlatformMetrics[platform.anp_name] = {};
+
+            // Add all available fields for this platform
+            const platformFieldList = fieldsResponse.data.data.fields.filter(
+              (field: PlatformField) => field.anp_id === platform.anp_id
+            );
+
+            platformFieldList.forEach((field: PlatformField) => {
+              newPlatformMetrics[platform.anp_name][field.anf_name] = "";
+            });
+          });
+
+          setPlatformMetrics(newPlatformMetrics);
+        }
+      } catch (error) {
+        console.error("Error fetching platforms and fields:", error);
+        setErrorMessage("Failed to fetch platforms and fields data");
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchPlatformsAndFields();
+  }, []);
 
   // Update day of week when date changes
   useEffect(() => {
@@ -103,14 +234,13 @@ export default function CreateAnalytic() {
   }, [selectedDate, setValue, existingAnalytics, topicsData]);
 
   // Filter available topics based on the selected date
-  // Filter available topics based on the selected date
-  const filterAvailableTopics = (date: string) => {
+  const filterAvailableTopics = (date: string): void => {
     if (!date || !topicsData.length) {
       return;
     }
 
     // Get list of lup_ids that already have analytics for the selected date
-    const existingLupIds =
+    const existingLupIds: number[] =
       existingAnalytics.length > 0
         ? existingAnalytics
             .filter((item) => item.anc_tanggal === date)
@@ -121,7 +251,7 @@ export default function CreateAnalytic() {
     const availableTopics = topicsData
       .filter((item) => item && typeof item === "object")
       .map((item) => {
-        let lupId = null;
+        let lupId: string | null = null;
         if (
           item.platforms &&
           typeof item.platforms === "object" &&
@@ -141,7 +271,7 @@ export default function CreateAnalytic() {
       .filter(
         (topic) =>
           topic.lupId !== null &&
-          !existingLupIds.includes(parseInt(topic.lupId))
+          !existingLupIds.includes(parseInt(topic.lupId as string))
       );
 
     setTopics(availableTopics);
@@ -171,7 +301,11 @@ export default function CreateAnalytic() {
   }, [selectedTopicId, topics, setValue]);
 
   // Handle platform metric changes
-  const handleMetricChange = (platform: any, metric: any, value: any) => {
+  const handleMetricChange = (
+    platform: string,
+    metric: string,
+    value: string
+  ): void => {
     setPlatformMetrics((prev) => ({
       ...prev,
       [platform]: {
@@ -181,135 +315,181 @@ export default function CreateAnalytic() {
     }));
   };
 
-  // Modified onSubmit to match backend expectations
-  const onSubmit = async (data: any) => {
-    try {
-      setLoading(true);
+  // Custom validation for platform metrics
+  const validateDynamicPlatformMetrics = (
+    platforms: string[],
+    metrics: MetricsState
+  ): { success: boolean; error: PlatformErrorsState } => {
+    const errors: PlatformErrorsState = {};
+    let isValid = true;
 
-      const validationResult = validatePlatformMetrics(
-        selectedPlatforms,
-        platformMetrics
+    platforms.forEach((platform) => {
+      if (!errors[platform]) errors[platform] = {};
+
+      // Find all fields for this platform
+      const platformFieldsList = getFieldsForPlatform(platform);
+
+      // Check required fields
+      platformFieldsList.forEach((field) => {
+        if (field.anf_required === 1) {
+          const value = metrics[platform]?.[field.anf_name];
+          if (!value || value.trim() === "") {
+            errors[platform][
+              field.anf_name
+            ] = `${field.anf_name} is required for ${platform}`;
+            isValid = false;
+          }
+        }
+      });
+    });
+
+    return {
+      success: isValid,
+      error: isValid ? {} : errors,
+    };
+  };
+
+  // Create a new field via API
+  const createFieldViaAPI = async (
+    platformId: number,
+    fieldName: string,
+    required: boolean
+  ): Promise<PlatformField | null> => {
+    try {
+      const response = await axios.post(
+        "http://127.0.0.1:8000/api/analyticcontent/create/field",
+        {
+          anp_id: platformId,
+          anf_name: fieldName.toLowerCase().replace(/\s+/g, "_"),
+          anf_required: required ? 1 : 0,
+        }
       );
 
-      if (!validationResult.success) {
-        setPlatformErrors(validationResult.error);
+      if (response.data?.status && response.data?.data?.field) {
+        return response.data.data.field;
+      }
+      return null;
+    } catch (error) {
+      console.error("Error creating new field:", error);
+      setErrorMessage("Failed to create new field");
+      return null;
+    }
+  };
 
-        let timerInterval: any;
-        Swal.fire({
-          title: "Oops...!",
-          text: "Silahkan isi semua field yang diperlukan",
-          icon: "error",
-          timer: 700,
-          timerProgressBar: true,
-          showConfirmButton: false,
-          didOpen: () => {
-            Swal.showLoading();
-            const timer = Swal.getPopup()?.querySelector("b");
-            if (timer) {
-              timerInterval = setInterval(() => {
-                if (timer) timer.textContent = `${Swal.getTimerLeft()}`;
-              }, 100);
-            }
-          },
-          willClose: () => {
-            clearInterval(timerInterval);
-          },
-        }).then((result) => {
-          if (result.dismiss === Swal.DismissReason.timer) {
-            console.log("Alert closed by the timer");
-          }
-        });
+  // Handler to show the add field form
+  const handleShowAddField = (platformName: string): void => {
+    setAddFieldForm({
+      platform: platformName,
+      name: "",
+      required: false,
+    });
+  };
 
+  // Handler to save the new field
+  const handleSaveNewField = async (): Promise<void> => {
+    if (!addFieldForm || !addFieldForm.name.trim()) {
+      // Validation: field name cannot be empty
+      return;
+    }
+
+    const { platform, name, required } = addFieldForm;
+    setIsAddingField(true);
+    setLoading(true);
+
+    try {
+      const platformObj = availablePlatforms.find(
+        (p) => p.anp_name === platform
+      );
+      if (!platformObj) {
+        setErrorMessage("Platform not found");
+        setIsAddingField(false);
         setLoading(false);
         return;
       }
 
-      setPlatformErrors({});
-      // Prepare data for backend
-      const formData = {
-        anc_tanggal: data.anc_tanggal,
-        anc_hari: data.anc_hari,
-        lup_id: data.lup_id,
-        platforms: data.platforms,
-        reach: {},
-        like: {},
-        comment: {},
-        share: {},
-        save: {},
+      // Create a temporary field immediately for UI responsiveness
+      // This gives immediate feedback before the API call completes
+      const tempFieldName = name.toLowerCase().replace(/\s+/g, "_");
+      const tempField: PlatformField = {
+        anf_id: `temp-${Date.now()}`, // Temporary ID until we get the real one
+        anp_id: platformObj.anp_id,
+        anf_name: tempFieldName,
+        anf_required: required ? 1 : 0,
+        created_at: new Date().toISOString(),
+        updated_at: null,
+        platforms: [platformObj],
+        custom: true,
       };
 
-      // Ensure we have reach values for each platform (required by backend)
-      selectedPlatforms.forEach((platform) => {
-        // Make sure platform name is normalized
-        const normalizedPlatform = platform.trim().toLowerCase();
+      // Update UI immediately with temporary field
+      setPlatformFields((prevFields) => [...prevFields, tempField]);
+      setPlatformMetrics((prev) => ({
+        ...prev,
+        [platform]: {
+          ...(prev[platform] || {}),
+          [tempFieldName]: "", // Initialize with empty value
+        },
+      }));
 
-        // Only add other metrics if they have values
-        if ((platformMetrics as any)[normalizedPlatform].reach)
-          (formData.reach as any)[normalizedPlatform] = (
-            platformMetrics as any
-          )[normalizedPlatform].reach;
-        if ((platformMetrics as any)[normalizedPlatform].like)
-          (formData.like as any)[normalizedPlatform] = (platformMetrics as any)[
-            normalizedPlatform
-          ].like;
-        if ((platformMetrics as any)[normalizedPlatform].comment)
-          (formData.comment as any)[normalizedPlatform] = (
-            platformMetrics as any
-          )[normalizedPlatform].comment;
-        if ((platformMetrics as any)[normalizedPlatform].share)
-          (formData.share as any)[normalizedPlatform] = (
-            platformMetrics as any
-          )[normalizedPlatform].share;
-        if ((platformMetrics as any)[normalizedPlatform].save)
-          (formData.save as any)[normalizedPlatform] = (platformMetrics as any)[
-            normalizedPlatform
-          ].save;
-      });
+      console.log("Added temporary field:", tempField);
+      console.log("Updated platformFields state:", [
+        ...platformFields,
+        tempField,
+      ]);
 
-      console.log("Submitting data:", formData);
-
-      const response = await axios.post(
-        "http://127.0.0.1:8000/api/analyticcontent/create",
-        formData
+      // Now make the API call
+      const newField = await createFieldViaAPI(
+        platformObj.anp_id,
+        name,
+        required
       );
 
-      console.log("Response:", response.data);
-      setSuccessMessage("Content successfully added!");
+      if (newField) {
+        // Replace the temporary field with the real one from API
+        setPlatformFields((prevFields) =>
+          prevFields.map((field) =>
+            field.anf_id === tempField.anf_id
+              ? { ...newField, platforms: [platformObj], custom: true }
+              : field
+          )
+        );
 
-      // Refresh the analytics data
-      fetchAnalytics();
+        console.log("Replaced temp field with real field from API:", newField);
 
-      setTimeout(() => {
-        setModalOpen(false);
-        reset();
-        window.location.reload();
-        setPlatformMetrics({
-          website: { reach: "", like: "", comment: "", share: "", save: "" },
-          instagram: { reach: "", like: "", comment: "", share: "", save: "" },
-          twitter: { reach: "", like: "", comment: "", share: "", save: "" },
-          facebook: { reach: "", like: "", comment: "", share: "", save: "" },
-          youtube: { reach: "", like: "", comment: "", share: "", save: "" },
-          tiktok: { reach: "", like: "", comment: "", share: "", save: "" },
+        // Success message
+        Swal.fire({
+          icon: "success",
+          title: "Success!",
+          text: `Field "${name}" has been added successfully.`,
+          timer: 1500,
+          showConfirmButton: false,
         });
-        setPlatformErrors({});
-      }, 1500);
-    } catch (error: any) {
-      console.error("Error submitting form:", error);
-      if (
-        error.response &&
-        error.response.data &&
-        error.response.data.message
-      ) {
-        setErrorMessage(error.response.data.message);
-      } else {
-        setErrorMessage("Failed to add content. Please try again.");
       }
+    } catch (error) {
+      console.error("Error adding new field:", error);
+      setErrorMessage("Failed to add new field");
+
+      // Remove the temporary field if API call fails
+      setPlatformFields((prevFields) =>
+        prevFields.filter((field) => !String(field.anf_id).startsWith("temp-"))
+      );
+
+      Swal.fire({
+        icon: "error",
+        title: "Error!",
+        text: "Failed to add new field. Please try again.",
+        timer: 1500,
+        showConfirmButton: false,
+      });
     } finally {
+      // Reset the add field form, not the entire modal
+      setAddFieldForm(null);
+      setIsAddingField(false);
       setLoading(false);
     }
   };
 
-  const handlePlatformChange = (platform: any) => {
+  const handlePlatformChange = (platform: string): void => {
     // Only allow changes if platforms are not disabled
     if (!platformsDisabled) {
       const normalizedPlatform = platform.toLowerCase();
@@ -325,38 +505,166 @@ export default function CreateAnalytic() {
     }
   };
 
-  const onAdd = () => {
+  const onSubmit = async (data: FormData): Promise<void> => {
+    try {
+      // Set loading state
+      setLoading(true);
+      setErrorMessage("");
+
+      // Check if platforms selected
+      if (!selectedPlatforms.length) {
+        setErrorMessage("Silakan pilih minimal satu platform");
+        setLoading(false);
+        return;
+      }
+
+      // Validate platform metrics
+      const validation = validateDynamicPlatformMetrics(
+        selectedPlatforms,
+        platformMetrics
+      );
+
+      if (!validation.success) {
+        setPlatformErrors(validation.error);
+        setLoading(false);
+        return;
+      }
+
+      // Reset previous errors
+      setPlatformErrors({});
+
+      // Prepare data array with CORRECT FIELD NAMES
+      const allDataToSubmit = [];
+
+      // Loop through each selected platform
+      for (const platform of selectedPlatforms) {
+        const fields = getFieldsForPlatform(platform);
+        const platformObj = availablePlatforms.find(
+          (p) => p.anp_name === platform
+        );
+        if (!platformObj) continue;
+
+        for (const field of fields) {
+          const value = platformMetrics[platform]?.[field.anf_name];
+
+          // Skip optional empty fields
+          if (
+            (value === "" || value === null || value === undefined) &&
+            field.anf_required === 0
+          ) {
+            continue;
+          }
+
+          // IMPORTANT: Match the field names expected by backend
+          allDataToSubmit.push({
+            anc_tgl: data.anc_tanggal, // Changed from anc_tanggal to anc_tgl
+            anc_hari: data.anc_hari,
+            lup_id: parseInt(data.lup_id),
+            anf_id: field.anf_id,
+            value: parseInt(value || "0"),
+          });
+        }
+      }
+
+      // Make API request with correctly formatted data
+      const response = await axios.post(
+        "http://127.0.0.1:8000/api/analyticcontent/create",
+        { inputs: allDataToSubmit }
+      );
+
+      if (response.data?.status) {
+        // Success
+        setSuccessMessage("Data berhasil disimpan!");
+
+        Swal.fire({
+          icon: "success",
+          title: "Berhasil!",
+          text: "Semua data telah berhasil disimpan.",
+          timer: 1500,
+          showConfirmButton: false,
+        });
+
+        await fetchAnalytics();
+        setModalOpen(false);
+        reset();
+      } else {
+        // Failed
+        setErrorMessage(
+          "Gagal menyimpan data: " + (response.data?.message || "Unknown error")
+        );
+
+        Swal.fire({
+          icon: "error",
+          title: "Error",
+          text: "Gagal menyimpan data. Silakan coba lagi.",
+        });
+      }
+    } catch (error: any) {
+      console.error("Error saat submit form:", error);
+
+      // Add debugging to see the exact error
+      if (error.response) {
+        console.error("Error response:", error.response.data);
+        setErrorMessage(
+          `Gagal: ${error.response.data.message || "Unknown error"}`
+        );
+      } else {
+        setErrorMessage("Gagal menyimpan data. Silakan coba lagi.");
+      }
+
+      Swal.fire({
+        icon: "error",
+        title: "Error",
+        text: "Gagal menyimpan data. Silakan coba lagi.",
+      });
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const onAdd = (): void => {
     setModalOpen(true);
     setSelectedPlatforms([]);
     setErrorMessage("");
     setSuccessMessage("");
     reset();
     setPlatformsDisabled(false);
-    setPlatformMetrics({
-      website: { reach: "", like: "", comment: "", share: "", save: "" },
-      instagram: { reach: "", like: "", comment: "", share: "", save: "" },
-      twitter: { reach: "", like: "", comment: "", share: "", save: "" },
-      facebook: { reach: "", like: "", comment: "", share: "", save: "" },
-      youtube: { reach: "", like: "", comment: "", share: "", save: "" },
-      tiktok: { reach: "", like: "", comment: "", share: "", save: "" },
+
+    // Reset platform metrics
+    const newPlatformMetrics: MetricsState = {};
+    availablePlatforms.forEach((platform) => {
+      newPlatformMetrics[platform.anp_name] = {};
+
+      // Add fields for this platform
+      const platformFieldsList = getFieldsForPlatform(platform.anp_name);
+
+      platformFieldsList.forEach((field) => {
+        newPlatformMetrics[platform.anp_name][field.anf_name] = "";
+      });
     });
+
+    setPlatformMetrics(newPlatformMetrics);
 
     // Set default date to today
     const today = new Date().toISOString().split("T")[0];
     setValue("anc_tanggal", today);
   };
 
-  const handleCancel = () => {
+  const handleCancel = (): void => {
     setModalOpen(false);
     reset();
   };
 
   // Fetch analytics data
-  const fetchAnalytics = async () => {
+  const fetchAnalytics = async (): Promise<number> => {
     try {
-      const response = await axios.get(
-        "http://127.0.0.1:8000/api/analyticcontent"
-      );
+      const response = await axios.get<{
+        status: boolean;
+        message: string;
+        data: {
+          analytic_content: AnalyticData[];
+        };
+      }>("http://127.0.0.1:8000/api/analyticcontent");
 
       // Check if response has the expected structure and contains data
       if (response.data?.status && response.data?.data?.analytic_content) {
@@ -365,6 +673,7 @@ export default function CreateAnalytic() {
         console.log("No analytics data available");
         setExistingAnalytics([]);
       }
+      return 1;
     } catch (err) {
       console.log("Failed to fetch analytics data");
       setExistingAnalytics([]);
@@ -374,7 +683,7 @@ export default function CreateAnalytic() {
 
   // Fetch topics and analytics on component mount
   useEffect(() => {
-    const fetchData = async () => {
+    const fetchData = async (): Promise<void> => {
       try {
         setLoading(true);
 
@@ -407,32 +716,39 @@ export default function CreateAnalytic() {
     fetchData();
   }, []);
 
-  // Platform display settings
-  const platformSettings = {
-    website: {
-      displayName: "Website",
-      metrics: ["reach"],
-    },
-    instagram: {
-      displayName: "Instagram",
-      metrics: ["reach", "like", "comment", "share", "save"],
-    },
-    twitter: {
-      displayName: "Twitter",
-      metrics: ["reach", "like", "comment", "share", "save"],
-    },
-    facebook: {
-      displayName: "Facebook",
-      metrics: ["reach", "like", "comment", "share", "save"],
-    },
-    youtube: {
-      displayName: "Youtube",
-      metrics: ["reach", "like", "comment", "share", "save"],
-    },
-    tiktok: {
-      displayName: "TikTok",
-      metrics: ["reach", "like", "comment", "share", "save"],
-    },
+  // Helper function to get fields for a specific platform
+  // Helper function to get fields for a specific platform
+  const getFieldsForPlatform = (platformName: string): PlatformField[] => {
+    const platform = availablePlatforms.find(
+      (p) => p.anp_name === platformName
+    );
+
+    if (!platform) return [];
+
+    // Direct debugging to see what fields are available
+    console.log(`Getting fields for platform ${platformName}:`, platformFields);
+
+    return platformFields.filter((field) => {
+      // Include custom fields created for this platform
+      if (field.custom && field.anp_id === platform.anp_id) {
+        console.log(`Found custom field for ${platformName}:`, field);
+        return true;
+      }
+
+      // Include standard fields from API that match this platform
+      if (Array.isArray(field.platforms)) {
+        const matchingPlatform = field.platforms.find(
+          (p) => p.anp_id === platform.anp_id
+        );
+        if (matchingPlatform) {
+          return true;
+        }
+      } else if (field.anp_id === platform.anp_id) {
+        return true;
+      }
+
+      return false;
+    });
   };
 
   return (
@@ -537,7 +853,7 @@ export default function CreateAnalytic() {
                     )}
                   </div>
 
-                  {/* Platform selection */}
+                  {/* Platform selection - Dynamic from API */}
                   <div className="grid items-center gap-1.5">
                     <Label htmlFor="platforms" className="mb-1">
                       Platform Media Sosial
@@ -550,95 +866,200 @@ export default function CreateAnalytic() {
                     </Label>
 
                     <div className="grid grid-cols-2 gap-4">
-                      {Object.keys(platformSettings).map((platformKey) => {
-                        const platform = (platformSettings as any)[platformKey];
-                        const isSelected =
-                          selectedPlatforms.includes(platformKey);
+                      {loading ? (
+                        <div>Loading platforms...</div>
+                      ) : availablePlatforms.length === 0 ? (
+                        <div>No platforms available</div>
+                      ) : (
+                        availablePlatforms.map((platform) => {
+                          const platformName = platform.anp_name;
+                          const isSelected =
+                            selectedPlatforms.includes(platformName);
+                          const displayName =
+                            platformName.charAt(0).toUpperCase() +
+                            platformName.slice(1);
 
-                        return (
-                          <div key={platformKey} className="mb-4">
-                            <div className="flex items-center space-x-2 mb-2">
-                              <Checkbox
-                                id={`platform-${platformKey}`}
-                                checked={isSelected}
-                                onCheckedChange={() =>
-                                  handlePlatformChange(platformKey)
-                                }
-                                disabled={platformsDisabled}
-                                className={
-                                  platformsDisabled ? "cursor-not-allowed" : ""
-                                }
-                              />
-                              <label
-                                htmlFor={`platform-${platformKey}`}
-                                className="text-sm font-medium leading-none"
-                              >
-                                {platform.displayName}
-                              </label>
-                            </div>
+                          // Get fields for this platform
+                          const fields = getFieldsForPlatform(platformName);
 
-                            {isSelected && (
-                              <>
-                                <div className="ml-6 flex flex-wrap gap-2">
-                                  {platform.metrics.map((metric: any) => (
-                                    <div
-                                      key={`${platformKey}-${metric}`}
-                                      className="flex items-center space-x-2"
-                                    >
-                                      <Label
-                                        htmlFor={`${platformKey}-${metric}`}
-                                        className="w-16 text-xs"
-                                      >
-                                        {metric.charAt(0).toUpperCase() +
-                                          metric.slice(1)}
-                                        {metric === "reach" && (
-                                          <span className="text-red-500">
-                                            {" "}
-                                            *
-                                          </span>
-                                        )}
-                                      </Label>
-                                      <Input
-                                        type="number"
-                                        min="0"
-                                        id={`${platformKey}-${metric}`}
-                                        className="h-8 w-24"
-                                        placeholder="0"
-                                        value={
-                                          (platformMetrics as any)[platformKey][
-                                            metric
-                                          ]
-                                        }
-                                        onChange={(e) =>
-                                          handleMetricChange(
-                                            platformKey,
-                                            metric,
-                                            e.target.value
-                                          )
-                                        }
-                                      />
+                          // Check if this platform has the add field form open
+                          const isAddingField =
+                            addFieldForm &&
+                            addFieldForm.platform === platformName;
+
+                          return (
+                            <div key={platform.anp_id} className="mb-2">
+                              <div className="flex items-center space-x-2 mb-1">
+                                <Checkbox
+                                  id={`platform-${platformName}`}
+                                  checked={isSelected}
+                                  onCheckedChange={() =>
+                                    handlePlatformChange(platformName)
+                                  }
+                                  disabled={platformsDisabled}
+                                  className={
+                                    platformsDisabled
+                                      ? "cursor-not-allowed"
+                                      : ""
+                                  }
+                                />
+                                <label
+                                  htmlFor={`platform-${platformName}`}
+                                  className="text-sm font-medium leading-none"
+                                >
+                                  {displayName}
+                                </label>
+                              </div>
+
+                              {isSelected && (
+                                <div className="ml-6 space-y-1">
+                                  {fields.length > 0 && (
+                                    <div className="flex flex-wrap gap-2">
+                                      {fields.map((field) => (
+                                        <div
+                                          key={`${platformName}-${field.anf_name}-${field.anf_id}`} // Add anf_id to key for better tracking
+                                          className="flex items-center space-x-2"
+                                        >
+                                          <Label
+                                            htmlFor={`${platformName}-${field.anf_name}`}
+                                            className="w-16 text-xs"
+                                          >
+                                            {field.anf_name
+                                              .charAt(0)
+                                              .toUpperCase() +
+                                              field.anf_name.slice(1)}
+                                            {field.anf_required === 1 && (
+                                              <span className="text-red-500">
+                                                {" "}
+                                                *
+                                              </span>
+                                            )}
+                                          </Label>
+                                          <Input
+                                            type="number"
+                                            min="0"
+                                            id={`${platformName}-${field.anf_name}`}
+                                            className="h-7 w-24"
+                                            placeholder="0"
+                                            value={
+                                              platformMetrics[platformName]?.[
+                                                field.anf_name
+                                              ] || ""
+                                            }
+                                            onChange={(e) =>
+                                              handleMetricChange(
+                                                platformName,
+                                                field.anf_name,
+                                                e.target.value
+                                              )
+                                            }
+                                          />
+                                        </div>
+                                      ))}
                                     </div>
-                                  ))}
+                                  )}
 
-                                  {/* Add error message for reach field */}
-                                </div>
-                                <div className="ps-5 pt-1">
+                                  {/* Add Field Form */}
+                                  {isAddingField ? (
+                                    <div className="mt-2 p-2 border border-gray-200 rounded-md bg-gray-50">
+                                      <div className="flex items-center gap-2 mb-2">
+                                        <div>
+                                          <Label
+                                            htmlFor="new-field-name"
+                                            className="text-xs block mb-1"
+                                          >
+                                            Nama Field
+                                          </Label>
+                                          <Input
+                                            type="text"
+                                            id="new-field-name"
+                                            className="h-7 w-full"
+                                            placeholder="Nama field"
+                                            value={addFieldForm.name}
+                                            onChange={(e) =>
+                                              setAddFieldForm({
+                                                ...addFieldForm,
+                                                name: e.target.value,
+                                              })
+                                            }
+                                          />
+                                        </div>
+                                        <div className="flex-shrink-0 mt-5">
+                                          <div className="flex items-center gap-2">
+                                            <Checkbox
+                                              id="new-field-required"
+                                              checked={addFieldForm.required}
+                                              onCheckedChange={(checked) =>
+                                                setAddFieldForm({
+                                                  ...addFieldForm,
+                                                  required: checked === true,
+                                                })
+                                              }
+                                            />
+                                            <Label
+                                              htmlFor="new-field-required"
+                                              className="text-xs cursor-pointer"
+                                            >
+                                              Required
+                                            </Label>
+                                          </div>
+                                        </div>
+                                      </div>
+                                      <div className="flex justify-end gap-2">
+                                        <button
+                                          type="button"
+                                          onClick={() => setAddFieldForm(null)}
+                                          className="text-xs px-2 py-1 text-gray-600 hover:text-gray-800"
+                                        >
+                                          Batal
+                                        </button>
+                                        <button
+                                          type="button"
+                                          onClick={handleSaveNewField}
+                                          className="text-xs px-3 py-1 bg-blue-600 text-white rounded hover:bg-blue-700"
+                                        >
+                                          Simpan
+                                        </button>
+                                      </div>
+                                    </div>
+                                  ) : (
+                                    <button
+                                      type="button"
+                                      onClick={() =>
+                                        handleShowAddField(platformName)
+                                      }
+                                      className="text-xs text-blue-600 hover:text-blue-800 hover:underline"
+                                    >
+                                      Tambah Input Field Baru
+                                    </button>
+                                  )}
+
+                                  {/* Show error messages with reduced spacing */}
                                   {platformErrors &&
-                                    platformErrors[platformKey] &&
-                                    platformErrors[platformKey].reach && (
-                                      <div className="text-red-500 text-xs ml-1">
-                                        Reach wajib diisi untuk{" "}
-                                        {platform.displayName}
+                                    platformErrors[platformName] &&
+                                    Object.keys(platformErrors[platformName])
+                                      .length > 0 && (
+                                      <div className="pt-1">
+                                        {Object.keys(
+                                          platformErrors[platformName]
+                                        ).map((fieldName) => (
+                                          <div
+                                            key={`error-${platformName}-${fieldName}`}
+                                            className="text-red-500 text-xs sentence-case"
+                                          >
+                                            {fieldName} wajib diisi untuk{" "}
+                                            {displayName}
+                                          </div>
+                                        ))}
                                       </div>
                                     )}
                                 </div>
-                              </>
-                            )}
-                          </div>
-                        );
-                      })}
+                              )}
+                            </div>
+                          );
+                        })
+                      )}
                     </div>
-
                     {errors.platforms?.message && (
                       <div className="text-red-500 text-xs">
                         {errors.platforms?.message}
