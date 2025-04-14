@@ -3,19 +3,8 @@ import {
   Calendar,
   Hash,
   Book,
-  Instagram,
-  Facebook,
-  Twitter,
-  Youtube,
   PenSquare,
-  Eye,
-  Heart,
-  MessageCircle,
-  Share2,
-  Bookmark,
   BarChart4,
-  ArrowUpRight,
-  Globe,
   Trash,
 } from "lucide-react";
 import {
@@ -24,49 +13,121 @@ import {
   TooltipProvider,
   TooltipTrigger,
 } from "@/components/ui/tooltip";
-import { Badge } from "@/components/ui/badge";
-import { FaTiktok } from "react-icons/fa";
 import { Button } from "@/components/ui/button";
-import UpdateAnalytic from "./update";
+import { useEffect, useState } from "react";
+import axios from "axios";
 
-type Platform = {
-  acr_id: number;
-  acr_platform: string;
-  acr_reach: string;
-  acr_like: string | null;
-  acr_comment: string | null;
-  acr_share: string | null;
-  acr_save: string | null;
+// Define the types to match the API response
+export type AnalyticField = {
+  name: string;
+  required: boolean;
 };
 
-export type Analytic = {
+export type AnalyticPlatform = {
+  name: string;
+};
+
+export type AnalyticContent = {
   anc_id: number;
   anc_tanggal: string;
   anc_hari: string;
   lup_id: number;
+  topik_konten: string;
+  platform: AnalyticPlatform;
+  field: AnalyticField;
+  value: number | string;
   created_at: string;
   updated_at: string;
-  platforms: Platform[];
+};
+
+// Define a consolidated type for the processed data
+export type Analytic = {
+  anc_id: number;
+  anc_tanggal: string;
+  anc_hari: string;
   date: string;
   day: string;
+  lup_id: number;
+  topik_konten: string;
+  platforms: {
+    [platform: string]: {
+      [field: string]: string | number;
+    };
+  };
+  created_at: string;
+  updated_at: string;
+};
+
+// API response types
+interface Platform {
+  anp_id: number;
+  anp_name: string;
+  created_at: string;
+  updated_at: string;
+}
+
+interface Field {
+  anf_id: number;
+  anp_id: number;
+  anf_name: string;
+  anf_required: number;
+  created_at: string | null;
+  updated_at: string | null;
+  platforms: Platform[];
+}
+
+// Helper function to process raw API data into the format we need
+export const processAnalyticData = (data: AnalyticContent[]): Analytic[] => {
+  // Group by date and lup_id
+  const groupedData: { [key: string]: Analytic } = {};
+
+  data.forEach((item) => {
+    const key = `${item.anc_tanggal}_${item.lup_id}`;
+
+    // Create or update the entry
+    if (!groupedData[key]) {
+      groupedData[key] = {
+        anc_id: item.anc_id, // Using the first anc_id for this group
+        anc_tanggal: item.anc_tanggal,
+        anc_hari: item.anc_hari,
+        date: item.anc_tanggal,
+        day: item.anc_hari,
+        lup_id: item.lup_id,
+        topik_konten: item.topik_konten,
+        platforms: {},
+        created_at: item.created_at,
+        updated_at: item.updated_at,
+      };
+    }
+
+    // Initialize platform if not exists
+    if (!groupedData[key].platforms[item.platform.name]) {
+      groupedData[key].platforms[item.platform.name] = {};
+    }
+
+    // Add field value to platform
+    const fieldKey = `acr_${item.field.name}`;
+    groupedData[key].platforms[item.platform.name][fieldKey] = item.value;
+  });
+
+  // Convert the object to array
+  return Object.values(groupedData);
 };
 
 // Komponen statistik untuk memvisualisasikan nilai
 const StatItem = ({
   value,
-  icon: Icon,
   label,
 }: {
-  value: string;
-  icon: any;
+  value: string | number;
   label: string;
 }) => {
   // Konversi nilai numerik untuk ditampilkan dengan lebih baik
   const formattedValue =
-    value === "-"
+    value === "-" || value === undefined || value === null
       ? "-"
-      : parseInt(value) > 1000
-      ? `${(parseInt(value) / 1000).toFixed(1)}K`
+      : parseInt(value.toString()) > 1000
+      ? `${(parseInt(value.toString()) / 1000).toFixed(1)}K`
       : value;
 
   // Color mapping berdasarkan metric
@@ -94,11 +155,12 @@ const StatItem = ({
       <Tooltip>
         <TooltipTrigger asChild>
           <div
-            className={`flex flex-col items-center justify-center p-2 ${
-              value !== "-" ? getColorClass() : "text-gray-400"
+            className={`flex justify-center p-1 ${
+              value !== "-" && value !== undefined && value !== null
+                ? getColorClass()
+                : "text-gray-400"
             }`}
           >
-            <Icon size={16} className="mb-1" />
             <span className="font-medium">{formattedValue}</span>
           </div>
         </TooltipTrigger>
@@ -115,29 +177,33 @@ const StatItem = ({
 // Platform Header Component
 const PlatformHeader = ({
   platform,
-  icon: Icon,
   metrics,
+  width,
 }: {
   platform: string;
-  icon: any;
-  metrics: { label: string; icon: any }[];
+  metrics: { label: string }[];
+  width: string;
 }) => {
   return (
-    <div className="w-full">
-      <div className="border-y border-e p-2 bg-gray-50 flex items-center justify-center gap-2 font-medium">
-        <Icon size={18} />
+    <div className={width} style={{ width }}>
+      <div className="border-y py-2 bg-gray-50 flex items-center justify-center font-medium text-sm">
         <span>{platform}</span>
       </div>
       <div className="flex w-full">
-        {metrics.map((metric, idx) => (
-          <div
-            key={idx}
-            className="p-1 w-[400px] text-center text-xs border-e flex flex-col items-center justify-center"
-          >
-            <metric.icon size={12} className="mb-1" />
-            {metric.label}
+        {metrics.length > 0 ? (
+          metrics.map((metric, idx) => (
+            <div
+              key={idx}
+              className="flex-1 py-1 text-center text-xs flex items-center justify-center"
+            >
+              {metric.label}
+            </div>
+          ))
+        ) : (
+          <div className="w-full py-1 text-center text-xs text-gray-500 italic">
+            Tidak ada field
           </div>
-        ))}
+        )}
       </div>
     </div>
   );
@@ -148,84 +214,89 @@ const PlatformMetrics = ({
   platformName,
   platformData,
   metrics,
+  width,
 }: {
   platformName: string;
-  platformData: Platform[] | undefined;
-  metrics: { field: string; label: string; icon: any }[];
+  platformData: any;
+  metrics: { field: string; label: string }[];
+  width: string;
 }) => {
   const getPlatformValue = (field: string) => {
-    if (!platformData) return "-";
-    const data = platformData.find(
-      (p) => p.acr_platform === platformName.toLowerCase()
-    );
-    if (!data) return "-";
-    return (data as any)[field] || "-";
+    if (!platformData || !platformData[platformName.toLowerCase()]) return "-";
+    return platformData[platformName.toLowerCase()][field] || "-";
   };
 
+  // Check if we have any data for this platform
+  const hasPlatformData =
+    platformData && platformData[platformName.toLowerCase()];
+
+  if (metrics.length === 0) {
+    return (
+      <div className={width} style={{ width }}>
+        <div className="w-full py-2 text-center text-xs text-gray-500 italic">
+          -
+        </div>
+      </div>
+    );
+  }
+
   return (
-    <div className="grid grid-cols-5 divide-x divide-gray-200">
+    <div className={`flex ${width}`} style={{ width }}>
       {metrics.map((metric, idx) => (
-        <StatItem
-          key={idx}
-          value={getPlatformValue(metric.field)}
-          icon={metric.icon}
-          label={metric.label}
-        />
+        <div key={idx} className="flex-1">
+          <StatItem
+            value={getPlatformValue(metric.field)}
+            label={metric.label}
+          />
+        </div>
       ))}
     </div>
   );
 };
 
-export const createColumns = (onlinePlanners: any[]): ColumnDef<Analytic>[] => {
-  const getContentInfoByLupId = (
-    lupId: number
-  ): { topik: string; lup_id: number } => {
-    if (!lupId || !onlinePlanners || onlinePlanners.length === 0)
-      return { topik: "-", lup_id: lupId };
+// Custom hook to fetch platform and field data
+export const usePlatformData = () => {
+  const [platforms, setPlatforms] = useState<Platform[]>([]);
+  const [fields, setFields] = useState<Field[]>([]);
+  const [loading, setLoading] = useState(true);
 
-    // Find the planner with matching lup_id
-    const matchingPlanner = onlinePlanners.find(
-      (planner) => planner.platforms && planner.platforms.lup_id === lupId
-    );
+  useEffect(() => {
+    const fetchData = async () => {
+      try {
+        const [platformsResponse, fieldsResponse] = await Promise.all([
+          axios.get("http://127.0.0.1:8000/api/analyticcontent/get/platform"),
+          axios.get("http://127.0.0.1:8000/api/analyticcontent/get/field"),
+        ]);
 
-    return {
-      topik: matchingPlanner ? matchingPlanner.onp_topik_konten : "-",
-      lup_id: lupId,
+        setPlatforms(platformsResponse.data.data.analytic_platforms);
+        setFields(fieldsResponse.data.data.fields);
+      } catch (error) {
+        console.error("Error fetching platform data:", error);
+      } finally {
+        setLoading(false);
+      }
     };
+
+    fetchData();
+  }, []);
+
+  return { platforms, fields, loading };
+};
+
+// Platform width configuration
+const getPlatformWidth = (platformName: string, metricCount: number) => {
+  // Standardized width for each platform based on metric count
+  return metricCount === 0 ? "120px" : `${metricCount * 80}px`;
+};
+
+export const createColumns = (onlinePlanners: any[]): ColumnDef<Analytic>[] => {
+  // Using the custom hook to get platform data
+  const { platforms, fields, loading } = usePlatformData();
+
+  // Group fields by platform
+  const getFieldsByPlatform = (platformId: number) => {
+    return fields.filter((field) => field.anp_id === platformId);
   };
-
-  // Definisi metrics untuk setiap platform
-  const standardMetrics = [
-    { field: "acr_reach", label: "Reach", icon: Eye },
-    { field: "acr_like", label: "Like", icon: Heart },
-    { field: "acr_comment", label: "Comment", icon: MessageCircle },
-    { field: "acr_share", label: "Shares", icon: Share2 },
-    { field: "acr_save", label: "Saves", icon: Bookmark },
-  ];
-
-  const twitterMetrics = [
-    { field: "acr_reach", label: "Reach", icon: Eye },
-    { field: "acr_like", label: "Like", icon: Heart },
-    { field: "acr_comment", label: "Comment", icon: MessageCircle },
-    { field: "acr_share", label: "Retweet", icon: Share2 },
-    { field: "acr_save", label: "Saves", icon: Bookmark },
-  ];
-
-  const youtubeMetrics = [
-    { field: "acr_reach", label: "Views", icon: Eye },
-    { field: "acr_like", label: "Like", icon: Heart },
-    { field: "acr_comment", label: "Comment", icon: MessageCircle },
-    { field: "acr_share", label: "Shares", icon: Share2 },
-    { field: "acr_save", label: "Saves", icon: Bookmark },
-  ];
-
-  const tiktokMetrics = [
-    { field: "acr_reach", label: "Views", icon: Eye },
-    { field: "acr_like", label: "Like", icon: Heart },
-    { field: "acr_comment", label: "Comment", icon: MessageCircle },
-    { field: "acr_share", label: "Shares", icon: Share2 },
-    { field: "acr_save", label: "Saves", icon: Bookmark },
-  ];
 
   return [
     {
@@ -297,7 +368,7 @@ export const createColumns = (onlinePlanners: any[]): ColumnDef<Analytic>[] => {
       },
     },
     {
-      accessorKey: "lup_id",
+      accessorKey: "topik_konten",
       header: () => (
         <div className="font-semibold text-center">
           <div className="flex items-center justify-center gap-1">
@@ -307,9 +378,6 @@ export const createColumns = (onlinePlanners: any[]): ColumnDef<Analytic>[] => {
         </div>
       ),
       cell: ({ row }) => {
-        const lupId = row.getValue("lup_id") as number;
-        const contentInfo = getContentInfoByLupId(lupId);
-
         return (
           <div className="w-[300px] p-1">
             <div className="flex items-center">
@@ -317,7 +385,9 @@ export const createColumns = (onlinePlanners: any[]): ColumnDef<Analytic>[] => {
                 size={16}
                 className="mr-2 flex-shrink-0 text-gray-500"
               />
-              <p className="text-left truncate">{contentInfo.topik}</p>
+              <p className="text-left truncate">
+                {row.original.topik_konten || "-"}
+              </p>
             </div>
           </div>
         );
@@ -325,154 +395,141 @@ export const createColumns = (onlinePlanners: any[]): ColumnDef<Analytic>[] => {
     },
     {
       accessorKey: "platforms",
-      header: () => (
-        <div className="font-semibold text-center border-b border-gray-200 w-[2100px]">
-          <div className="flex items-center justify-center gap-1 my-2">
-            <BarChart4 size={18} />
-            <p>Social Media Analytics Report</p>
-          </div>
-          <div className="flex w-full">
-            {/* Instagram header */}
-            <div className="col-span-1 w-[400px]">
-              <PlatformHeader
-                platform="Instagram"
-                icon={Instagram}
-                metrics={standardMetrics.map((m) => ({
-                  label: m.label,
-                  icon: m.icon,
-                }))}
-              />
-            </div>
-
-            {/* Facebook header */}
-            <div className="col-span-1 w-[400px]">
-              <PlatformHeader
-                platform="Facebook"
-                icon={Facebook}
-                metrics={standardMetrics.map((m) => ({
-                  label: m.label,
-                  icon: m.icon,
-                }))}
-              />
-            </div>
-
-            {/* Twitter header */}
-            <div className="col-span-1 w-[400px]">
-              <PlatformHeader
-                platform="Twitter"
-                icon={Twitter}
-                metrics={twitterMetrics.map((m) => ({
-                  label: m.label,
-                  icon: m.icon,
-                }))}
-              />
-            </div>
-
-            {/* YouTube header */}
-            <div className="col-span-1 w-[400px]">
-              <PlatformHeader
-                platform="YouTube"
-                icon={Youtube}
-                metrics={youtubeMetrics.map((m) => ({
-                  label: m.label,
-                  icon: m.icon,
-                }))}
-              />
-            </div>
-
-            {/* TikTok header */}
-            <div className="col-span-1 w-[400px]">
-              <PlatformHeader
-                platform="TikTok"
-                icon={FaTiktok}
-                metrics={tiktokMetrics.map((m) => ({
-                  label: m.label,
-                  icon: m.icon,
-                }))}
-              />
-            </div>
-
-            {/* Website header */}
-            <div className="col-span-1 w-full">
-              <div className="border-y p-2 text-center bg-gray-50 flex items-center justify-center gap-1 font-medium w-full">
-                <Globe size={16} />
-                <span>Website</span>
-              </div>
-              <div className="grid grid-cols-1 w-full">
-                <div className="p-1 text-center text-xs w-full flex flex-col items-center justify-center">
-                  <Eye size={12} className="mb-1" />
-                  Reach
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
-      ),
-      cell: ({ row }) => {
-        const platformsData = row.original.platforms || [];
+      header: () => {
+        if (loading) {
+          return <div>Loading platforms...</div>;
+        }
 
         return (
-          <div className="flex w-full divide-x divide-gray-200 hover:bg-gray-50 transition-colors w-[2100px]">
-            {/* Instagram cells */}
-            <div className="col-span-1 w-[400px]">
-              <PlatformMetrics
-                platformName="instagram"
-                platformData={platformsData}
-                metrics={standardMetrics}
-              />
+          <div className="font-semibold text-center border-b border-gray-200 w-full">
+            <div className="flex items-center justify-center gap-1 my-2">
+              <BarChart4 size={18} />
+              <p>Social Media Analytics Report</p>
             </div>
+            <div className="flex w-full">
+              {platforms.map((platform) => {
+                // Get all fields for this platform
+                const platformFields = getFieldsByPlatform(platform.anp_id);
 
-            {/* Facebook cells */}
-            <div className="col-span-1 w-[400px]">
-              <PlatformMetrics
-                platformName="facebook"
-                platformData={platformsData}
-                metrics={standardMetrics}
-              />
-            </div>
+                // If it's website, handle specially
+                if (platform.anp_name === "website") {
+                  return (
+                    <div
+                      key={platform.anp_id}
+                      className="flex-shrink-0"
+                      style={{ width: "100px" }}
+                    >
+                      <div className="border-y py-2 text-center bg-gray-50 flex items-center justify-center font-medium w-full">
+                        <span>Website</span>
+                      </div>
+                      <div className="w-full">
+                        <div className="py-1 text-center text-xs w-full flex items-center justify-center">
+                          Reach
+                        </div>
+                      </div>
+                    </div>
+                  );
+                }
 
-            {/* Twitter cells */}
-            <div className="col-span-1 w-[400px]">
-              <PlatformMetrics
-                platformName="twitter"
-                platformData={platformsData}
-                metrics={twitterMetrics}
-              />
-            </div>
+                // Create metrics for this platform
+                const metrics = platformFields.map((field) => ({
+                  label:
+                    field.anf_name.charAt(0).toUpperCase() +
+                    field.anf_name.slice(1),
+                }));
 
-            {/* YouTube cells */}
-            <div className="col-span-1 w-[400px]">
-              <PlatformMetrics
-                platformName="youtube"
-                platformData={platformsData}
-                metrics={youtubeMetrics}
-              />
-            </div>
+                const platformName =
+                  platform.anp_name.charAt(0).toUpperCase() +
+                  platform.anp_name.slice(1);
 
-            {/* TikTok cells */}
-            <div className="col-span-1 w-[400px]">
-              <PlatformMetrics
-                platformName="tiktok"
-                platformData={platformsData}
-                metrics={tiktokMetrics}
-              />
-            </div>
+                const width = getPlatformWidth(
+                  platform.anp_name,
+                  metrics.length
+                );
 
-            {/* Website cell */}
-            <div className="w-[100px]">
-              <div className="flex items-center justify-center h-full">
-                <StatItem
-                  value={(() => {
-                    const data = platformsData.find(
-                      (p) => p.acr_platform === "website"
-                    );
-                    return data ? data.acr_reach || "-" : "-";
-                  })()}
-                  icon={Eye}
-                  label="Reach"
-                />
-              </div>
+                return (
+                  <div
+                    key={platform.anp_id}
+                    className="flex-shrink-0"
+                    style={{ width }}
+                  >
+                    <PlatformHeader
+                      platform={platformName}
+                      metrics={metrics}
+                      width={width}
+                    />
+                  </div>
+                );
+              })}
             </div>
+          </div>
+        );
+      },
+      cell: ({ row }) => {
+        const platformsData = row.original.platforms || {};
+
+        if (loading) {
+          return <div>Loading...</div>;
+        }
+
+        return (
+          <div className="flex w-full divide-x divide-gray-200 hover:bg-gray-50 transition-colors">
+            {platforms.map((platform) => {
+              // If it's website, handle specially
+              if (platform.anp_name === "website") {
+                const hasWebsiteData =
+                  platformsData.website && platformsData.website.acr_reach;
+
+                return (
+                  <div
+                    key={platform.anp_id}
+                    className="flex-shrink-0"
+                    style={{ width: "100px" }}
+                  >
+                    {hasWebsiteData ? (
+                      <div className="flex items-center justify-center h-full">
+                        <StatItem
+                          value={platformsData.website?.acr_reach || "-"}
+                          label="Reach"
+                        />
+                      </div>
+                    ) : (
+                      <div className="py-2 text-center text-xs text-gray-500 italic">
+                        -
+                      </div>
+                    )}
+                  </div>
+                );
+              }
+
+              // Get all fields for this platform
+              const platformFields = getFieldsByPlatform(platform.anp_id);
+
+              // Create metrics for this platform
+              const metrics = platformFields.map((field) => ({
+                field: `acr_${field.anf_name}`,
+                label:
+                  field.anf_name.charAt(0).toUpperCase() +
+                  field.anf_name.slice(1),
+              }));
+
+              const width = getPlatformWidth(platform.anp_name, metrics.length);
+
+              return (
+                <div
+                  key={platform.anp_id}
+                  className="flex-shrink-0"
+                  style={{ width }}
+                >
+                  <PlatformMetrics
+                    platformName={platform.anp_name}
+                    platformData={platformsData}
+                    metrics={metrics}
+                    width={width}
+                  />
+                </div>
+              );
+            })}
           </div>
         );
       },
@@ -490,22 +547,12 @@ export const createColumns = (onlinePlanners: any[]): ColumnDef<Analytic>[] => {
           setSelectedItem: (id: number) => void;
         };
         const rowData = row.original;
-        const lupId = row.getValue("lup_id") as number;
-        const contentInfo = getContentInfoByLupId(lupId);
 
         return (
-          <div className="w-[50px] flex gap-1">
-            {/* <UpdateAnalytic
-              id={rowData.anc_id}
-              currentDate={rowData.anc_tanggal}
-              currentDay={rowData.anc_hari}
-              currentLup={contentInfo.topik}
-              lupId={contentInfo.lup_id} // Pass the lup_id explicitly
-              currentPlatform={rowData.platforms}
-            /> */}
+          <div className="w-[80px] flex justify-center">
             <Button
-              className="bg-red-500 hover:bg-red-600 text-white flex items-center gap-2 h-8 w-full text-xs px-3 rounded-md"
-              onClick={() => meta.handleDelete(row.getValue("anc_id"))}
+              className="bg-red-500 hover:bg-red-600 text-white flex items-center gap-2 h-8 w-10 text-xs px-3 rounded-md"
+              onClick={() => meta.handleDelete(rowData.anc_id)}
             >
               <Trash size={16} />
             </Button>

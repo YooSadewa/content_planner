@@ -23,7 +23,12 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Slash } from "lucide-react";
 import DataTableAnalytic from "./datatable";
 import { useEffect, useState } from "react";
-import { Analytic, createColumns } from "./columns"; // Ubah import columns menjadi createColumns
+import {
+  Analytic,
+  createColumns,
+  AnalyticContent,
+  processAnalyticData,
+} from "./columns";
 import axios from "axios";
 import CreateAnalytic from "./adddata";
 
@@ -51,19 +56,10 @@ export default function ContentAnalyticPage() {
         ) {
           const analyticData =
             analyticResponse.value.data.data.analytic_content || [];
-          // Transform the analytic data
-          const transformedData: Analytic[] = analyticData.map((item: any) => ({
-            anc_id: item.anc_id,
-            anc_tanggal: item.anc_tanggal,
-            anc_hari: item.anc_hari,
-            lup_id: item.lup_id,
-            created_at: item.created_at,
-            updated_at: item.updated_at,
-            platforms: item.platforms || [],
-            date: item.anc_tanggal,
-            day: item.anc_hari,
-          }));
-          setTableDataAnalytic(transformedData);
+
+          // Process the API data into the format our table needs
+          const processedData = processAnalyticData(analyticData);
+          setTableDataAnalytic(processedData);
         } else {
           console.log("No analytics data available or request failed");
           setTableDataAnalytic([]);
@@ -82,7 +78,8 @@ export default function ContentAnalyticPage() {
           setOnlinePlanners([]);
         }
       } catch (err) {
-        console.log("An error occurred during data fetching", err);
+        console.error("An error occurred during data fetching", err);
+        setError("Failed to fetch data. Please try again later.");
       } finally {
         setLoading(false);
       }
@@ -91,8 +88,27 @@ export default function ContentAnalyticPage() {
     fetchData();
   }, []);
 
-  // Buat columns dengan melewatkan data onlinePlanners
+  // Create columns with onlinePlanners data
   const columns = createColumns(onlinePlanners);
+
+  // Handle delete function for the table
+  const handleDelete = async (id: number) => {
+    try {
+      // Add your delete logic here
+      // const response = await axios.delete(`http://127.0.0.1:8000/api/analyticcontent/${id}`);
+      // if (response.data.status) {
+      //   setTableDataAnalytic(tableDataAnalytic.filter(item => item.anc_id !== id));
+      // }
+      console.log("Delete analytic with ID:", id);
+      // For now, just remove from state for demonstration
+      setTableDataAnalytic(
+        tableDataAnalytic.filter((item) => item.anc_id !== id)
+      );
+    } catch (err) {
+      console.error("Failed to delete analytic", err);
+    }
+  };
+
   return (
     <div className="w-[1050px]">
       <div className="px-5 pt-5 overflow-auto">
@@ -151,10 +167,14 @@ export default function ContentAnalyticPage() {
                   </Pagination>
                 </div>
               </div>
+            ) : error ? (
+              <div className="w-full p-6 text-center text-red-500">{error}</div>
             ) : (
-              <>
-                <DataTableAnalytic data={tableDataAnalytic} columns={columns} isLoading={loading}/>
-              </>
+              <DataTableAnalytic
+                data={tableDataAnalytic}
+                columns={columns}
+                isLoading={loading}
+              />
             )}
           </CardContent>
         </Card>

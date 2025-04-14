@@ -32,6 +32,7 @@ import {
 } from "@/components/ui/select";
 import axios from "axios";
 import { Analytic } from "./columns";
+import Swal from "sweetalert2";
 
 interface DataTableAnalyticProps {
   data: Analytic[];
@@ -62,6 +63,7 @@ export default function DataTableAnalytic({
     });
   }, [data, monthSort]); // Only re-sort when data or monthSort changes
 
+  // Inside DataTableAnalytic component
   const table = useReactTable({
     data: sortedData,
     columns,
@@ -74,22 +76,81 @@ export default function DataTableAnalytic({
     },
     meta: {
       hoveredRow,
-      handleDelete: async (idANC: number) => {
+      handleDelete: async (ancId: number) => {
         try {
+          // Find the record to get lup_id and date
+          const record = sortedData.find((item) => item.anc_id === ancId);
+
+          if (!record) {
+            Swal.fire({
+              icon: "error",
+              title: "Error",
+              text: "Data tidak ditemukan",
+            });
+            return;
+          }
+
+          const { lup_id, anc_tanggal } = record;
+
+          // Use SweetAlert for confirmation
+          const result = await Swal.fire({
+            title: "Konfirmasi",
+            text: "Apakah Anda yakin ingin menghapus semua data analisis untuk konten ini?",
+            icon: "warning",
+            showCancelButton: true,
+            confirmButtonColor: "#d33",
+            cancelButtonColor: "#3085d6",
+            confirmButtonText: "Ya, hapus!",
+            cancelButtonText: "Batal",
+          });
+
+          // If the user clicked "Cancel" button
+          if (!result.isConfirmed) {
+            return;
+          }
+
+          // Show loading state
+          Swal.fire({
+            title: "Memproses...",
+            text: "Sedang menghapus data",
+            allowOutsideClick: false,
+            allowEscapeKey: false,
+            didOpen: () => {
+              Swal.showLoading();
+            },
+          });
+
+          // Call the API with lup_id and date parameters
           const response = await axios.delete(
-            `http://127.0.0.1:8000/api/analyticcontent/delete/${idANC}`
+            `http://127.0.0.1:8000/api/analyticcontent/delete/${lup_id}/${anc_tanggal}`
           );
 
           if (response.data.status) {
-            window.location.reload();
-            console.log(`Online Planner dengan ID ${idANC} berhasil dihapus.`);
+            Swal.fire({
+              icon: "success",
+              title: "Berhasil!",
+              text: `Data analitik berhasil dihapus.`,
+            }).then(() => {
+              window.location.reload();
+            });
           } else {
-            console.error("Deletion failed:", response.data.message);
+            Swal.fire({
+              icon: "error",
+              title: "Gagal",
+              text: response.data.message || "Gagal menghapus data",
+            });
           }
-        } catch (err) {
-          console.error("Terjadi kesalahan:", error);
-          setError("Gagal menghapus Online Planner");
+        } catch (err: any) {
+          Swal.fire({
+            icon: "error",
+            title: "Error",
+            text: err.message || "Terjadi kesalahan saat menghapus data",
+          });
+          console.error("Terjadi kesalahan:", err);
         }
+      },
+      setSelectedItem: (id: number) => {
+        // Your existing logic for selecting an item if needed
       },
     },
   });

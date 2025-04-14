@@ -583,9 +583,10 @@ export default function CreateAnalytic() {
           timer: 1500,
           showConfirmButton: false,
         });
-
+        
         await fetchAnalytics();
         setModalOpen(false);
+        window.location.reload();
         reset();
       } else {
         // Failed
