@@ -16,6 +16,7 @@ import {
 import { Button } from "@/components/ui/button";
 import { useEffect, useState } from "react";
 import axios from "axios";
+import UpdateAnalytic from "./update";
 
 // Define the types to match the API response
 export type AnalyticField = {
@@ -56,6 +57,7 @@ export type Analytic = {
   };
   created_at: string;
   updated_at: string;
+  value: any;
 };
 
 // API response types
@@ -97,6 +99,7 @@ export const processAnalyticData = (data: AnalyticContent[]): Analytic[] => {
         platforms: {},
         created_at: item.created_at,
         updated_at: item.updated_at,
+        value: item.value
       };
     }
 
@@ -547,9 +550,20 @@ export const createColumns = (onlinePlanners: any[]): ColumnDef<Analytic>[] => {
           setSelectedItem: (id: number) => void;
         };
         const rowData = row.original;
+        console.log("checking row", rowData)
 
+        // Extract required data for UpdateAnalytic
         return (
-          <div className="w-[80px] flex justify-center">
+          <div className="w-[80px] flex justify-center gap-1">
+            <UpdateAnalytic
+              id={rowData.anc_id}
+              currentDate={rowData.date}
+              currentDay={rowData.day}
+              currentTopic={rowData.lup_id?.toString() || ""}
+              currentPlatform={rowData.platforms as any} // You need to determine which platform to use or pass all platforms
+              currentValue="" // You need to determine which value to use initially
+              currentField="" // You need to determine which field to use initially
+            />
             <Button
               className="bg-red-500 hover:bg-red-600 text-white flex items-center gap-2 h-8 w-10 text-xs px-3 rounded-md"
               onClick={() => meta.handleDelete(rowData.anc_id)}
