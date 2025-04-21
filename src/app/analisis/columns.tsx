@@ -99,7 +99,7 @@ export const processAnalyticData = (data: AnalyticContent[]): Analytic[] => {
         platforms: {},
         created_at: item.created_at,
         updated_at: item.updated_at,
-        value: item.value
+        value: item.value,
       };
     }
 
@@ -550,7 +550,7 @@ export const createColumns = (onlinePlanners: any[]): ColumnDef<Analytic>[] => {
           setSelectedItem: (id: number) => void;
         };
         const rowData = row.original;
-        console.log("checking row", rowData)
+        console.log("checking row", rowData);
 
         // Extract required data for UpdateAnalytic
         return (
@@ -560,9 +560,7 @@ export const createColumns = (onlinePlanners: any[]): ColumnDef<Analytic>[] => {
               currentDate={rowData.date}
               currentDay={rowData.day}
               currentTopic={rowData.lup_id?.toString() || ""}
-              currentPlatform={rowData.platforms as any} // You need to determine which platform to use or pass all platforms
-              currentValue="" // You need to determine which value to use initially
-              currentField="" // You need to determine which field to use initially
+              currentPlatform={rowData.platforms} // Make sure this matches the prop name
             />
             <Button
               className="bg-red-500 hover:bg-red-600 text-white flex items-center gap-2 h-8 w-10 text-xs px-3 rounded-md"

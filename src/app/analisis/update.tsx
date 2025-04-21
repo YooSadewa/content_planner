@@ -76,10 +76,10 @@ interface AnalyticContentInput {
   value: number;
 }
 
-// New interface for platforms data from rowData
+// Type for passing platform data from rowData
 interface PlatformData {
   [platform: string]: {
-    [metric: string]: number;
+    [metric: string]: number | string;
   };
 }
 
@@ -88,9 +88,7 @@ type UpdateAnalyticProps = {
   currentDate: string;
   currentDay: string;
   currentTopic: string;
-  platformData?: PlatformData; // New prop for platform data from rowData
-  // Optional legacy props kept for backward compatibility
-  currentPlatform?: string;
+  currentPlatform?: PlatformData; // Changed type to match rowData.platforms structure
   currentValue?: string;
   currentField?: string;
 };
@@ -100,8 +98,7 @@ export default function UpdateAnalytic({
   currentDate,
   currentDay,
   currentTopic,
-  platformData = {}, // Default to empty object
-  currentPlatform = "",
+  currentPlatform = {}, // Default to empty object
   currentValue = "",
   currentField = "",
 }: UpdateAnalyticProps) {
@@ -223,48 +220,34 @@ export default function UpdateAnalytic({
           }
         );
 
-        setPlatformMetrics(newMetrics);
-        
-        // Apply platformData from rowData to the metrics
-        if (Object.keys(platformData).length > 0) {
+        // Apply the current platform data to the metrics if available
+        // Apply the current platform data to the metrics if available
+        if (currentPlatform && Object.keys(currentPlatform).length > 0) {
           const updatedMetrics = { ...newMetrics };
-          
-          // For each platform in platformData
-          Object.keys(platformData).forEach(platformName => {
+
+          // For each platform in currentPlatform
+          Object.keys(currentPlatform).forEach((platformName) => {
             if (!updatedMetrics[platformName]) {
               updatedMetrics[platformName] = {};
             }
-            
-            // Add platform to selected platforms if not already there
+
+            // Add platform to selected platforms if not already included
             if (!selectedPlatforms.includes(platformName)) {
-              setSelectedPlatforms(prev => [...prev, platformName]);
+              setSelectedPlatforms((prev) => [...prev, platformName]);
             }
-            
+
             // For each metric in this platform
-            Object.keys(platformData[platformName]).forEach(metricName => {
-              updatedMetrics[platformName][metricName] = 
-                platformData[platformName][metricName].toString();
+            Object.keys(currentPlatform[platformName]).forEach((metricKey) => {
+              // Extract the field name from the metric key (e.g., "acr_reach" -> "reach")
+              const fieldName = metricKey.replace("acr_", "");
+
+              // Update the metrics with the value
+              updatedMetrics[platformName][fieldName] =
+                currentPlatform[platformName][metricKey].toString();
             });
           });
-          
+
           setPlatformMetrics(updatedMetrics);
-        }
-        // Legacy support for old format
-        else if (currentPlatform && currentField && currentValue) {
-          const updatedMetrics = { ...newMetrics };
-          const platformName = currentPlatform.toLowerCase();
-          
-          if (!updatedMetrics[platformName]) {
-            updatedMetrics[platformName] = {};
-          }
-          
-          updatedMetrics[platformName][currentField.toLowerCase()] = currentValue;
-          setPlatformMetrics(updatedMetrics);
-          
-          // Add platform to selected platforms if not already there
-          if (!selectedPlatforms.includes(platformName)) {
-            setSelectedPlatforms(prev => [...prev, platformName]);
-          }
         }
       }
 
@@ -650,13 +633,11 @@ export default function UpdateAnalytic({
     setDayOfWeek(currentDay);
     setSelectedTopicId(currentTopic);
 
-    // Set initial platforms based on platformData
-    if (Object.keys(platformData).length > 0) {
-      setSelectedPlatforms(Object.keys(platformData).map(name => name.toLowerCase()));
-    }
-    // Legacy support
-    else if (currentPlatform) {
-      setSelectedPlatforms([currentPlatform]);
+    // Set initial platforms based on currentPlatform
+    if (currentPlatform && Object.keys(currentPlatform).length > 0) {
+      setSelectedPlatforms(
+        Object.keys(currentPlatform).map((name) => name.toLowerCase())
+      );
     } else {
       setSelectedPlatforms([]);
     }
